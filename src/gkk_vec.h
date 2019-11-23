@@ -2,6 +2,7 @@
 #define GKK_VEC_H
 
 #include <cmath>
+#include <iostream>
 
 class vec4;
 
@@ -30,6 +31,7 @@ class vec3 {
   inline vec3& operator/=(const float t);
   
   operator vec4() const;
+  friend std::ostream& operator<<(std::ostream& os, const vec3& v);
 
   float squared_length() const {
     return e[0]*e[0] + e[1]*e[1] + e[2]*e[2];
@@ -85,6 +87,13 @@ inline vec3 normalize(const vec3& v)
 {
   float norm = std::sqrt(dot(v, v));
   return v/norm;
+}
+
+inline vec3 cross(const vec3& v1, const vec3& v2)
+{
+  return vec3(v1[1]*v2[2] - v1[2]*v2[1],
+	      v1[2]*v2[0] - v1[0]*v2[2],
+	      v1[0]*v2[1] - v1[1]*v2[0]);
 }
 
 inline vec3 reflect(const vec3& v, const vec3& n)

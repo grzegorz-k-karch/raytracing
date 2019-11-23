@@ -59,7 +59,11 @@ int generate_test_image(std::vector<vec3>& raw_image,
 			const int nx=400,
 			const int ny=200)
 {
-  Camera camera(90.0f, float(nx)/float(ny));
+  // default camera
+  // Camera camera(90.0f, float(nx)/float(ny));
+  Camera camera(vec3(-2.0f, 2.0f, 1.0f),
+  		vec3(0.0f, 0.0f, -1.0f),
+  		vec3(0.0f, 1.0f, 0.0f), 45.0f, float(nx)/float(ny));  
   
   Object *objects[5];
   objects[0] = new Sphere(vec3(0.0f, 0.0f, -1.0f), 0.5f, new Lambertian(vec3(0.8f, 0.3f, 0.3f)));
@@ -94,8 +98,8 @@ int generate_test_image(std::vector<vec3>& raw_image,
 
 int main()
 {
-  int nx = 600;
-  int ny = 300;
+  int nx = 1200;
+  int ny = 600;
   std::vector<vec3> raw_image(nx*ny);
 
   generate_test_image(raw_image, nx, ny);

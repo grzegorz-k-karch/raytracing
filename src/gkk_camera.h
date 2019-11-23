@@ -8,6 +8,20 @@
 
 class Camera {
  public:
+  Camera(vec3 lookfrom, vec3 lookat, vec3 up, float fov, float aspect) {
+    vec3 u, v, w;
+    float theta = fov*pi/180.0f;
+    float half_height = std::tan(theta/2.0f);
+    float half_width = aspect*half_height;
+    
+    origin = lookfrom;
+    w = normalize(lookfrom - lookat);
+    u = normalize(cross(up, w));
+    v = cross(w, u);
+    lower_left_corner = origin - half_width*u - half_height*v - w;
+    horizontal = 2.0f*half_width*u;
+    vertical = 2.0f*half_height*v;
+  }
   Camera(float fov, float aspect) {
 
     float theta = fov*pi/180.0f;
@@ -20,8 +34,8 @@ class Camera {
     origin = vec3(0.0f, 0.0f, 0.0f);
   }
 
-  Ray get_ray(float u, float v) {
-    return Ray(origin, lower_left_corner + u*horizontal + v*vertical);
+  Ray get_ray(float s, float t) {
+    return Ray(origin, lower_left_corner + s*horizontal + t*vertical - origin);
   }
   
   vec3 origin;
