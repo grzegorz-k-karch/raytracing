@@ -61,9 +61,11 @@ int generate_test_image(std::vector<vec3>& raw_image,
 {
   // default camera
   // Camera camera(90.0f, float(nx)/float(ny));
-  Camera camera(vec3(-2.0f, 2.0f, 1.0f),
-  		vec3(0.0f, 0.0f, -1.0f),
-  		vec3(0.0f, 1.0f, 0.0f), 45.0f, float(nx)/float(ny));  
+  vec3 lookfrom = vec3(-2.0f, 2.0f, 1.0f);
+  vec3 lookat = vec3(0.0f, 0.0f, -1.0f);
+  vec3 up = vec3(0.0f, 1.0f, 0.0f);
+  Camera camera(lookfrom, lookat, up, 45.0f, float(nx)/float(ny),
+		0.5f, (lookfrom-lookat).length());  
   
   Object *objects[5];
   objects[0] = new Sphere(vec3(0.0f, 0.0f, -1.0f), 0.5f, new Lambertian(vec3(0.8f, 0.3f, 0.3f)));
