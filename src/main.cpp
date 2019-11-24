@@ -55,32 +55,66 @@ int write_ppm(const std::vector<vec3>& raw_image,
   return 0;
 }
 
+Object* random_scene()
+{
+  int n = 500;
+  Object **objects = new Object*[n+1];
+  objects[0] = new Sphere(vec3(0.0f, -1000.0f, 0.0f), 1000.0f,
+		       new Lambertian(vec3(0.5f, 0.5f, 0.5f)));
+  int i = 1;
+  for (int a = -11; a < 11; a++) {
+    for (int b = -11; b < 11; b++) {
+      float choose_mat = gkk_random<float>();
+      vec3 center(a + 0.9f*gkk_random<float>(),
+		  0.2f,
+		  b + 0.9f*gkk_random<float>());
+      if ((center - vec3(4.0f, 0.2f, 0.0f)).length() > 0.9f) {
+	if (choose_mat < 0.8f) { // diffuse
+	  objects[i++] = new Sphere(center, 0.2f,
+				 new Lambertian(vec3(gkk_random<float>()*gkk_random<float>(),
+						     gkk_random<float>()*gkk_random<float>(),
+						     gkk_random<float>()*gkk_random<float>())));
+	}
+	else if (choose_mat < 0.95f) { // metal
+	  objects[i++] = new Sphere(center, 0.2f,
+				 new Metal(vec3(0.5f*(1.0f + gkk_random<float>()),
+						0.5f*(1.0f + gkk_random<float>()),
+						0.5f*(1.0f + gkk_random<float>())),
+					   0.5f*gkk_random<float>()));
+	}
+	else { // glass
+	  objects[i++] = new Sphere(center, 0.2f, new Dielectric(1.5f));
+	}
+      }
+    }
+  }
+
+  objects[i++] = new Sphere(vec3(0.0f, 1.0f, 0.0f), 1.0f, new Dielectric(1.5f));
+  objects[i++] = new Sphere(vec3(-4.0f, 1.0f, 0.0f), 1.0f, new Lambertian(vec3(0.4f, 0.2f, 0.1f)));
+  objects[i++] = new Sphere(vec3(4.0f, 1.0f, 0.0f), 1.0f, new Metal(vec3(0.7f, 0.6f, 0.5f), 0.0f));
+
+  return new ObjectList(objects, i);
+}
+
 int generate_test_image(std::vector<vec3>& raw_image,
 			const int nx=400,
 			const int ny=200)
 {
   // default camera
   // Camera camera(90.0f, float(nx)/float(ny));
-  vec3 lookfrom = vec3(-2.0f, 2.0f, 1.0f);
-  vec3 lookat = vec3(0.0f, 0.0f, -1.0f);
+  vec3 lookfrom = vec3(-1.0f, 2.0f, 4.0f);
+  vec3 lookat = vec3(0.0f, 1.0f, 0.0f);
   vec3 up = vec3(0.0f, 1.0f, 0.0f);
-  Camera camera(lookfrom, lookat, up, 45.0f, float(nx)/float(ny),
+  Camera camera(lookfrom, lookat, up, 60.0f, float(nx)/float(ny),
 		0.5f, (lookfrom-lookat).length());  
   
-  Object *objects[5];
-  objects[0] = new Sphere(vec3(0.0f, 0.0f, -1.0f), 0.5f, new Lambertian(vec3(0.8f, 0.3f, 0.3f)));
-  objects[1] = new Sphere(vec3(0.0f, -100.5f, -1.0f), 100.0f, new Lambertian(vec3(0.8f, 0.8f, 0.0f)));
-  objects[2] = new Sphere(vec3(1.0f, 0.0f, -1.0f), 0.5f, new Metal(vec3(0.8f, 0.6f, 0.2f), 0.3f));
-  objects[3] = new Sphere(vec3(-1.0f, 0.0f, -1.0f), 0.5f, new Dielectric(1.5f));  
-  objects[4] = new Sphere(vec3(-1.0f, 0.0f, -1.0f), -0.45f, new Dielectric(1.5f));  
-  
-  Object *world = new ObjectList(objects, 5);
+  Object *world = random_scene();
 
   for (int j = ny - 1; j >= 0; j--) {
     for (int i = 0; i < nx; i++) {
       
       vec3 color = vec3(0.0f, 0.0f, 0.0f);
-      int ns = 1000;
+      int ns = 500;
       for (int s = 0; s < ns; s++) {
 	float u = float(i + gkk_random<float>())/float(nx);
 	float v = float(j + gkk_random<float>())/float(ny);
@@ -100,8 +134,8 @@ int generate_test_image(std::vector<vec3>& raw_image,
 
 int main()
 {
-  int nx = 1200;
-  int ny = 600;
+  int nx = 1600;
+  int ny = 800;
   std::vector<vec3> raw_image(nx*ny);
 
   generate_test_image(raw_image, nx, ny);
