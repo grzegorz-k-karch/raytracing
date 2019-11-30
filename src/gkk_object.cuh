@@ -1,8 +1,8 @@
 #ifndef GKK_OBJECT_H
 #define GKK_OBJECT_H
 
-#include "gkk_vec.h"
-#include "gkk_ray.h"
+#include "gkk_vec.cuh"
+#include "gkk_ray.cuh"
 
 class Material;
 

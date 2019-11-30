@@ -1,4 +1,6 @@
 #include "gkk_cuda_utils.cuh"
+#include "gkk_vec.cuh"
+#include "gkk_color.cuh"
 
 #include <iostream>
 
@@ -17,6 +19,28 @@ __global__ void render(float* fb, int max_x, int max_y)
   fb[pixel_idx + 2] = 0.2f;
 }
 
+// assuming pixel values are in range (0,1)
+int write_ppm(const float* raw_image,
+	      const int nx=300,
+	      const int ny=200)
+{
+  std::cout << "P3\n" << nx << " " << ny << "\n255\n";
+  for (int j = ny-1; j >= 0; j--) {
+    for (int i = 0; i < nx; i++) {
+      size_t pixel_idx = (i + j*nx)*3;
+      vec3 color = vec3(raw_image[pixel_idx + 0],
+			raw_image[pixel_idx + 1],
+			raw_image[pixel_idx + 2]);
+      // gamma correction
+      color = vec3(std::sqrt(color.r()), std::sqrt(color.g()), std::sqrt(color.b()));
+      int ir = int(255.99f*color.r());
+      int ig = int(255.99f*color.g());
+      int ib = int(255.99f*color.b());
+      std::cout << ir << " " << ig << " " << ib << "\n";
+    }
+  }
+  return 0;
+}
 int main()
 {
   int nx = 1600;
@@ -37,21 +61,7 @@ int main()
   checkCudaErrors(cudaGetLastError());
   checkCudaErrors(cudaDeviceSynchronize());
 
-  std::cout << "P3\n" << nx << " " << ny << "\n255\n";
-  for (int j = ny-1; j >= 0; j--) {
-    for (int i = 0; i < nx; i++) {
-      size_t pixel_idx = (i + j*nx)*3;
-      float r = fb[pixel_idx + 0];
-      float g = fb[pixel_idx + 1];
-      float b = fb[pixel_idx + 2];
-
-      int ir = int(255.99f*r);
-      int ig = int(255.99f*g);
-      int ib = int(255.99f*b);
-      std::cout << ir << " " << ig << " " << ib << "\n";
-    }
-  }
-
+  write_ppm(fb, nx, ny);
 
   cudaFree(fb);
 
