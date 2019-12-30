@@ -8,7 +8,9 @@ void check_cuda(cudaError_t result,
 		int const line)
 {
   if (result) {
-    std::cerr << "CUDA error = " << static_cast<unsigned int>(result) << " at "
+    std::cerr << "CUDA error = "
+      << static_cast<unsigned int>(result)
+	      << " : " << cudaGetErrorString(result) << " at "
 	      << file << ":" << line << " '" << func << "'" << std::endl;
     cudaDeviceReset();
     exit(99);

@@ -1,6 +1,6 @@
-#include "gkk_random.h"
+#include "gkk_random.cuh"
 
-vec3 random_in_unit_sphere()
+__host__ __device__ vec3 random_in_unit_sphere()
 {
   vec3 p;
   do {
@@ -12,7 +12,7 @@ vec3 random_in_unit_sphere()
   return p;
 }
 
-vec3 random_in_unit_disk()
+__host__ __device__ vec3 random_in_unit_disk()
 {
   vec3 p;
   do {

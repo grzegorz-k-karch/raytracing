@@ -15,19 +15,19 @@ struct hit_record {
 
 class Object {
  public:
-  virtual bool hit(const Ray& ray, float t_min, float t_max,
-		   hit_record& hrec) const = 0;
+  __host__ __device__ virtual bool hit(const Ray& ray, float t_min, float t_max,
+				       hit_record& hrec) const = 0;
 };
 
 class ObjectList: public Object {
  public:
   ObjectList() {}
- ObjectList(Object** objects, int num_objects):
-  objects(objects), num_objects(num_objects) {}
+  __host__ __device__ ObjectList(Object** objects, int num_objects):
+    objects(objects), num_objects(num_objects) {}
   
-  virtual bool hit(const Ray& ray,
-		   float t_min, float t_max,
-		   hit_record& hrec) const;
+  __host__ __device__ virtual bool hit(const Ray& ray,
+				       float t_min, float t_max,
+				       hit_record& hrec) const;
   
   Object **objects;
   int num_objects;

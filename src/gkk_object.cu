@@ -1,8 +1,8 @@
-#include "gkk_object.h"
+#include "gkk_object.cuh"
 
-bool ObjectList::hit(const Ray& ray,
-		     float t_min, float t_max,
-		     hit_record& hrec) const {
+__host__ __device__ bool ObjectList::hit(const Ray& ray,
+					 float t_min, float t_max,
+					 hit_record& hrec) const {
   
   bool hit_any = false;
   hit_record tmp_hrec;

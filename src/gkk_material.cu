@@ -1,8 +1,8 @@
-#include "gkk_material.h"
-#include "gkk_random.h"
+#include "gkk_material.cuh"
+#include "gkk_random.cuh"
 
-bool Lambertian::scatter(const Ray& in_ray, const hit_record& hrec,
-			 vec3& attenuation, Ray& out_rays) const
+__host__ __device__ bool Lambertian::scatter(const Ray& in_ray, const hit_record& hrec,
+					     vec3& attenuation, Ray& out_rays) const
 {
   vec3 target = hrec.p + hrec.n + random_in_unit_sphere();
   out_rays = Ray(hrec.p, target - hrec.p);
@@ -11,8 +11,8 @@ bool Lambertian::scatter(const Ray& in_ray, const hit_record& hrec,
 }
 
 
-bool Metal::scatter(const Ray& in_ray, const hit_record& hrec,
-		    vec3& attenuation, Ray& out_rays) const
+__host__ __device__ bool Metal::scatter(const Ray& in_ray, const hit_record& hrec,
+					vec3& attenuation, Ray& out_rays) const
 {
   vec3 reflected = reflect(normalize(in_ray.direction()), hrec.n);
   out_rays = Ray(hrec.p, reflected + fuzz*random_in_unit_sphere());
@@ -21,8 +21,8 @@ bool Metal::scatter(const Ray& in_ray, const hit_record& hrec,
 }
 
 
-bool Dielectric::scatter(const Ray& in_ray, const hit_record& hrec,
-			 vec3& attenuation, Ray& out_rays) const
+__host__ __device__ bool Dielectric::scatter(const Ray& in_ray, const hit_record& hrec,
+					     vec3& attenuation, Ray& out_rays) const
 {
   vec3 outward_normal;
   float n1_over_n2;
@@ -62,7 +62,7 @@ bool Dielectric::scatter(const Ray& in_ray, const hit_record& hrec,
   return true;  
 }
 
-float schlick(float cosine, float ref_idx)
+__host__ __device__ float schlick(float cosine, float ref_idx)
 {
   float r0 = (1.0f - ref_idx)/(1.0f + ref_idx);
   r0 = r0*r0;

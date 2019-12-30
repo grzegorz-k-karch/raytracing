@@ -36,7 +36,9 @@ class vec3 {
   __host__ __device__ float squared_length() const {
     return e[0]*e[0] + e[1]*e[1] + e[2]*e[2];
   }
-  __host__ __device__ float length() const { return std::sqrt(squared_length()); }
+  __host__ __device__ float length() const {
+    return std::sqrt(squared_length());
+  }
     
   float e[3];
 };
@@ -113,7 +115,6 @@ __host__ __device__ inline bool refract(const vec3& v, const vec3& n, float n1_o
   return false;
 }
 
-
 class vec4 {
 
  public:
@@ -135,6 +136,5 @@ class vec4 {
 
   float e[4];
 };
-
 
 #endif//GKK_VEC_H
