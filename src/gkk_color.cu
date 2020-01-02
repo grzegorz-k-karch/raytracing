@@ -20,7 +20,7 @@ __host__ __device__ vec3 get_color(const Ray& ray, Object* world, int depth)
   if (world->hit(ray, 0.001f, GKK_FLOAT_MAX, hrec)) {
     Ray scattered;
     vec3 attenuation;
-    if (depth < 3 && hrec.material_ptr->scatter(ray, hrec, attenuation, scattered)) { // TODO: 50
+    if (depth < 5 && hrec.material_ptr->scatter(ray, hrec, attenuation, scattered)) { // TODO: 50
       color = attenuation*get_color(scattered, world, depth+1);
     }
   }
@@ -30,3 +30,29 @@ __host__ __device__ vec3 get_color(const Ray& ray, Object* world, int depth)
   return color;
 }
 
+__host__ __device__ vec3 get_color(const Ray& ray, Object* world)
+{
+  hit_record hrec;
+  vec3 color;
+  Ray in_ray = ray;
+  vec3 attenuation_total = vec3(1.0f, 1.0f, 1.0f);
+
+  for (int i = 0; i < 50; i++) {
+    if (world->hit(ray, 0.001f, GKK_FLOAT_MAX, hrec)) {
+      vec3 attenuation;
+      Ray scattered;
+      if (hrec.material_ptr->scatter(in_ray, hrec, attenuation, scattered)) {
+    	attenuation_total *= attenuation;
+    	in_ray = scattered;
+      }
+    }
+    else {
+      color = get_plane_color(in_ray);
+      break;
+    }
+  }
+
+  color *= attenuation_total;
+
+  return color;
+}

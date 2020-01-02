@@ -80,7 +80,7 @@ __global__ void render(vec3* fb, int max_x, int max_y,
   float u = float(i)/float(max_x);
   float v = float(j)/float(max_y);
   Ray ray(origin, lower_left_corner + u*horizontal + v*vertical);
-  vec3 color = get_color(ray, *world, 0);
+  vec3 color = get_color(ray, *world); //, 0);
   fb[pixel_idx] = color;
 }
 

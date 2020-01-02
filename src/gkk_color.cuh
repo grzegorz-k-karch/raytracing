@@ -9,5 +9,7 @@ __host__ __device__ vec3 get_plane_color(const Ray& ray);
 
 __host__ __device__ vec3 get_color(const Ray& ray, Object* world, int depth);
 
+__host__ __device__ vec3 get_color(const Ray& ray, Object* world);
+
 #endif//GKK_COLOR_CUH
 

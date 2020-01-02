@@ -44,10 +44,10 @@ class vec3 {
 };
 
 __host__ __device__ inline vec3& vec3::operator+=(const vec3& v2) {
-    e[0] += v2[0];
-    e[1] += v2[1];
-    e[2] += v2[2];
-    return *this;
+  e[0] += v2[0];
+  e[1] += v2[1];
+  e[2] += v2[2];
+  return *this;
 }
 
 __host__ __device__ inline vec3 operator+(const vec3& v1, const vec3& v2)
@@ -73,6 +73,13 @@ __host__ __device__ inline vec3 operator*(const float t, const vec3& v)
 __host__ __device__ inline vec3 operator*(const vec3& v1, const vec3& v2)
 {
   return vec3(v1[0]*v2[0], v1[1]*v2[1], v1[2]*v2[2]);
+}
+
+__host__ __device__ inline vec3& vec3::operator*=(const vec3& v2) {
+  e[0] *= v2[0];
+  e[1] *= v2[1];
+  e[2] *= v2[2];
+  return *this;
 }
 
 __host__ __device__ inline vec3 operator/(const vec3& v, const float t)
