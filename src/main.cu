@@ -6,6 +6,8 @@
 
 #include <iostream>
 
+#include <curand_kernel.h>
+
 // assuming pixel values are in range (0,1)
 int write_ppm(vec3* raw_image,
 	      const int nx=300,
@@ -140,8 +142,8 @@ void generate_test_image(vec3* raw_image,
 
 int main()
 {
-  int nx = 600;
-  int ny = 300;
+  int nx = 1600;
+  int ny = 800;
 
   int num_pixels = nx*ny;
 

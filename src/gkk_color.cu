@@ -38,7 +38,7 @@ __host__ __device__ vec3 get_color(const Ray& ray, Object* world)
   vec3 attenuation_total = vec3(1.0f, 1.0f, 1.0f);
 
   for (int i = 0; i < 50; i++) {
-    if (world->hit(ray, 0.001f, GKK_FLOAT_MAX, hrec)) {
+    if (world->hit(in_ray, 0.001f, GKK_FLOAT_MAX, hrec)) {
       vec3 attenuation;
       Ray scattered;
       if (hrec.material_ptr->scatter(in_ray, hrec, attenuation, scattered)) {
