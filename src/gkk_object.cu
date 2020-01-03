@@ -1,6 +1,6 @@
 #include "gkk_object.cuh"
 
-__host__ __device__ bool ObjectList::hit(const Ray& ray,
+__device__ bool ObjectList::hit(const Ray& ray,
 					 float t_min, float t_max,
 					 hit_record& hrec) const {
   

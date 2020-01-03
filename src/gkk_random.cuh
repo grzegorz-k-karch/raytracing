@@ -1,22 +1,13 @@
 #ifndef GKK_RANDOM_CUH
 #define GKK_RANDOM_CUH
 
-#include <functional>
-#include <random>
-
 #include "gkk_vec.cuh"
 
-template<typename T>
-__host__ __device__ __inline__ T gkk_random()
-{
-  return 0.5f;
-  // static std::uniform_real_distribution<T> distribution(0.0, 1.0);
-  // static std::mt19937 generator;
-  // static std::function<T()> rand_generator = std::bind(distribution, generator);
-  // return rand_generator();
-}
+#include <functional>
+#include <random>
+#include <curand_kernel.h>
 
-__host__ __device__ vec3 random_in_unit_sphere();
-__host__ __device__ vec3 random_in_unit_disk();
+__device__ vec3 random_in_unit_sphere(curandState* local_rand_state);
+__device__ vec3 random_in_unit_disk(curandState* local_rand_state);
 
 #endif//GKK_RANDOM_CUH

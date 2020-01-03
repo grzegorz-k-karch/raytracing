@@ -30,60 +30,40 @@ int write_ppm(vec3* raw_image,
 }
 
 
-__device__ bool hit_sphere(const vec3& center, float radius, const Ray& ray)
-{
-  vec3 oc = ray.o - center;
-  float a = dot(ray.d, ray.d);
-  float b = 2.0f*dot(oc, ray.d);
-  float c = dot(oc, oc) - radius*radius;
-  float discriminant = b*b - 4*a*c;
-
-  return (discriminant > 0.0f);
-}
-
-
-__global__ void render(vec3* fb, int max_x, int max_y,
-		       vec3 lower_left_corner, vec3 horizontal,
-		       vec3 vertical, vec3 origin)
+__global__ void render_init(int max_x, int max_y, curandState* rand_state)
 {
   int i = threadIdx.x + blockIdx.x*blockDim.x;
   int j = threadIdx.y + blockIdx.y*blockDim.y;
-
   if ((i >= max_x) || (j >= max_y)) {
     return;
   }
 
   int pixel_idx = i + j*max_x;
-  float u = float(i)/float(max_x);
-  float v = float(j)/float(max_y);
-  Ray ray(origin, lower_left_corner + u*horizontal + v*vertical);
-  vec3 color = get_plane_color(ray);
-  vec3 sphere_center = vec3(0.0f, 0.0f, -2.0f);
-  float sphere_radius = 0.5f;
-  if (hit_sphere(sphere_center, sphere_radius, ray)) {
-    color = vec3(1.0f, 0.0f, 0.0f);
-  }
-  fb[pixel_idx] = color;
+  curand_init(1984, pixel_idx, 0, &rand_state[pixel_idx]);
 }
 
-
-__global__ void render(vec3* fb, int max_x, int max_y,
+__global__ void render(vec3* fb, int max_x, int max_y, int ns,
 		       vec3 lower_left_corner, vec3 horizontal,
-		       vec3 vertical, vec3 origin, Object** world)
+		       vec3 vertical, vec3 origin, Object** world,
+		       curandState* rand_state)
 {
   int i = threadIdx.x + blockIdx.x*blockDim.x;
   int j = threadIdx.y + blockIdx.y*blockDim.y;
-
   if ((i >= max_x) || (j >= max_y)) {
     return;
   }
 
   int pixel_idx = i + j*max_x;
-  float u = float(i)/float(max_x);
-  float v = float(j)/float(max_y);
-  Ray ray(origin, lower_left_corner + u*horizontal + v*vertical);
-  vec3 color = get_color(ray, *world); //, 0);
-  fb[pixel_idx] = color;
+  curandState local_rand_state = rand_state[pixel_idx];
+  vec3 color = vec3(0.0f, 0.0f, 0.0f);
+  
+  for (int s = 0; s < ns; s++) {
+    float u = float(i + curand_uniform(&local_rand_state))/float(max_x);
+    float v = float(j + curand_uniform(&local_rand_state))/float(max_y);
+    Ray ray(origin, lower_left_corner + u*horizontal + v*vertical);
+    color += get_color(ray, *world, &local_rand_state);
+  }
+  fb[pixel_idx] = color/float(ns);
 }
 
 
@@ -108,8 +88,8 @@ __global__ void free_world(Object** d_list, Object** d_world)
 
 
 void generate_test_image(vec3* raw_image,
-			const int nx=400,
-			const int ny=200)
+			 const int nx, const int ny,
+			 const int num_samples)
 {
 
   int tx = 8;
@@ -118,6 +98,13 @@ void generate_test_image(vec3* raw_image,
   dim3 blocks((nx+tx-1)/tx, (ny+ty-1)/ty);
   dim3 threads(tx, ty);
 
+  curandState *d_rand_state;
+  checkCudaErrors(cudaMalloc((void**)&d_rand_state, nx*ny*sizeof(curandState)));
+
+  render_init<<<blocks, threads>>>(nx, ny, d_rand_state);
+  checkCudaErrors(cudaGetLastError());
+  checkCudaErrors(cudaDeviceSynchronize());
+  
   Object **d_list;
   checkCudaErrors(cudaMalloc((void**)&d_list, 2*sizeof(Object*)));
   Object **d_world;
@@ -127,9 +114,9 @@ void generate_test_image(vec3* raw_image,
   checkCudaErrors(cudaGetLastError());
   checkCudaErrors(cudaDeviceSynchronize());
 
-  render<<<blocks, threads>>>(raw_image, nx, ny, vec3(-2.0f, -1.0f, -1.0f),
+  render<<<blocks, threads>>>(raw_image, nx, ny, num_samples, vec3(-2.0f, -1.0f, -1.0f),
 			      vec3(4.0f, 0.0f, 0.0f), vec3(0.0, 2.0f, 0.0f),
-			      vec3(0.0f, 0.0f, 0.0f), d_world);
+			      vec3(0.0f, 0.0f, 0.0f), d_world, d_rand_state);
   checkCudaErrors(cudaGetLastError());
   checkCudaErrors(cudaDeviceSynchronize());
 
@@ -138,12 +125,14 @@ void generate_test_image(vec3* raw_image,
   
   checkCudaErrors(cudaFree(d_list));
   checkCudaErrors(cudaFree(d_world));
+  checkCudaErrors(cudaFree(d_rand_state));
 }
 
 int main()
 {
   int nx = 1600;
   int ny = 800;
+  int ns = 1000;
 
   int num_pixels = nx*ny;
 
@@ -151,10 +140,10 @@ int main()
   vec3 *fb;
   checkCudaErrors(cudaMallocManaged((void**)&fb, fb_size));
 
-  generate_test_image(fb, nx, ny);
+  generate_test_image(fb, nx, ny, ns);
   write_ppm(fb, nx, ny);
 
   cudaFree(fb);
-
+  
   return 0;
 }

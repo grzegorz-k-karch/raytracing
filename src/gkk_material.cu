@@ -1,28 +1,31 @@
 #include "gkk_material.cuh"
 #include "gkk_random.cuh"
 
-__host__ __device__ bool Lambertian::scatter(const Ray& in_ray, const hit_record& hrec,
-					     vec3& attenuation, Ray& out_rays) const
+__device__ bool Lambertian::scatter(const Ray& in_ray, const hit_record& hrec,
+				    vec3& attenuation, Ray& out_rays,
+				    curandState* local_rand_state) const
 {
-  vec3 target = hrec.p + hrec.n + random_in_unit_sphere();
+  vec3 target = hrec.p + hrec.n + random_in_unit_sphere(local_rand_state);
   out_rays = Ray(hrec.p, target - hrec.p);
   attenuation = albedo;
   return true;
 }
 
 
-__host__ __device__ bool Metal::scatter(const Ray& in_ray, const hit_record& hrec,
-					vec3& attenuation, Ray& out_rays) const
+__device__ bool Metal::scatter(const Ray& in_ray, const hit_record& hrec,
+			       vec3& attenuation, Ray& out_rays,
+			       curandState* local_rand_state) const
 {
   vec3 reflected = reflect(normalize(in_ray.direction()), hrec.n);
-  out_rays = Ray(hrec.p, reflected + fuzz*random_in_unit_sphere());
+  out_rays = Ray(hrec.p, reflected + fuzz*random_in_unit_sphere(local_rand_state));
   attenuation = albedo;
   return (dot(out_rays.direction(), hrec.n) > 0.0f);
 }
 
 
-__host__ __device__ bool Dielectric::scatter(const Ray& in_ray, const hit_record& hrec,
-					     vec3& attenuation, Ray& out_rays) const
+__device__ bool Dielectric::scatter(const Ray& in_ray, const hit_record& hrec,
+				    vec3& attenuation, Ray& out_rays,
+				    curandState* local_rand_state) const
 {
   vec3 outward_normal;
   float n1_over_n2;
@@ -51,7 +54,7 @@ __host__ __device__ bool Dielectric::scatter(const Ray& in_ray, const hit_record
     reflect_prob = 1.0f;
   }
 
-  if (gkk_random<float>() < reflect_prob) {
+  if (curand_uniform(local_rand_state) < reflect_prob) {
     vec3 reflected = reflect(normalize(in_ray.direction()), hrec.n);
     out_rays = Ray(hrec.p, reflected);
   }
@@ -62,7 +65,7 @@ __host__ __device__ bool Dielectric::scatter(const Ray& in_ray, const hit_record
   return true;  
 }
 
-__host__ __device__ float schlick(float cosine, float ref_idx)
+__device__ float schlick(float cosine, float ref_idx)
 {
   float r0 = (1.0f - ref_idx)/(1.0f + ref_idx);
   r0 = r0*r0;

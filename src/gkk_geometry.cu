@@ -3,7 +3,7 @@
 
 #include <algorithm>
 
-__host__ __device__ bool Sphere::hit(const Ray& ray, float t_min, float t_max, hit_record& hrec) const {
+__device__ bool Sphere::hit(const Ray& ray, float t_min, float t_max, hit_record& hrec) const {
 
   vec3 oc = ray.origin() - center;
   vec3 d = ray.direction();
@@ -28,7 +28,7 @@ __host__ __device__ bool Sphere::hit(const Ray& ray, float t_min, float t_max, h
   return false;
 }
 
-__host__ __device__ vec3 Sphere::normal_at_p(const vec3& point) const
+__device__ vec3 Sphere::normal_at_p(const vec3& point) const
 {
   return normalize(point - center);
 }

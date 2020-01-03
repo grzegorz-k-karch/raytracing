@@ -8,11 +8,11 @@
 
 class Sphere: public Object {
  public:
-  __host__ __device__ Sphere(const vec3& center, const float radius, Material* material_ptr) :
+  __device__ Sphere(const vec3& center, const float radius, Material* material_ptr) :
     center(center), radius(radius), material_ptr(material_ptr) {}
   
-  __host__ __device__ bool hit(const Ray& ray, float t_min, float t_max, hit_record& hrec) const;
-  __host__ __device__ vec3 normal_at_p(const vec3& point) const;
+  __device__ bool hit(const Ray& ray, float t_min, float t_max, hit_record& hrec) const;
+  __device__ vec3 normal_at_p(const vec3& point) const;
 
   vec3 center;
   float radius;
