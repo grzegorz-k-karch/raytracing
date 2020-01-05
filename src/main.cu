@@ -4,16 +4,22 @@
 #include "gkk_object.cuh"
 #include "gkk_geometry.cuh"
 
-#include <iostream>
-
 #include <curand_kernel.h>
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <boost/program_options.hpp>
+namespace po = boost::program_options;
+
 
 // assuming pixel values are in range (0,1)
 int write_ppm(vec3* raw_image,
-	      const int nx=300,
-	      const int ny=200)
+	      const int nx,
+	      const int ny,
+	      std::string output)
 {
-  std::cout << "P3\n" << nx << " " << ny << "\n255\n";
+  std::fstream fs(output, std::fstream::out);
+  fs << "P3\n" << nx << " " << ny << "\n255\n";
   for (int j = ny-1; j >= 0; j--) {
     for (int i = 0; i < nx; i++) {
       size_t pixel_idx = i + j*nx;
@@ -23,9 +29,10 @@ int write_ppm(vec3* raw_image,
       int ir = int(255.99f*color.r());
       int ig = int(255.99f*color.g());
       int ib = int(255.99f*color.b());
-      std::cout << ir << " " << ig << " " << ib << "\n";
+      fs << ir << " " << ig << " " << ib << "\n";
     }
   }
+  fs.close();
   return 0;
 }
 
@@ -42,6 +49,7 @@ __global__ void render_init(int max_x, int max_y, curandState* rand_state)
   curand_init(1984, pixel_idx, 0, &rand_state[pixel_idx]);
 }
 
+
 __global__ void render(vec3* fb, int max_x, int max_y, int ns,
 		       vec3 lower_left_corner, vec3 horizontal,
 		       vec3 vertical, vec3 origin, Object** world,
@@ -56,7 +64,7 @@ __global__ void render(vec3* fb, int max_x, int max_y, int ns,
   int pixel_idx = i + j*max_x;
   curandState local_rand_state = rand_state[pixel_idx];
   vec3 color = vec3(0.0f, 0.0f, 0.0f);
-  
+
   for (int s = 0; s < ns; s++) {
     float u = float(i + curand_uniform(&local_rand_state))/float(max_x);
     float v = float(j + curand_uniform(&local_rand_state))/float(max_y);
@@ -104,7 +112,7 @@ void generate_test_image(vec3* raw_image,
   render_init<<<blocks, threads>>>(nx, ny, d_rand_state);
   checkCudaErrors(cudaGetLastError());
   checkCudaErrors(cudaDeviceSynchronize());
-  
+
   Object **d_list;
   checkCudaErrors(cudaMalloc((void**)&d_list, 2*sizeof(Object*)));
   Object **d_world;
@@ -122,17 +130,40 @@ void generate_test_image(vec3* raw_image,
 
   free_world<<<1, 1>>>(d_list, d_world);
   checkCudaErrors(cudaGetLastError());
-  
+
   checkCudaErrors(cudaFree(d_list));
   checkCudaErrors(cudaFree(d_world));
   checkCudaErrors(cudaFree(d_rand_state));
 }
 
-int main()
+
+int main(int argc, char** argv)
 {
-  int nx = 1600;
-  int ny = 800;
-  int ns = 1000;
+  std::string output = "";
+  int nx;
+  int ny;
+  int ns;
+
+  try {
+    po::options_description desc{"Options"};
+    desc.add_options()
+      ("help,h", "Help screen")
+      ("output,o", po::value<std::string>(&output)->required(), "Filename for the output figure")
+      ("resolution-x,x", po::value<int>(&nx)->default_value(1600), "Horizontal output resolution")
+      ("resolution-y,y", po::value<int>(&ny)->default_value(800), "Vertical output resolution")
+      ("num-samples,s", po::value<int>(&ns)->default_value(100), "Number of samples per pixel");
+    po::variables_map vm;
+    po::store(po::parse_command_line(argc, argv, desc), vm);
+
+    if (vm.count("help")) {
+      std::cout << desc << std::endl;
+      return 0;
+    }
+    po::notify(vm);
+  }
+  catch(const std::runtime_error &ex) {
+    std::cerr << ex.what() << std::endl;
+  }
 
   int num_pixels = nx*ny;
 
@@ -141,9 +172,9 @@ int main()
   checkCudaErrors(cudaMallocManaged((void**)&fb, fb_size));
 
   generate_test_image(fb, nx, ny, ns);
-  write_ppm(fb, nx, ny);
+  write_ppm(fb, nx, ny, output);
 
   cudaFree(fb);
-  
+
   return 0;
 }

@@ -10,3 +10,4 @@ set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -gencode arch=compute_75,code=sm_75")
 set_target_properties(raytracing-cuda PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 target_compile_features(raytracing-cuda PUBLIC cxx_std_11)
 
+target_link_libraries(raytracing-cuda boost_program_options)
