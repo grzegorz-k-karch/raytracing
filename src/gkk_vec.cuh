@@ -37,7 +37,7 @@ class vec3 {
     return e[0]*e[0] + e[1]*e[1] + e[2]*e[2];
   }
   __device__ float length() const {
-    return std::sqrt(squared_length());
+    return sqrtf(squared_length());
   }
     
   float e[3];
@@ -94,8 +94,11 @@ __device__ inline float dot(const vec3& v1, const vec3& v2)
 
 __device__ inline vec3 normalize(const vec3& v)
 {
-  float norm = std::sqrt(dot(v, v));
-  return v/norm;
+  float norm = sqrtf(dot(v, v));
+  if (norm > 0.0f) {
+    return v/norm;
+  }
+  return v;
 }
 
 __device__ inline vec3 cross(const vec3& v1, const vec3& v2)
@@ -116,7 +119,7 @@ __device__ inline bool refract(const vec3& v, const vec3& n, float n1_over_n2, v
   float dt = dot(uv, n);
   float discriminant = 1.0f - n1_over_n2*n1_over_n2*(1.0f - dt*dt);
   if (discriminant > 0.0f) {
-    refracted = n1_over_n2*(uv - n*dt) - n*std::sqrt(discriminant);
+    refracted = n1_over_n2*(uv - n*dt) - n*sqrtf(discriminant);
     return true;
   }
   return false;

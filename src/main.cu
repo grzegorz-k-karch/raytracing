@@ -3,6 +3,7 @@
 #include "gkk_color.cuh"
 #include "gkk_object.cuh"
 #include "gkk_geometry.cuh"
+#include "gkk_camera.cuh"
 
 #include <curand_kernel.h>
 #include <iostream>
@@ -65,10 +66,18 @@ __global__ void render(vec3* fb, int max_x, int max_y, int ns,
   curandState local_rand_state = rand_state[pixel_idx];
   vec3 color = vec3(0.0f, 0.0f, 0.0f);
 
+  // default camera
+  vec3 lookfrom = vec3(0.0f, 1.0f, 2.0f);
+  vec3 lookat = vec3(0.0f, 0.0f, -1.0f);
+  vec3 up = vec3(0.0f, 1.0f, 0.0f);
+  Camera camera(lookfrom, lookat, up, 60.0f, float(max_x)/float(max_y),
+		0.5f, (lookfrom-lookat).length());
+
   for (int s = 0; s < ns; s++) {
     float u = float(i + curand_uniform(&local_rand_state))/float(max_x);
     float v = float(j + curand_uniform(&local_rand_state))/float(max_y);
-    Ray ray(origin, lower_left_corner + u*horizontal + v*vertical);
+    Ray ray = camera.get_ray(u, v, &local_rand_state);
+    // Ray ray(origin, lower_left_corner + u*horizontal + v*vertical);
     color += get_color(ray, *world, &local_rand_state);
   }
   fb[pixel_idx] = color/float(ns);
@@ -82,7 +91,11 @@ __global__ void create_world(Object** d_list, Object** d_world)
 			   new Lambertian(vec3(0.5f, 0.5f, 0.5f)));
     *(d_list + 1) = new Sphere(vec3(0.0f, -100.5f, -1.0f), 100.0f,
 			       new Lambertian(vec3(0.5f, 0.5f, 0.5f)));
-    *d_world = new ObjectList(d_list, 2);
+    *(d_list + 2) = new Sphere(vec3(1.0f, 0.0f, -1.0f), 0.5f,
+			       new Metal(vec3(0.95f, 0.5f, 0.5f), 0.5f));
+    *(d_list + 3) = new Sphere(vec3(-1.0f, 0.0f, -1.0f), 0.5f,
+			       new Dielectric(1.5f));
+    *d_world = new ObjectList(d_list, 4);
   }
 }
 
@@ -91,6 +104,8 @@ __global__ void free_world(Object** d_list, Object** d_world)
 {
   delete *(d_list);
   delete *(d_list + 1);
+  delete *(d_list + 2);
+  delete *(d_list + 3);
   delete *d_world;
 }
 
@@ -114,7 +129,7 @@ void generate_test_image(vec3* raw_image,
   checkCudaErrors(cudaDeviceSynchronize());
 
   Object **d_list;
-  checkCudaErrors(cudaMalloc((void**)&d_list, 2*sizeof(Object*)));
+  checkCudaErrors(cudaMalloc((void**)&d_list, 4*sizeof(Object*)));
   Object **d_world;
   checkCudaErrors(cudaMalloc((void**)&d_world, sizeof(Object*)));
 
