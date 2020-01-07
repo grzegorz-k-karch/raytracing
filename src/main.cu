@@ -52,9 +52,7 @@ __global__ void render_init(int max_x, int max_y, curandState* rand_state)
 
 
 __global__ void render(vec3* fb, int max_x, int max_y, int ns,
-		       vec3 lower_left_corner, vec3 horizontal,
-		       vec3 vertical, vec3 origin, Object** world,
-		       curandState* rand_state)
+		       Object** world, curandState* rand_state)
 {
   int i = threadIdx.x + blockIdx.x*blockDim.x;
   int j = threadIdx.y + blockIdx.y*blockDim.y;
@@ -67,45 +65,80 @@ __global__ void render(vec3* fb, int max_x, int max_y, int ns,
   vec3 color = vec3(0.0f, 0.0f, 0.0f);
 
   // default camera
-  vec3 lookfrom = vec3(0.0f, 1.0f, 2.0f);
-  vec3 lookat = vec3(0.0f, 0.0f, -1.0f);
+  vec3 lookfrom = vec3(0.0f, 2.2f, -5.0f);
+  vec3 lookat = vec3(0.0f, 0.0f, 0.0f);
   vec3 up = vec3(0.0f, 1.0f, 0.0f);
   Camera camera(lookfrom, lookat, up, 60.0f, float(max_x)/float(max_y),
-		0.5f, (lookfrom-lookat).length());
+		0.125f, (lookfrom-lookat).length());
 
   for (int s = 0; s < ns; s++) {
     float u = float(i + curand_uniform(&local_rand_state))/float(max_x);
     float v = float(j + curand_uniform(&local_rand_state))/float(max_y);
     Ray ray = camera.get_ray(u, v, &local_rand_state);
-    // Ray ray(origin, lower_left_corner + u*horizontal + v*vertical);
     color += get_color(ray, *world, &local_rand_state);
   }
   fb[pixel_idx] = color/float(ns);
 }
 
 
-__global__ void create_world(Object** d_list, Object** d_world)
+__global__ void create_world(Object** d_list, Object** d_world, int n,
+			     curandState* rand_state)
 {
   if (threadIdx.x == 0 && blockIdx.x == 0) {
-    *(d_list) = new Sphere(vec3(0.0f, 0.0f, -1.0f), 0.5f,
-			   new Lambertian(vec3(0.5f, 0.5f, 0.5f)));
-    *(d_list + 1) = new Sphere(vec3(0.0f, -100.5f, -1.0f), 100.0f,
-			       new Lambertian(vec3(0.5f, 0.5f, 0.5f)));
-    *(d_list + 2) = new Sphere(vec3(1.0f, 0.0f, -1.0f), 0.5f,
-			       new Metal(vec3(0.95f, 0.5f, 0.5f), 0.5f));
-    *(d_list + 3) = new Sphere(vec3(-1.0f, 0.0f, -1.0f), 0.5f,
-			       new Dielectric(1.5f));
-    *d_world = new ObjectList(d_list, 4);
+    curandState local_rand_state = rand_state[0];
+    
+    d_list[0] = new Sphere(vec3(0.0f, -1000.0f, 0.0f), 1000.0f,
+    			   new Lambertian(vec3(0.5f, 0.5f, 0.5f)));
+
+    d_list[1] = new Sphere(vec3(0.0f, 1.0f, 0.0f), 1.0f, new Dielectric(1.5f));
+    d_list[2] = new Sphere(vec3(-4.0f, 1.0f, 0.0f), 1.0f, new Lambertian(vec3(0.4f, 0.2f, 0.1f)));
+    d_list[3] = new Sphere(vec3(4.0f, 1.0f, 0.0f), 1.0f, new Metal(vec3(0.7f, 0.6f, 0.5f), 0.0f));
+   
+    int i = 4;
+    for (int a = -11; a < 11; a++) {
+      for (int b = -11; b < 11; b++) {
+    	float choose_mat = curand_uniform(&local_rand_state);
+    	vec3 center(a + 0.9f*curand_uniform(&local_rand_state),
+    		    0.2f,
+    		    b + 0.9f*curand_uniform(&local_rand_state));
+    	if ((center - vec3(4.0f, 0.2f, 0.0f)).length() > 0.9f) {
+    	  if (choose_mat < 0.8f) { // diffuse
+    	    d_list[i++] =
+    	      new Sphere(center, 0.2f,
+    			 new Lambertian(vec3(curand_uniform(&local_rand_state)*curand_uniform(&local_rand_state),
+    					     curand_uniform(&local_rand_state)*curand_uniform(&local_rand_state),
+    					     curand_uniform(&local_rand_state)*curand_uniform(&local_rand_state))));
+    	  }
+    	  else if (choose_mat < 0.95f) { // metal
+    	    d_list[i++] =
+    	      new Sphere(center, 0.2f,
+    			 new Metal(vec3(0.5f*(1.0f + curand_uniform(&local_rand_state)),
+    					0.5f*(1.0f + curand_uniform(&local_rand_state)),
+    					0.5f*(1.0f + curand_uniform(&local_rand_state))),
+    				   0.5f*curand_uniform(&local_rand_state)));
+    	  }
+    	  else { // glass
+    	    d_list[i++] = new Sphere(center, 0.2f, new Dielectric(1.5f));
+    	  }
+    	}
+	if (i >= n) {
+	  break;
+	}
+      }
+      if (i >= n) {
+	break;
+      }
+    }
+    *d_world = new ObjectList(d_list, n);
   }
 }
 
 
-__global__ void free_world(Object** d_list, Object** d_world)
+__global__ void free_world(Object** d_list, Object** d_world, int n)
 {
-  delete *(d_list);
-  delete *(d_list + 1);
-  delete *(d_list + 2);
-  delete *(d_list + 3);
+  for (int i = 0; i < n; i++) {
+    delete d_list[i];
+  }
   delete *d_world;
 }
 
@@ -128,22 +161,22 @@ void generate_test_image(vec3* raw_image,
   checkCudaErrors(cudaGetLastError());
   checkCudaErrors(cudaDeviceSynchronize());
 
+  int num_spheres = 480;
+  
   Object **d_list;
-  checkCudaErrors(cudaMalloc((void**)&d_list, 4*sizeof(Object*)));
+  checkCudaErrors(cudaMalloc((void**)&d_list, num_spheres*sizeof(Object*)));
   Object **d_world;
   checkCudaErrors(cudaMalloc((void**)&d_world, sizeof(Object*)));
 
-  create_world<<<1, 1>>>(d_list, d_world);
+  create_world<<<1, 1>>>(d_list, d_world, num_spheres, d_rand_state);
   checkCudaErrors(cudaGetLastError());
   checkCudaErrors(cudaDeviceSynchronize());
 
-  render<<<blocks, threads>>>(raw_image, nx, ny, num_samples, vec3(-2.0f, -1.0f, -1.0f),
-			      vec3(4.0f, 0.0f, 0.0f), vec3(0.0, 2.0f, 0.0f),
-			      vec3(0.0f, 0.0f, 0.0f), d_world, d_rand_state);
+  render<<<blocks, threads>>>(raw_image, nx, ny, num_samples, d_world, d_rand_state);
   checkCudaErrors(cudaGetLastError());
   checkCudaErrors(cudaDeviceSynchronize());
 
-  free_world<<<1, 1>>>(d_list, d_world);
+  free_world<<<1, 1>>>(d_list, d_world, num_spheres);
   checkCudaErrors(cudaGetLastError());
 
   checkCudaErrors(cudaFree(d_list));

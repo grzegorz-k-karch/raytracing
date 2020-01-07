@@ -16,7 +16,7 @@ class Camera {
     float half_width = aspect*half_height;
     
     origin = lookfrom;
-    lens_radius = aperture/4.0f;
+    lens_radius = aperture/2.0f;
 
     w = normalize(lookfrom - lookat);
     u = normalize(cross(up, w));
