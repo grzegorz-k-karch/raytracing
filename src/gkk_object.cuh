@@ -7,7 +7,7 @@
 class Material;
 
 struct hit_record {
-  float t; // time ?
+  float t;
   vec3 p;
   vec3 n;
   Material *material_ptr;
@@ -24,11 +24,11 @@ class ObjectList: public Object {
   ObjectList() {}
   __device__ ObjectList(Object** objects, int num_objects):
     objects(objects), num_objects(num_objects) {}
-  
+
   __device__ virtual bool hit(const Ray& ray,
 				       float t_min, float t_max,
 				       hit_record& hrec) const;
-  
+
   Object **objects;
   int num_objects;
 };

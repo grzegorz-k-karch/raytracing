@@ -86,14 +86,14 @@ __global__ void create_world(Object** d_list, Object** d_world, int n,
 {
   if (threadIdx.x == 0 && blockIdx.x == 0) {
     curandState local_rand_state = rand_state[0];
-    
+
     d_list[0] = new Sphere(vec3(0.0f, -1000.0f, 0.0f), 1000.0f,
     			   new Lambertian(vec3(0.5f, 0.5f, 0.5f)));
 
     d_list[1] = new Sphere(vec3(0.0f, 1.0f, 0.0f), 1.0f, new Dielectric(1.5f));
     d_list[2] = new Sphere(vec3(-4.0f, 1.0f, 0.0f), 1.0f, new Lambertian(vec3(0.4f, 0.2f, 0.1f)));
     d_list[3] = new Sphere(vec3(4.0f, 1.0f, 0.0f), 1.0f, new Metal(vec3(0.7f, 0.6f, 0.5f), 0.0f));
-   
+
     int i = 4;
     for (int a = -11; a < 11; a++) {
       for (int b = -11; b < 11; b++) {
@@ -102,14 +102,14 @@ __global__ void create_world(Object** d_list, Object** d_world, int n,
     		    0.2f,
     		    b + 0.9f*curand_uniform(&local_rand_state));
     	if ((center - vec3(4.0f, 0.2f, 0.0f)).length() > 0.9f) {
-    	  if (choose_mat < 0.8f) { // diffuse
+    	  if (choose_mat < 0.5f) { // diffuse
     	    d_list[i++] =
     	      new Sphere(center, 0.2f,
     			 new Lambertian(vec3(curand_uniform(&local_rand_state)*curand_uniform(&local_rand_state),
     					     curand_uniform(&local_rand_state)*curand_uniform(&local_rand_state),
     					     curand_uniform(&local_rand_state)*curand_uniform(&local_rand_state))));
     	  }
-    	  else if (choose_mat < 0.95f) { // metal
+    	  else if (choose_mat < 0.75f) { // metal
     	    d_list[i++] =
     	      new Sphere(center, 0.2f,
     			 new Metal(vec3(0.5f*(1.0f + curand_uniform(&local_rand_state)),
@@ -162,7 +162,7 @@ void generate_test_image(vec3* raw_image,
   checkCudaErrors(cudaDeviceSynchronize());
 
   int num_spheres = 480;
-  
+
   Object **d_list;
   checkCudaErrors(cudaMalloc((void**)&d_list, num_spheres*sizeof(Object*)));
   Object **d_world;
