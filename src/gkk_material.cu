@@ -6,7 +6,7 @@ __device__ bool Lambertian::scatter(const Ray& in_ray, const hit_record& hrec,
 				    curandState* local_rand_state) const
 {
   vec3 target = hrec.p + hrec.n + random_in_unit_sphere(local_rand_state);
-  out_rays = Ray(hrec.p, target - hrec.p);
+  out_rays = Ray(hrec.p, target - hrec.p, in_ray.time());
   attenuation = albedo;
   return true;
 }
@@ -17,7 +17,7 @@ __device__ bool Metal::scatter(const Ray& in_ray, const hit_record& hrec,
 			       curandState* local_rand_state) const
 {
   vec3 reflected = reflect(normalize(in_ray.direction()), hrec.n);
-  out_rays = Ray(hrec.p, reflected + fuzz*random_in_unit_sphere(local_rand_state));
+  out_rays = Ray(hrec.p, reflected + fuzz*random_in_unit_sphere(local_rand_state), in_ray.time());
   attenuation = albedo;
   return (dot(out_rays.direction(), hrec.n) > 0.0f);
 }
@@ -56,10 +56,10 @@ __device__ bool Dielectric::scatter(const Ray& in_ray, const hit_record& hrec,
 
   if (curand_uniform(local_rand_state) < reflect_prob) {
     vec3 reflected = reflect(normalize(in_ray.direction()), hrec.n);
-    out_rays = Ray(hrec.p, reflected);
+    out_rays = Ray(hrec.p, reflected, in_ray.time());
   }
   else {
-    out_rays = Ray(hrec.p, refracted);
+    out_rays = Ray(hrec.p, refracted, in_ray.time());
   }
   
   return true;  

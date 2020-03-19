@@ -33,6 +33,40 @@ __device__ vec3 Sphere::normal_at_p(const vec3& point) const
   return normalize(point - center);
 }
 
+__device__ bool MovingSphere::hit(const Ray& ray, float t_min, float t_max, hit_record& hrec) const {
+
+  vec3 oc = ray.origin() - center_at_time(ray.time());
+  vec3 d = ray.direction();
+  // computing discriminant for ray-sphere intersection
+  float a = dot(d, d);
+  float b = 2.0f*dot(d, oc);
+  float c = dot(oc, oc) - radius*radius;
+  float discriminant = b*b - 4.0f*a*c;
+  float t = -1.0f;
+  if (discriminant > 0.0f) {
+    float x1 = (-b - sqrtf(discriminant))/(2.0f*a);
+    float x2 = (-b + sqrtf(discriminant))/(2.0f*a);
+    t = fminf(x1, x2);
+    if (t > t_min && t < t_max) {
+      hrec.t = t;
+      hrec.p = ray.point_at_t(t);
+      hrec.n = normal_at_p(hrec.p, center_at_time(ray.time()));
+      hrec.material_ptr = material_ptr;
+      return true;
+    }
+  }
+  return false;
+}
+
+__device__ vec3 MovingSphere::normal_at_p(const vec3& point, const vec3& center) const
+{
+  return normalize(point - center);
+}
+
+__device__ vec3 MovingSphere::center_at_time(float timestamp) const
+{
+  return center0 + ((timestamp - time0)/(time1 - time0))*(center1 - center0);
+}
 
 // from http://fileadmin.cs.lth.se/cs/Personal/Tomas_Akenine-Moller/raytri/
 // code rewritten to do tests on the sign of the determinant

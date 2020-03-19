@@ -4,12 +4,14 @@
 #include "gkk_object.cuh"
 #include "gkk_geometry.cuh"
 #include "gkk_camera.cuh"
+#include "plyreader.h"
 
 #include <curand_kernel.h>
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <boost/program_options.hpp>
+
 namespace po = boost::program_options;
 
 int load_obj(std::string input,
@@ -43,6 +45,61 @@ int load_obj(std::string input,
   fs.close();
   return 0;
 }
+
+
+int load_ply(std::string input,
+	     std::vector<vec3>& point_list,
+	     std::vector<int>& triangle_list)
+{
+  std::vector<float> vertices;
+  std::vector<float> normals;
+  std::vector<unsigned int> indices;
+
+  readPlyObject(input, vertices, normals, indices);
+
+  float minx = vertices[0];
+  float maxx = vertices[0];
+  float miny = vertices[1];
+  float maxy = vertices[1];
+  float minz = vertices[2];
+  float maxz = vertices[2];
+
+
+  for (int i = 0; i < vertices.size()/3; i++) {
+    float x = vertices[i*3+0]*20.0f;
+    float y = vertices[i*3+1]*20.0f;
+    float z = vertices[i*3+2]*20.0f;
+
+    point_list.push_back(vec3(x, y, z));
+
+    if (x < minx) {
+      minx = x;
+    }
+    if (x > maxx) {
+      maxx = x;
+    }
+    if (y < miny) {
+      miny = y;
+    }
+    if (y > maxy) {
+      maxy = y;
+    }
+    if (z < minz) {
+      minz = z;
+    }
+    if (z > maxz) {
+      maxz = z;
+    }
+  }
+
+  for (int i = 0; i < indices.size(); i++) {
+    triangle_list.push_back(indices[i]);
+  }
+
+  return 0;
+}
+
+
 
 // assuming pixel values are in range (0,1)
 int write_ppm(vec3* raw_image,
@@ -100,7 +157,7 @@ __global__ void render(vec3* fb, int max_x, int max_y, int ns,
   vec3 lookat = vec3(0.0f, 1.0f, 0.0f);
   vec3 up = vec3(0.0f, 1.0f, 0.0f);
   Camera camera(lookfrom, lookat, up, 60.0f, float(max_x)/float(max_y),
-		0.125f, (lookfrom-lookat).length());
+		0.125f, (lookfrom-lookat).length(), 0.0f, 1.0f);
 
   for (int s = 0; s < ns; s++) {
     float u = float(i + curand_uniform(&local_rand_state))/float(max_x);
@@ -121,14 +178,14 @@ __global__ void create_world(Object** obj_list, Object** world, int n,
     curandState local_rand_state = rand_state[0];
 
     obj_list[0] = new Sphere(vec3(0.0f, -1000.0f, 0.0f), 1000.0f,
-			     new Lambertian(vec3(0.5f, 0.5f, 0.5f)));
+    			     new Lambertian(vec3(0.5f, 0.5f, 0.5f)));
 
     obj_list[1] = new Sphere(vec3(0.0f, 1.0f, 0.0f), 1.0f, new Dielectric(1.5f));
     obj_list[2] = new Sphere(vec3(-4.0f, 1.0f, 0.0f), 1.0f, new Lambertian(vec3(0.4f, 0.2f, 0.1f)));
     obj_list[3] = new Sphere(vec3(4.0f, 1.0f, 0.0f), 1.0f, new Metal(vec3(0.7f, 0.6f, 0.5f), 0.0f));
 
     obj_list[4] = new TriangleMesh(point_list, num_points, triangle_list, num_triangles,
-				   new Metal(vec3(1.0f, 0.6f, 0.5f), 0.0f));
+				   new Lambertian(vec3(1.0f, 0.3f, 0.5f)));
 
     int i = 5;
     for (int a = -11; a < 11; a++) {
@@ -140,10 +197,11 @@ __global__ void create_world(Object** obj_list, Object** world, int n,
     	if ((center - vec3(4.0f, 0.2f, 0.0f)).length() > 0.9f) {
     	  if (choose_mat < 0.5f) { // diffuse
     	    obj_list[i++] =
-    	      new Sphere(center, 0.2f,
-    			 new Lambertian(vec3(curand_uniform(&local_rand_state)*curand_uniform(&local_rand_state),
-    					     curand_uniform(&local_rand_state)*curand_uniform(&local_rand_state),
-    					     curand_uniform(&local_rand_state)*curand_uniform(&local_rand_state))));
+    	      new MovingSphere(center, center + vec3(0.0f, curand_uniform(&local_rand_state), 0.0f),
+			       0.0f, 1.0f, 0.2f,
+			       new Lambertian(vec3(curand_uniform(&local_rand_state)*curand_uniform(&local_rand_state),
+						   curand_uniform(&local_rand_state)*curand_uniform(&local_rand_state),
+						   curand_uniform(&local_rand_state)*curand_uniform(&local_rand_state))));
     	  }
     	  else if (choose_mat < 0.75f) { // metal
     	    obj_list[i++] =
@@ -198,25 +256,10 @@ void generate_test_image(vec3* raw_image,
   checkCudaErrors(cudaDeviceSynchronize());
 
   std::vector<vec3> point_list;
-  // point_list.push_back(vec3(0.0f, 0.0f, 0.0f));
-  // point_list.push_back(vec3(3.0f, 0.0f, 0.0f));
-  // point_list.push_back(vec3(0.0f, 3.0f, 0.0f));
-  // point_list.push_back(vec3(0.0f, 0.0f, 3.0f));
   std::vector<int> triangle_list;
-  // triangle_list.push_back(0);
-  // triangle_list.push_back(1);
-  // triangle_list.push_back(2);
-  // triangle_list.push_back(0);
-  // triangle_list.push_back(2);
-  // triangle_list.push_back(3);
-  // triangle_list.push_back(0);
-  // triangle_list.push_back(3);
-  // triangle_list.push_back(1);
-  // triangle_list.push_back(1);
-  // triangle_list.push_back(3);
-  // triangle_list.push_back(2);
 
-  load_obj("../models/teapot.obj", point_list, triangle_list);
+  // load_obj("../models/teapot.obj", point_list, triangle_list);
+  load_ply("../models/bunny.ply", point_list, triangle_list);
 
   int num_triangles = triangle_list.size()/3;
   int num_points = point_list.size();
@@ -230,7 +273,7 @@ void generate_test_image(vec3* raw_image,
   checkCudaErrors(cudaMemcpy(d_triangle_list, triangle_list.data(),
 			     num_triangles*3*sizeof(int), cudaMemcpyHostToDevice));
 
-  int num_spheres = 480;  
+  int num_spheres = 480;
 
   Object **d_list;
   checkCudaErrors(cudaMalloc((void**)&d_list, (num_spheres + 1)*sizeof(Object*)));
@@ -263,7 +306,7 @@ int main(int argc, char** argv)
   int nx;
   int ny;
   int ns;
-  
+
   try {
     po::options_description desc{"Options"};
     desc.add_options()
@@ -286,15 +329,16 @@ int main(int argc, char** argv)
   }
 
   int num_pixels = nx*ny;
+  size_t framebuffer_size = num_pixels*sizeof(vec3);
 
-  size_t fb_size = num_pixels*sizeof(vec3);
-  vec3 *fb;
-  checkCudaErrors(cudaMallocManaged((void**)&fb, fb_size));
+  vec3 *framebuffer;
+  checkCudaErrors(cudaMallocManaged((void**)&framebuffer, framebuffer_size));
 
-  generate_test_image(fb, nx, ny, ns);
-  write_ppm(fb, nx, ny, output);
+  generate_test_image(framebuffer, nx, ny, ns);
 
-  cudaFree(fb);
+  write_ppm(framebuffer, nx, ny, output);
+
+  cudaFree(framebuffer);
 
   return 0;
 }
