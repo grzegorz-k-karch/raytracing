@@ -28,6 +28,13 @@ __device__ bool Sphere::hit(const Ray& ray, float t_min, float t_max, hit_record
   return false;
 }
 
+__device__ bool Sphere::bbox(float t0, float t1, AABB& output_bbox) const
+{
+  output_bbox = AABB(center - vec3(radius, radius, radius),
+		     center + vec3(radius, radius, radius));
+  return true;
+}
+
 __device__ vec3 Sphere::normal_at_p(const vec3& point) const
 {
   return normalize(point - center);
@@ -58,12 +65,25 @@ __device__ bool MovingSphere::hit(const Ray& ray, float t_min, float t_max, hit_
   return false;
 }
 
-__device__ vec3 MovingSphere::normal_at_p(const vec3& point, const vec3& center) const
+__device__
+bool MovingSphere::bbox(float t0, float t1, AABB& output_bbox) const
+{
+  AABB bbox0(center_at_time(t0) - vec3(radius, radius, radius),
+	     center_at_time(t0) + vec3(radius, radius, radius));
+  AABB bbox1(center_at_time(t1) - vec3(radius, radius, radius),
+	     center_at_time(t1) + vec3(radius, radius, radius));
+  output_bbox = surrounding_bbox(bbox0, bbox1);
+  return true;
+}
+
+__device__
+vec3 MovingSphere::normal_at_p(const vec3& point, const vec3& center) const
 {
   return normalize(point - center);
 }
 
-__device__ vec3 MovingSphere::center_at_time(float timestamp) const
+__device__
+vec3 MovingSphere::center_at_time(float timestamp) const
 {
   return center0 + ((timestamp - time0)/(time1 - time0))*(center1 - center0);
 }
@@ -135,21 +155,6 @@ int intersect_triangle(vec3 orig, vec3 dir,
 
 
 __device__
-vec3 TriangleMesh::normal_at_p(const vec3& point,
-			       const vec3 vert0,
-			       const vec3 vert1,
-			       const vec3 vert2) const
-{
-  vec3 e0 = vert1 - vert0;
-  vec3 e1 = vert2 - vert0;
-  vec3 n = cross(e0, e1);
-  n = normalize(n);
-  
-  return n;
-}
-
-
-__device__
 bool TriangleMesh::hit(const Ray& ray, float t_min, float t_max, hit_record& hrec) const
 {
   float u, v;
@@ -195,4 +200,27 @@ bool TriangleMesh::hit(const Ray& ray, float t_min, float t_max, hit_record& hre
     return true;
   }
   return false;
+}
+
+
+__device__
+bool TriangleMesh::bbox(float t0, float t1, AABB& output_bbox) const
+{
+  output_bbox = _bbox;
+  return true;
+}
+
+
+__device__
+vec3 TriangleMesh::normal_at_p(const vec3& point,
+			       const vec3 vert0,
+			       const vec3 vert1,
+			       const vec3 vert2) const
+{
+  vec3 e0 = vert1 - vert0;
+  vec3 e1 = vert2 - vert0;
+  vec3 n = cross(e0, e1);
+  n = normalize(n);
+  
+  return n;
 }

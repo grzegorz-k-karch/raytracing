@@ -1,9 +1,10 @@
 #include "gkk_object.cuh"
 
-__device__ bool ObjectList::hit(const Ray& ray,
-					 float t_min, float t_max,
-					 hit_record& hrec) const {
-  
+__device__
+bool ObjectList::hit(const Ray& ray,
+		     float t_min, float t_max,
+		     hit_record& hrec) const
+{
   bool hit_any = false;
   hit_record tmp_hrec;
   float closest_so_far = t_max;
@@ -15,4 +16,10 @@ __device__ bool ObjectList::hit(const Ray& ray,
     }
   }
   return hit_any;
+}
+
+__device__
+bool ObjectList::bbox(float t0, float t1, AABB& output_bbox) const
+{
+  return false;
 }

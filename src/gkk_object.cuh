@@ -3,8 +3,10 @@
 
 #include "gkk_vec.cuh"
 #include "gkk_ray.cuh"
+#include "gkk_aabb.cuh"
 
 class Material;
+
 
 struct hit_record {
   float t;
@@ -13,11 +15,14 @@ struct hit_record {
   Material *material_ptr;
 };
 
+
 class Object {
  public:
   __device__ virtual bool hit(const Ray& ray, float t_min, float t_max,
 				       hit_record& hrec) const = 0;
+  __device__ virtual bool bbox(float t0, float t1, AABB& output_bbox) const = 0;
 };
+
 
 class ObjectList: public Object {
  public:
@@ -26,8 +31,10 @@ class ObjectList: public Object {
     objects(objects), num_objects(num_objects) {}
 
   __device__ virtual bool hit(const Ray& ray,
-				       float t_min, float t_max,
-				       hit_record& hrec) const;
+			      float t_min, float t_max,
+			      hit_record& hrec) const;
+  __device__ virtual bool bbox(float t0, float t1,
+			       AABB& output_bbox) const;
 
   Object **objects;
   int num_objects;

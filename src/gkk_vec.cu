@@ -2,7 +2,7 @@
 
 std::ostream& operator<<(std::ostream& os, const vec3& v)
 {
-  os << "(" << v[0] << "," << v[1] << "," << v[2] << ")";
+  return os << "(" << v[0] << "," << v[1] << "," << v[2] << ")";
 }
 
 __device__ vec3::operator vec4() const

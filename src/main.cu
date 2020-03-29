@@ -49,7 +49,8 @@ int load_obj(std::string input,
 
 int load_ply(std::string input,
 	     std::vector<vec3>& point_list,
-	     std::vector<int>& triangle_list)
+	     std::vector<int>& triangle_list,
+	     vec3& bmin, vec3& bmax)
 {
   std::vector<float> vertices;
   std::vector<float> normals;
@@ -91,6 +92,9 @@ int load_ply(std::string input,
       maxz = z;
     }
   }
+
+  bmin = vec3(minx, miny, minz);
+  bmax = vec3(maxx, maxy, maxz);
 
   for (int i = 0; i < indices.size(); i++) {
     triangle_list.push_back(indices[i]);
@@ -172,7 +176,8 @@ __global__ void render(vec3* fb, int max_x, int max_y, int ns,
 __global__ void create_world(Object** obj_list, Object** world, int n,
 			     curandState* rand_state,
 			     vec3* point_list, int num_points,
-			     int* triangle_list, int num_triangles)
+			     int* triangle_list, int num_triangles,
+			     const vec3* bbox)
 {
   if (threadIdx.x == 0 && blockIdx.x == 0) {
     curandState local_rand_state = rand_state[0];
@@ -185,7 +190,7 @@ __global__ void create_world(Object** obj_list, Object** world, int n,
     obj_list[3] = new Sphere(vec3(4.0f, 1.0f, 0.0f), 1.0f, new Metal(vec3(0.7f, 0.6f, 0.5f), 0.0f));
 
     obj_list[4] = new TriangleMesh(point_list, num_points, triangle_list, num_triangles,
-				   new Lambertian(vec3(1.0f, 0.3f, 0.5f)));
+    				   new Lambertian(vec3(1.0f, 0.3f, 0.5f)), bbox[0], bbox[1]);
 
     int i = 5;
     for (int a = -11; a < 11; a++) {
@@ -257,9 +262,10 @@ void generate_test_image(vec3* raw_image,
 
   std::vector<vec3> point_list;
   std::vector<int> triangle_list;
+  vec3 bmin, bmax;
 
   // load_obj("../models/teapot.obj", point_list, triangle_list);
-  load_ply("../models/bunny.ply", point_list, triangle_list);
+  load_ply("../models/bunny.ply", point_list, triangle_list, bmin, bmax);
 
   int num_triangles = triangle_list.size()/3;
   int num_points = point_list.size();
@@ -268,10 +274,13 @@ void generate_test_image(vec3* raw_image,
   checkCudaErrors(cudaMalloc((void**)&d_point_list, num_points*sizeof(vec3)));
   int *d_triangle_list;
   checkCudaErrors(cudaMalloc((void**)&d_triangle_list, num_triangles*3*sizeof(int)));
-
   checkCudaErrors(cudaMemcpy(d_point_list, point_list.data(), num_points*sizeof(vec3), cudaMemcpyHostToDevice));
   checkCudaErrors(cudaMemcpy(d_triangle_list, triangle_list.data(),
 			     num_triangles*3*sizeof(int), cudaMemcpyHostToDevice));
+  vec3 *d_bbox;
+  checkCudaErrors(cudaMalloc((void**)&d_bbox, 2*sizeof(vec3)));
+  checkCudaErrors(cudaMemcpy(&d_bbox[0], &bmin, sizeof(vec3), cudaMemcpyHostToDevice));
+  checkCudaErrors(cudaMemcpy(&d_bbox[1], &bmax, sizeof(vec3), cudaMemcpyHostToDevice));
 
   int num_spheres = 480;
 
@@ -281,7 +290,7 @@ void generate_test_image(vec3* raw_image,
   checkCudaErrors(cudaMalloc((void**)&d_world, sizeof(Object*)));
 
   create_world<<<1, 1>>>(d_list, d_world, num_spheres + 1, d_rand_state,
-			 d_point_list, num_points, d_triangle_list, num_triangles);
+			 d_point_list, num_points, d_triangle_list, num_triangles, d_bbox);
   checkCudaErrors(cudaGetLastError());
   checkCudaErrors(cudaDeviceSynchronize());
 
