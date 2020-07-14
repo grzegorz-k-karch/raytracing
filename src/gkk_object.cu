@@ -1,5 +1,6 @@
 #include "gkk_object.cuh"
 
+
 __device__
 bool ObjectList::hit(const Ray& ray,
 		     float t_min, float t_max,
@@ -18,8 +19,101 @@ bool ObjectList::hit(const Ray& ray,
   return hit_any;
 }
 
+
 __device__
 bool ObjectList::bbox(float t0, float t1, AABB& output_bbox) const
 {
-  return false;
+  if (objects == nullptr) {
+    return false;
+  }
+  bool has_bbox = false;
+  if (_bbox == nullptr) {
+    AABB surr_bbox;
+
+    // get the first bounding box to initialize the  surrounding bounding box
+    int i = 0;
+    for (; i < num_objects; i++) {
+      if (objects[0]->bbox(t0, t1, surr_bbox)) {
+	break;
+      }
+    }
+    // process remaining bounding boxes
+    for (; i < num_objects; i++) {
+      AABB tmp_bbox;
+      if (objects[0]->bbox(t0, t1, tmp_bbox)) {
+	surr_bbox = surrounding_bbox(surr_bbox, tmp_bbox);
+	has_bbox = true;
+      }
+    }
+    if (has_bbox) {
+      output_bbox = surr_bbox;
+    }
+  }
+  else {
+    output_bbox = *_bbox;
+    has_bbox = true;
+  }
+  return has_bbox;
+}
+
+
+__device__
+BVHNode::BVHNode(Object** objects, int start, int end, float time0, float time1,
+		 curandState* rand_state)
+{
+  int axis = int(ceilf(curand_uniform(rand_state)*3.0f) - 1.0f); //  (0:1](1:2](2:3])
+
+  int object_span = end - start;
+
+  if (object_span == 1) {
+    left = right = objects[start];
+  }
+  else if (object_span == 2) {
+    if (compare_bboxes(objects[start], objects[start + 1], axis)) {
+      left = objects[start];
+      right = objects[start + 1];
+    }
+    else {
+      left = objects[start + 1];
+      right = objects[start];
+    }
+  }
+  else {
+    // TODO: sort
+    int mid = start + object_span/2;
+    left = new BVHNode(objects, start, mid, time0, time1, rand_state);
+    right = new BVHNode(objects, mid, end, time0, time1, rand_state);
+  }
+
+  AABB box_left, box_right;
+  if (!left->bbox(time0, time1, box_left) || !right->bbox(time0, time1, box_right))  {
+    printf("|||| No bounding box in BVHNode constructor.\n");
+  }
+
+  _bbox = new AABB(surrounding_bbox(box_left, box_right));
+}
+
+
+__device__
+bool BVHNode::hit(const Ray& ray, float t_min, float t_max, hit_record& hrec) const
+{
+  if (!_bbox->hit(ray, t_min, t_max)) {
+    return false;
+  }
+
+  bool hit_left = left->hit(ray, t_min, t_max, hrec);
+  bool hit_right = right->hit(ray, t_min, hit_left ? hrec.t : t_max, hrec);
+
+  return hit_left || hit_right;
+}
+
+
+__device__
+bool BVHNode::bbox(float t0, float t1, AABB& output_bbox) const
+{
+  if (_bbox == nullptr) {
+    return false;
+  }
+  output_bbox = *_bbox;
+  return true;
 }

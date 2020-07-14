@@ -17,6 +17,8 @@ public:
   __device__ AABB() {}
   __device__ AABB(const vec3& a, const vec3&b) :
     bmin(a), bmax(b) {}
+  __device__ AABB(const AABB& bbox) :
+  bmin(bbox.bmin), bmax(bbox.bmax) {}  
 
   __device__ vec3 min() const { return bmin; }
   __device__ vec3 max() const { return bmax; }

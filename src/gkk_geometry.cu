@@ -157,9 +157,9 @@ int intersect_triangle(vec3 orig, vec3 dir,
 __device__
 bool TriangleMesh::hit(const Ray& ray, float t_min, float t_max, hit_record& hrec) const
 {
-  float u, v;
+  // float u, v;
   float t = 3.402823e+38;
-  int isect = 0;
+  // int isect = 0;
   int tidx;
   for (int i = 0; i < num_triangles; i++) {
 
@@ -178,8 +178,8 @@ bool TriangleMesh::hit(const Ray& ray, float t_min, float t_max, hit_record& hre
     if (isect) {
       if (t_tmp < t) {
 	t = t_tmp;
-	u = u_tmp;
-	v = v_tmp;
+	// u = u_tmp;
+	// v = v_tmp;
 	tidx = i;
       }
     }

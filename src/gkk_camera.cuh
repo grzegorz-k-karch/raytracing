@@ -4,11 +4,13 @@
 #include "gkk_vec.cuh"
 #include "gkk_ray.cuh"
 #include "gkk_random.cuh"
+#include "gkk_xmlreader.h"
 
 class Camera {
  public:
-  __device__ Camera(vec3 lookfrom, vec3 lookat, vec3 up, float fov, float aspect,
-		    float aperture, float focus_dist, float _time0, float _time1) {
+  __device__ __host__
+  Camera(vec3 lookfrom, vec3 lookat, vec3 up, float fov, float aspect,
+	 float aperture, float focus_dist, float _time0, float _time1) {
     time0 = _time0;
     time1 = _time1;
 
@@ -28,6 +30,26 @@ class Camera {
       - focus_dist*w;
     horizontal = 2.0f*half_width*focus_dist*u;
     vertical = 2.0f*half_height*focus_dist*v;
+  }
+
+  __host__
+  Camera(pt::ptree camera) {
+    vec3 lookFrom = string2vec3(camera.get<std::string>("lookFrom.<xmlattr>.value"));
+    vec3 lookAt = string2vec3(camera.get<std::string>("lookAt.<xmlattr>.value"));
+    vec3 up = string2vec3(camera.get<std::string>("up.<xmlattr>.value"));
+    float fov = camera.get<float>("fov.<xmlattr>.value");
+    int res_x = camera.get<int>("res_x.<xmlattr>.value");
+    int res_y = camera.get<int>("res_y.<xmlattr>.value");    
+    float aspect = float(res_x)/float(res_y);
+    float aperture = camera.get<float>("fov.<xmlattr>.value");
+    float focus_distance = camera.get<float>("fov.<xmlattr>.value");
+    if (focus_distance < 0.0f) {
+      focus_distance = (lookFrom-lookAt).length();
+    }
+    float time0 = camera.get<float>("time0.<xmlattr>.value");
+    float time1 = camera.get<float>("time1.<xmlattr>.value");
+    Camera(lookFrom, lookAt, up, fov, aspect,
+	   aperture, focus_distance, time0, time1);
   }
 
   __device__ Ray get_ray(float s, float t, curandState* local_rand_state) {

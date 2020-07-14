@@ -4,6 +4,7 @@
 #include "gkk_object.cuh"
 #include "gkk_geometry.cuh"
 #include "gkk_camera.cuh"
+#include "gkk_xmlreader.h"
 #include "plyreader.h"
 
 #include <curand_kernel.h>
@@ -144,7 +145,8 @@ __global__ void render_init(int max_x, int max_y, curandState* rand_state)
 
 
 __global__ void render(vec3* fb, int max_x, int max_y, int ns,
-		       Object** world, curandState* rand_state)
+		       Object** world, curandState* rand_state,
+		       Camera* camera)
 {
   int i = threadIdx.x + blockIdx.x*blockDim.x;
   int j = threadIdx.y + blockIdx.y*blockDim.y;
@@ -156,17 +158,10 @@ __global__ void render(vec3* fb, int max_x, int max_y, int ns,
   curandState local_rand_state = rand_state[pixel_idx];
   vec3 color = vec3(0.0f, 0.0f, 0.0f);
 
-  // default camera
-  vec3 lookfrom = vec3(-1.0f, 2.7f, 4.5f);
-  vec3 lookat = vec3(0.0f, 1.0f, 0.0f);
-  vec3 up = vec3(0.0f, 1.0f, 0.0f);
-  Camera camera(lookfrom, lookat, up, 60.0f, float(max_x)/float(max_y),
-		0.125f, (lookfrom-lookat).length(), 0.0f, 1.0f);
-
   for (int s = 0; s < ns; s++) {
     float u = float(i + curand_uniform(&local_rand_state))/float(max_x);
     float v = float(j + curand_uniform(&local_rand_state))/float(max_y);
-    Ray ray = camera.get_ray(u, v, &local_rand_state);
+    Ray ray = camera->get_ray(u, v, &local_rand_state);
     color += get_color(ray, *world, &local_rand_state);
   }
   fb[pixel_idx] = color/float(ns);
@@ -244,7 +239,8 @@ __global__ void free_world(Object** d_list, Object** d_world, int n)
 
 void generate_test_image(vec3* raw_image,
 			 const int nx, const int ny,
-			 const int num_samples)
+			 const int num_samples,
+			 const Camera& camera)
 {
 
   int tx = 8;
@@ -282,6 +278,10 @@ void generate_test_image(vec3* raw_image,
   checkCudaErrors(cudaMemcpy(&d_bbox[0], &bmin, sizeof(vec3), cudaMemcpyHostToDevice));
   checkCudaErrors(cudaMemcpy(&d_bbox[1], &bmax, sizeof(vec3), cudaMemcpyHostToDevice));
 
+  Camera *d_camera;
+  checkCudaErrors(cudaMalloc((void**)&d_camera, sizeof(Camera)));
+  checkCudaErrors(cudaMemcpy(d_camera, &camera, sizeof(Camera), cudaMemcpyHostToDevice));  
+  
   int num_spheres = 480;
 
   Object **d_list;
@@ -294,7 +294,7 @@ void generate_test_image(vec3* raw_image,
   checkCudaErrors(cudaGetLastError());
   checkCudaErrors(cudaDeviceSynchronize());
 
-  render<<<blocks, threads>>>(raw_image, nx, ny, num_samples, d_world, d_rand_state);
+  render<<<blocks, threads>>>(raw_image, nx, ny, num_samples, d_world, d_rand_state, d_camera);
   checkCudaErrors(cudaGetLastError());
   checkCudaErrors(cudaDeviceSynchronize());
 
@@ -306,12 +306,14 @@ void generate_test_image(vec3* raw_image,
   checkCudaErrors(cudaFree(d_list));
   checkCudaErrors(cudaFree(d_world));
   checkCudaErrors(cudaFree(d_rand_state));
+  checkCudaErrors(cudaFree(d_camera));  
 }
 
 
 int main(int argc, char** argv)
 {
   std::string output = "";
+  std::string config_filepath = "";  
   int nx;
   int ny;
   int ns;
@@ -321,9 +323,10 @@ int main(int argc, char** argv)
     desc.add_options()
       ("help,h", "Help screen")
       ("output,o", po::value<std::string>(&output)->required(), "Filename for the output figure")
-      ("resolution-x,x", po::value<int>(&nx)->default_value(1600), "Horizontal output resolution")
-      ("resolution-y,y", po::value<int>(&ny)->default_value(800), "Vertical output resolution")
-      ("num-samples,s", po::value<int>(&ns)->default_value(100), "Number of samples per pixel");
+      ("resolution-x,x", po::value<int>(&nx)->default_value(480), "Horizontal output resolution")
+      ("resolution-y,y", po::value<int>(&ny)->default_value(320), "Vertical output resolution")
+      ("num-samples,s", po::value<int>(&ns)->default_value(64), "Number of samples per pixel")
+      ("config", po::value<std::string>(&config_filepath)->required(), "File with scene config");
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
 
@@ -337,13 +340,19 @@ int main(int argc, char** argv)
     std::cerr << ex.what() << std::endl;
   }
 
+  pt::ptree scene_tree;
+  xml_read(config_filepath, scene_tree);
+  
+  pt::ptree camera_tree = scene_tree.get_child("scene.camera");
+  Camera camera(camera_tree);
+
   int num_pixels = nx*ny;
   size_t framebuffer_size = num_pixels*sizeof(vec3);
 
   vec3 *framebuffer;
   checkCudaErrors(cudaMallocManaged((void**)&framebuffer, framebuffer_size));
 
-  generate_test_image(framebuffer, nx, ny, ns);
+  generate_test_image(framebuffer, nx, ny, ns, camera);
 
   write_ppm(framebuffer, nx, ny, output);
 
