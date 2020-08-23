@@ -21,26 +21,26 @@ bool ObjectList::hit(const Ray& ray,
 
 
 __device__
-bool ObjectList::bbox(float t0, float t1, AABB& output_bbox) const
+bool ObjectList::get_bbox(float t0, float t1, AABB& output_bbox) const
 {
   if (objects == nullptr) {
     return false;
   }
   bool has_bbox = false;
-  if (_bbox == nullptr) {
+  if (bbox == nullptr) {
     AABB surr_bbox;
 
     // get the first bounding box to initialize the  surrounding bounding box
     int i = 0;
     for (; i < num_objects; i++) {
-      if (objects[0]->bbox(t0, t1, surr_bbox)) {
+      if (objects[0]->get_bbox(t0, t1, surr_bbox)) {
 	break;
       }
     }
     // process remaining bounding boxes
     for (; i < num_objects; i++) {
       AABB tmp_bbox;
-      if (objects[0]->bbox(t0, t1, tmp_bbox)) {
+      if (objects[0]->get_bbox(t0, t1, tmp_bbox)) {
 	surr_bbox = surrounding_bbox(surr_bbox, tmp_bbox);
 	has_bbox = true;
       }
@@ -50,7 +50,7 @@ bool ObjectList::bbox(float t0, float t1, AABB& output_bbox) const
     }
   }
   else {
-    output_bbox = *_bbox;
+    output_bbox = *bbox;
     has_bbox = true;
   }
   return has_bbox;
@@ -86,18 +86,18 @@ BVHNode::BVHNode(Object** objects, int start, int end, float time0, float time1,
   }
 
   AABB box_left, box_right;
-  if (!left->bbox(time0, time1, box_left) || !right->bbox(time0, time1, box_right))  {
+  if (!left->get_bbox(time0, time1, box_left) || !right->get_bbox(time0, time1, box_right))  {
     printf("|||| No bounding box in BVHNode constructor.\n");
   }
 
-  _bbox = new AABB(surrounding_bbox(box_left, box_right));
+  bbox = new AABB(surrounding_bbox(box_left, box_right));
 }
 
 
 __device__
 bool BVHNode::hit(const Ray& ray, float t_min, float t_max, hit_record& hrec) const
 {
-  if (!_bbox->hit(ray, t_min, t_max)) {
+  if (!bbox->hit(ray, t_min, t_max)) {
     return false;
   }
 
@@ -109,11 +109,11 @@ bool BVHNode::hit(const Ray& ray, float t_min, float t_max, hit_record& hrec) co
 
 
 __device__
-bool BVHNode::bbox(float t0, float t1, AABB& output_bbox) const
+bool BVHNode::get_bbox(float t0, float t1, AABB& output_bbox) const
 {
-  if (_bbox == nullptr) {
+  if (bbox == nullptr) {
     return false;
   }
-  output_bbox = *_bbox;
+  output_bbox = *bbox;
   return true;
 }

@@ -6,16 +6,20 @@
 <scene version="0.0.1">
 
   <camera>
-    <lookFrom value="-1.0 2.7 4.5"/>
-    <lookAt value="0.0 1.0 0.0"/>
+    <lookFrom value="0.0 1.0 -4.0"/>
+    <lookAt value="0.0 0.0 0.0"/>
     <up value="0.0 1.0 0.0"/>
     <fov value="60.0"/>
-    <res_x value="800" />
-    <res_y value="600" />    
     <aperture value="0.125"/>
     <focus_distance value="-1.0"/>
     <time0 value="0.0"/>
     <time1 value="1.0"/>    
+    <res_x value="400" />
+    <res_y value="300" />
   </camera>
+
+  <triangle_mesh>
+    <source value="../models/bunny.ply"/>
+  </triangle_mesh>
     
 </scene>

@@ -22,7 +22,7 @@ class Object {
  public:
   __device__ virtual bool hit(const Ray& ray, float t_min, float t_max,
 				       hit_record& hrec) const = 0;
-  __device__ virtual bool bbox(float t0, float t1, AABB& output_bbox) const = 0;
+  __device__ virtual bool get_bbox(float t0, float t1, AABB& output_bbox) const = 0;
 };
 
 
@@ -34,12 +34,12 @@ class ObjectList: public Object {
     objects(objects), num_objects(num_objects) {}
 
   __device__ virtual bool hit(const Ray& ray, float t_min, float t_max, hit_record& hrec) const;
-  __device__ virtual bool bbox(float t0, float t1, AABB& output_bbox) const;
+  __device__ virtual bool get_bbox(float t0, float t1, AABB& output_bbox) const;
 
   Object **objects;
   int num_objects;
 
-  AABB *_bbox;
+  AABB *bbox;
 };
 
 
@@ -52,13 +52,13 @@ public:
   		     curandState* rand_state);
 
   __device__ virtual bool hit(const Ray& ray, float t_min, float t_max, hit_record& hrec) const;
-  __device__ virtual bool bbox(float t0, float t1, AABB& output_bbox) const;
+  __device__ virtual bool get_bbox(float t0, float t1, AABB& output_bbox) const;
 
 public:
   Object *left;
   Object *right;
 
-  AABB *_bbox;
+  AABB *bbox;
 };
 
 __device__ inline bool compare_bboxes(Object* a, Object* b, int axis)
@@ -66,7 +66,7 @@ __device__ inline bool compare_bboxes(Object* a, Object* b, int axis)
   AABB bbox_a;
   AABB bbox_b;
 
-  if (!a->bbox(0.0f, 0.0f, bbox_a) || !b->bbox(0.0f, 0.0f, bbox_b)) {
+  if (!a->get_bbox(0.0f, 0.0f, bbox_a) || !b->get_bbox(0.0f, 0.0f, bbox_b)) {
     return false;
   }
   return bbox_a.min().e[axis] <  bbox_b.min().e[axis]; 

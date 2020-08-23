@@ -1,0 +1,6 @@
+#include "gkk_aabb.cuh"
+
+std::ostream& operator<<(std::ostream& os, const& AABB)
+{
+  return os << "(" << bmin << ", " << bmax << ")";
+}

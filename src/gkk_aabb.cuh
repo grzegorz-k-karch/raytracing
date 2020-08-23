@@ -1,6 +1,11 @@
 #ifndef GKK_AABB_H
 #define GKK_AABB_H
 
+#include "gkk_vec.cuh"
+#include "gkk_ray.cuh"
+
+#include <iostream>
+
 __device__ inline float ffmin(float a, float b) { return a < b ? a : b; }
 
 __device__ inline float ffmax(float a, float b) { return a > b ? a : b; }
@@ -15,7 +20,7 @@ __device__ inline void swap(float& a, float& b)
 class AABB {
 public:
   __device__ AABB() {}
-  __device__ AABB(const vec3& a, const vec3&b) :
+  __device__ __host__ AABB(const vec3& a, const vec3&b) :
     bmin(a), bmax(b) {}
   __device__ AABB(const AABB& bbox) :
   bmin(bbox.bmin), bmax(bbox.bmax) {}  
@@ -40,6 +45,9 @@ public:
     return true;
   }
 
+  __host__
+  friend std::ostream& operator<<(std::ostream& os, const AABB& bbox);
+
   vec3 bmin;
   vec3 bmax;
 };
@@ -54,6 +62,5 @@ __device__ inline AABB surrounding_bbox(const AABB& b0, const AABB& b1) {
   
   return AABB(small, big);
 }
-
 
 #endif//GKK_AABB_H

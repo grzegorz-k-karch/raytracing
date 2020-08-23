@@ -1,7 +1,108 @@
+#include "gkk_vec.cuh"
 #include "gkk_geometry.cuh"
 #include "gkk_material.cuh"
+#include "plyreader.h"
 
 #include <algorithm>
+#include <string>
+#include <vector>
+#include <fstream>
+
+int load_obj(std::string input,
+	     std::vector<vec3>& point_list,
+	     std::vector<int>& triangle_list)
+{
+  std::fstream fs(input, std::fstream::in);
+  char c;
+  float x, y, z;
+  int prev_pos = 0;
+  while (fs >> c >> x >> y >> z) {
+    if (c != 'v') {
+      fs.seekg(prev_pos, fs.beg);
+      break;
+    }
+    prev_pos = fs.tellg();
+    vec3 v(x, y, z);
+    point_list.push_back(v);
+  }
+
+  int i0, i1, i2;
+  while (fs >> c >> i0 >> i1 >> i2) {
+    if (c != 'f') {
+      break;
+    }
+    triangle_list.push_back(i0-1);
+    triangle_list.push_back(i1-1);
+    triangle_list.push_back(i2-1);
+  }
+
+  fs.close();
+  return 0;
+}
+
+
+int load_ply(std::string input,
+	     vec3** point_list,
+	     int* num_points,
+	     int** triangle_list,
+	     int* num_triangles,
+	     vec3& bmin, vec3& bmax)
+{
+  std::vector<float> vertices;
+  std::vector<float> normals;
+  std::vector<unsigned int> indices;
+
+  readPlyObject(input, vertices, normals, indices);
+
+  float minx = vertices[0];
+  float maxx = vertices[0];
+  float miny = vertices[1];
+  float maxy = vertices[1];
+  float minz = vertices[2];
+  float maxz = vertices[2];
+
+  *num_points = vertices.size()/3;
+  *point_list = new vec3[*num_points];
+  
+  for (int i = 0; i < vertices.size()/3; i++) {
+    float x = vertices[i*3+0]*20.0f;
+    float y = vertices[i*3+1]*20.0f;
+    float z = vertices[i*3+2]*20.0f;
+
+    (*point_list)[i] = vec3(x, y, z);
+
+    if (x < minx) {
+      minx = x;
+    }
+    if (x > maxx) {
+      maxx = x;
+    }
+    if (y < miny) {
+      miny = y;
+    }
+    if (y > maxy) {
+      maxy = y;
+    }
+    if (z < minz) {
+      minz = z;
+    }
+    if (z > maxz) {
+      maxz = z;
+    }
+  }
+
+  bmin = vec3(minx, miny, minz);
+  bmax = vec3(maxx, maxy, maxz);
+
+  *num_triangles = indices.size();
+  *triangle_list = new int[*num_triangles];
+
+  for (int i = 0; i < indices.size(); i++) {
+    (*triangle_list)[i] = indices[i];
+  }
+
+  return 0;
+}
 
 __device__ bool Sphere::hit(const Ray& ray, float t_min, float t_max, hit_record& hrec) const {
 
@@ -28,7 +129,7 @@ __device__ bool Sphere::hit(const Ray& ray, float t_min, float t_max, hit_record
   return false;
 }
 
-__device__ bool Sphere::bbox(float t0, float t1, AABB& output_bbox) const
+__device__ bool Sphere::get_bbox(float t0, float t1, AABB& output_bbox) const
 {
   output_bbox = AABB(center - vec3(radius, radius, radius),
 		     center + vec3(radius, radius, radius));
@@ -66,7 +167,7 @@ __device__ bool MovingSphere::hit(const Ray& ray, float t_min, float t_max, hit_
 }
 
 __device__
-bool MovingSphere::bbox(float t0, float t1, AABB& output_bbox) const
+bool MovingSphere::get_bbox(float t0, float t1, AABB& output_bbox) const
 {
   AABB bbox0(center_at_time(t0) - vec3(radius, radius, radius),
 	     center_at_time(t0) + vec3(radius, radius, radius));
@@ -204,9 +305,9 @@ bool TriangleMesh::hit(const Ray& ray, float t_min, float t_max, hit_record& hre
 
 
 __device__
-bool TriangleMesh::bbox(float t0, float t1, AABB& output_bbox) const
+bool TriangleMesh::get_bbox(float t0, float t1, AABB& output_bbox) const
 {
-  output_bbox = _bbox;
+  output_bbox = bbox;
   return true;
 }
 
@@ -223,4 +324,15 @@ vec3 TriangleMesh::normal_at_p(const vec3& point,
   n = normalize(n);
   
   return n;
+}
+
+__host__ TriangleMesh::TriangleMesh(pt::ptree mesh)
+{
+  std::string ply_filepath = mesh.get<std::string>("source.<xmlattr>.value");
+  vec3 bmin, bmax;
+
+  load_ply(ply_filepath, &point_list, &num_points,
+	   &triangle_list, &num_triangles, bmin, bmax);
+
+  bbox = AABB(bmin, bmax);
 }
