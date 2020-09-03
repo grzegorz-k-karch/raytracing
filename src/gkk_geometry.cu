@@ -1,3 +1,4 @@
+#include "gkk_cuda_utils.cuh"
 #include "gkk_vec.cuh"
 #include "gkk_geometry.cuh"
 #include "gkk_material.cuh"
@@ -54,20 +55,21 @@ int load_ply(std::string input,
 
   readPlyObject(input, vertices, normals, indices);
 
-  float minx = vertices[0];
-  float maxx = vertices[0];
-  float miny = vertices[1];
-  float maxy = vertices[1];
-  float minz = vertices[2];
-  float maxz = vertices[2];
+  float scale = 20.0f;
+  float minx = vertices[0]*scale;
+  float maxx = vertices[0]*scale;
+  float miny = vertices[1]*scale;
+  float maxy = vertices[1]*scale;
+  float minz = vertices[2]*scale;
+  float maxz = vertices[2]*scale;
 
   *num_points = vertices.size()/3;
   *point_list = new vec3[*num_points];
   
   for (int i = 0; i < vertices.size()/3; i++) {
-    float x = vertices[i*3+0]*20.0f;
-    float y = vertices[i*3+1]*20.0f;
-    float z = vertices[i*3+2]*20.0f;
+    float x = vertices[i*3+0]*scale;
+    float y = vertices[i*3+1]*scale;
+    float z = vertices[i*3+2]*scale;
 
     (*point_list)[i] = vec3(x, y, z);
 
@@ -94,13 +96,12 @@ int load_ply(std::string input,
   bmin = vec3(minx, miny, minz);
   bmax = vec3(maxx, maxy, maxz);
 
-  *num_triangles = indices.size();
-  *triangle_list = new int[*num_triangles];
-
+  *num_triangles = indices.size()/3;
+  *triangle_list = new int[indices.size()];
   for (int i = 0; i < indices.size(); i++) {
     (*triangle_list)[i] = indices[i];
   }
-
+  
   return 0;
 }
 
@@ -307,6 +308,7 @@ bool TriangleMesh::hit(const Ray& ray, float t_min, float t_max, hit_record& hre
 __device__
 bool TriangleMesh::get_bbox(float t0, float t1, AABB& output_bbox) const
 {
+  printf("get_bbox\n");
   output_bbox = bbox;
   return true;
 }
@@ -326,7 +328,8 @@ vec3 TriangleMesh::normal_at_p(const vec3& point,
   return n;
 }
 
-__host__ TriangleMesh::TriangleMesh(pt::ptree mesh)
+__host__
+TriangleMesh::TriangleMesh(pt::ptree mesh)
 {
   std::string ply_filepath = mesh.get<std::string>("source.<xmlattr>.value");
   vec3 bmin, bmax;
@@ -336,3 +339,40 @@ __host__ TriangleMesh::TriangleMesh(pt::ptree mesh)
 
   bbox = AABB(bmin, bmax);
 }
+
+__global__
+void create_triangle_mesh(Object** obj_list, int list_offset,
+			  vec3* point_list, int num_points,
+			  int* triangle_list, int num_triangles,
+			  AABB* bbox)
+{
+  obj_list[list_offset] = new TriangleMesh(point_list, num_points,
+					   triangle_list, num_triangles,
+					   new Lambertian(vec3(1.0f, 0.3f, 0.5f)),
+					   *bbox);
+}
+
+__host__
+void TriangleMesh::copyToDevice(Object** d_obj_list, int list_offset) const
+{
+  vec3 *d_point_list;
+  checkCudaErrors(cudaMalloc((void**)&d_point_list, num_points*sizeof(vec3)));
+  checkCudaErrors(cudaMemcpy(d_point_list, point_list,
+			     num_points*sizeof(vec3), cudaMemcpyHostToDevice));
+
+  int *d_triangle_list;
+  checkCudaErrors(cudaMalloc((void**)&d_triangle_list,
+			     num_triangles*3*sizeof(int)));
+  checkCudaErrors(cudaMemcpy(d_triangle_list, triangle_list,
+  			     num_triangles*3*sizeof(int),
+			     cudaMemcpyHostToDevice));
+
+  AABB *d_bbox;
+  checkCudaErrors(cudaMalloc((void**)&d_bbox, sizeof(AABB)));
+  checkCudaErrors(cudaMemcpy(d_bbox, &(bbox), sizeof(AABB), cudaMemcpyHostToDevice));
+
+  create_triangle_mesh<<<1,1>>>(d_obj_list, list_offset,
+				d_point_list, num_points,
+				d_triangle_list, num_triangles, d_bbox);
+}
+

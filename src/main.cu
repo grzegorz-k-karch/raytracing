@@ -78,61 +78,18 @@ __global__ void render(vec3* fb, int max_x, int max_y, int ns,
 }
 
 
-__global__ void create_world(Object** obj_list, Object** world, int n,
-			     curandState* rand_state)// ,
-			     // vec3* point_list, int num_points,
-			     // int* triangle_list, int num_triangles,
-			     // const vec3* bbox)
-{
+__global__
+void create_world(Object** obj_list, Object** world, int n,
+		  curandState* rand_state){
   if (threadIdx.x == 0 && blockIdx.x == 0) {
     curandState local_rand_state = rand_state[0];
 
     obj_list[0] = new Sphere(vec3(0.0f, -1000.0f, 0.0f), 1000.0f,
     			     new Lambertian(vec3(0.5f, 0.5f, 0.5f)));
 
-    obj_list[1] = new Sphere(vec3(0.0f, 1.0f, 0.0f), 1.0f, new Dielectric(1.5f));
+    obj_list[1] = new Sphere(vec3(-8.0f, 1.0f, -1.0f), 1.0f, new Dielectric(1.5f));
     obj_list[2] = new Sphere(vec3(-4.0f, 1.0f, 0.0f), 1.0f, new Lambertian(vec3(0.4f, 0.2f, 0.1f)));
     obj_list[3] = new Sphere(vec3(4.0f, 1.0f, 0.0f), 1.0f, new Metal(vec3(0.7f, 0.6f, 0.5f), 0.0f));
-
-    // obj_list[4] = new TriangleMesh(point_list, num_points, triangle_list, num_triangles,
-    // 				   new Lambertian(vec3(1.0f, 0.3f, 0.5f)), bbox[0], bbox[1]);
-
-    // int i = 5;
-    // for (int a = -11; a < 11; a++) {
-    //   for (int b = -11; b < 11; b++) {
-    // 	float choose_mat = curand_uniform(&local_rand_state);
-    // 	vec3 center(a + 0.9f*curand_uniform(&local_rand_state),
-    // 		    0.2f,
-    // 		    b + 0.9f*curand_uniform(&local_rand_state));
-    // 	if ((center - vec3(4.0f, 0.2f, 0.0f)).length() > 0.9f) {
-    // 	  if (choose_mat < 0.5f) { // diffuse
-    // 	    obj_list[i++] =
-    // 	      new MovingSphere(center, center + vec3(0.0f, curand_uniform(&local_rand_state), 0.0f),
-    // 			       0.0f, 1.0f, 0.2f,
-    // 			       new Lambertian(vec3(curand_uniform(&local_rand_state)*curand_uniform(&local_rand_state),
-    // 						   curand_uniform(&local_rand_state)*curand_uniform(&local_rand_state),
-    // 						   curand_uniform(&local_rand_state)*curand_uniform(&local_rand_state))));
-    // 	  }
-    // 	  else if (choose_mat < 0.75f) { // metal
-    // 	    obj_list[i++] =
-    // 	      new Sphere(center, 0.2f,
-    // 			 new Metal(vec3(0.5f*(1.0f + curand_uniform(&local_rand_state)),
-    // 					0.5f*(1.0f + curand_uniform(&local_rand_state)),
-    // 					0.5f*(1.0f + curand_uniform(&local_rand_state))),
-    // 				   0.5f*curand_uniform(&local_rand_state)));
-    // 	  }
-    // 	  else { // glass
-    // 	    obj_list[i++] = new Sphere(center, 0.2f, new Dielectric(1.5f));
-    // 	  }
-    // 	}
-    // 	if (i >= n) {
-    // 	  break;
-    // 	}
-    //   }
-    //   if (i >= n) {
-    // 	break;
-    //   }
-    // }
     *world = new ObjectList(obj_list, n);
   }
 }
@@ -153,7 +110,6 @@ void generate_test_image(vec3* raw_image,
 			 const Camera& camera,
 			 const TriangleMesh& triangle_mesh)
 {
-
   int tx = 8;
   int ty = 8;
 
@@ -166,37 +122,21 @@ void generate_test_image(vec3* raw_image,
   checkCudaErrors(cudaGetLastError());
   checkCudaErrors(cudaDeviceSynchronize());
 
-
-  // triangle_mesh
-  int num_points = triangle_mesh.num_points;
-  vec3 *d_point_list;
-  checkCudaErrors(cudaMalloc((void**)&d_point_list, num_points*sizeof(vec3)));
-  checkCudaErrors(cudaMemcpy(d_point_list, triangle_mesh.point_list, num_points*sizeof(vec3), cudaMemcpyHostToDevice));
-  
-  int num_triangles = triangle_mesh.num_triangles;
-  int *d_triangle_list;
-  checkCudaErrors(cudaMalloc((void**)&d_triangle_list, num_triangles*3*sizeof(int)));
-  checkCudaErrors(cudaMemcpy(d_triangle_list, triangle_mesh.triangle_list,
-  			     num_triangles*3*sizeof(int), cudaMemcpyHostToDevice));
-
-  vec3 *d_bbox;
-  checkCudaErrors(cudaMalloc((void**)&d_bbox, 2*sizeof(vec3)));
-  checkCudaErrors(cudaMemcpy(d_bbox, &(triangle_mesh.bbox), sizeof(AABB), cudaMemcpyHostToDevice));
-  //~triangle_mesh
-  
   Camera *d_camera;
   checkCudaErrors(cudaMalloc((void**)&d_camera, sizeof(Camera)));
   checkCudaErrors(cudaMemcpy(d_camera, &camera, sizeof(Camera), cudaMemcpyHostToDevice));  
-  
-  int num_spheres = 3; //480;
+
+  int num_spheres = 4;
+  int num_objects = num_spheres + 1;
 
   Object **d_list;
-  checkCudaErrors(cudaMalloc((void**)&d_list, (num_spheres + 1)*sizeof(Object*)));
+  checkCudaErrors(cudaMalloc((void**)&d_list, num_objects*sizeof(Object*)));
   Object **d_world;
   checkCudaErrors(cudaMalloc((void**)&d_world, sizeof(Object*)));
 
-  create_world<<<1, 1>>>(d_list, d_world, num_spheres + 1, d_rand_state);// ,
-			 // d_point_list, num_points, d_triangle_list, num_triangles, d_bbox);
+  triangle_mesh.copyToDevice(d_list, num_spheres);
+  create_world<<<1, 1>>>(d_list, d_world, num_objects, d_rand_state);
+
   checkCudaErrors(cudaGetLastError());
   checkCudaErrors(cudaDeviceSynchronize());
 
@@ -204,12 +144,9 @@ void generate_test_image(vec3* raw_image,
   checkCudaErrors(cudaGetLastError());
   checkCudaErrors(cudaDeviceSynchronize());
 
-  destroy_world<<<1, 1>>>(d_list, d_world, num_spheres + 1);
+  destroy_world<<<1, 1>>>(d_list, d_world, num_spheres);
   checkCudaErrors(cudaGetLastError());
 
-  checkCudaErrors(cudaFree(d_bbox));
-  checkCudaErrors(cudaFree(d_point_list));
-  checkCudaErrors(cudaFree(d_triangle_list));
   checkCudaErrors(cudaFree(d_list));
   checkCudaErrors(cudaFree(d_world));
   checkCudaErrors(cudaFree(d_rand_state));

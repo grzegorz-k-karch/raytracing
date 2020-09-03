@@ -49,15 +49,18 @@ class TriangleMesh: public Object {
  public:
   __device__ TriangleMesh(vec3* point_list, int num_points,
 			  int* triangle_list, int num_triangles,
-			  Material* material_ptr, vec3& bmin, vec3& bmax) :
+			  Material* material_ptr, AABB bbox) :
     point_list(point_list), num_points(num_points),
     triangle_list(triangle_list), num_triangles(num_triangles),
-    material_ptr(material_ptr), bbox(AABB(bmin, bmax)) {}
+    material_ptr(material_ptr), bbox(bbox) {}
 
   __host__
   TriangleMesh(pt::ptree mesh);
+
+  __host__ void copyToDevice(Object** d_obj_list, int list_offset) const;
   
-  __device__ bool hit(const Ray& ray, float t_min, float t_max, hit_record& hrec) const;
+  __device__ bool hit(const Ray& ray, float t_min, float t_max,
+		      hit_record& hrec) const;
   __device__ bool get_bbox(float t0, float t1, AABB& output_bbox) const;
   __device__ vec3 normal_at_p(const vec3& point,
 			      const vec3 vert0,
