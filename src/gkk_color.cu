@@ -13,7 +13,8 @@ __device__ vec3 get_plane_color(const Ray& ray)
   return (1.0f - t)*vec3(1.0f, 1.0f, 1.0f) + t*vec3(0.5f, 0.7f, 1.0f);
 }
 
-__device__ vec3 get_color(const Ray& ray, Object* world, curandState* local_rand_state)
+__device__ vec3 get_color(const Ray& ray, Object* world,
+			  curandState* local_rand_state)
 {
   hit_record hrec;
   vec3 color;
@@ -24,7 +25,8 @@ __device__ vec3 get_color(const Ray& ray, Object* world, curandState* local_rand
     if (world->hit(in_ray, 0.001f, GKK_FLOAT_MAX, hrec)) {
       vec3 attenuation;
       Ray scattered;
-      if (hrec.material_ptr->scatter(in_ray, hrec, attenuation, scattered, local_rand_state)) {
+      if (hrec.material->scatter(in_ray, hrec, attenuation,
+				 scattered, local_rand_state)) {
     	attenuation_total *= attenuation;
     	in_ray = scattered;
       }

@@ -9,6 +9,8 @@
 #include <vector>
 #include <fstream>
 
+#include <boost/log/trivial.hpp>
+
 int load_obj(std::string input,
 	     std::vector<vec3>& point_list,
 	     std::vector<int>& triangle_list)
@@ -65,7 +67,7 @@ int load_ply(std::string input,
 
   *num_points = vertices.size()/3;
   *point_list = new vec3[*num_points];
-  
+
   for (int i = 0; i < vertices.size()/3; i++) {
     float x = vertices[i*3+0]*scale;
     float y = vertices[i*3+1]*scale;
@@ -101,11 +103,58 @@ int load_ply(std::string input,
   for (int i = 0; i < indices.size(); i++) {
     (*triangle_list)[i] = indices[i];
   }
-  
+
   return 0;
 }
 
-__device__ bool Sphere::hit(const Ray& ray, float t_min, float t_max, hit_record& hrec) const {
+
+__host__ Sphere::Sphere(pt::ptree tree)
+{
+  vec3 position =
+    string2vec3(tree.get<std::string>("center.<xmlattr>.value"));
+  float radius = tree.get<float>("radius.<xmlattr>.value");
+
+  pt::ptree material_tree = tree.get_child("material");
+  Material *material = Material::create(material_tree);
+
+  this->center = position;
+  this->radius = radius;
+  this->material = material;
+}
+
+__global__ void test(Object** obj_list, int list_offset,
+		     Material* material)
+{
+  printf("|||| test %p\n", obj_list[list_offset]);
+  // obj_list[list_offset] = new  Sphere(vec3(0.0f, 1.0f, 0.0f), 1.0f,
+  //  new Lambertian(vec3(0.95f, 0.5f, 0.5f)));
+  material->d_print();
+}
+
+__host__ void Sphere::copy_to_device(Object** d_obj_list, int list_offset) const
+{
+  Material *d_material;
+  std::cout << "MATERIAL size " << material->size() << std::endl;
+  checkCudaErrors(cudaMalloc((void**)&d_material, material->size()));
+  checkCudaErrors(cudaMemcpy(d_material, material,
+  			     material->size(), cudaMemcpyHostToDevice));
+  test<<<1,1>>>(d_obj_list, list_offset, d_material);
+  Sphere *d_sphere;
+  checkCudaErrors(cudaMalloc((void**)&d_sphere, sizeof(Sphere)));
+  checkCudaErrors(cudaMemcpy(d_sphere, this, sizeof(Sphere),
+  			     cudaMemcpyHostToDevice));
+  checkCudaErrors(cudaMemcpy(&(d_sphere->material), &d_material,
+			     sizeof(Material*), cudaMemcpyHostToDevice));
+
+  test<<<1,1>>>(d_obj_list, list_offset, d_material);
+  checkCudaErrors(cudaMemcpy(&(d_obj_list[list_offset]), &d_sphere,
+  			     sizeof(Sphere*), cudaMemcpyHostToDevice));
+  test<<<1,1>>>(d_obj_list, list_offset, d_material);
+}
+
+__device__ bool Sphere::hit(const Ray& ray, float t_min,
+			    float t_max, hit_record& hrec) const
+{
 
   vec3 oc = ray.origin() - center;
   vec3 d = ray.direction();
@@ -123,7 +172,7 @@ __device__ bool Sphere::hit(const Ray& ray, float t_min, float t_max, hit_record
       hrec.t = t;
       hrec.p = ray.point_at_t(t);
       hrec.n = normal_at_p(hrec.p);
-      hrec.material_ptr = material_ptr;
+      hrec.material = material;
       return true;
     }
   }
@@ -142,7 +191,9 @@ __device__ vec3 Sphere::normal_at_p(const vec3& point) const
   return normalize(point - center);
 }
 
-__device__ bool MovingSphere::hit(const Ray& ray, float t_min, float t_max, hit_record& hrec) const {
+__device__ bool MovingSphere::hit(const Ray& ray, float t_min,
+				  float t_max, hit_record& hrec) const
+{
 
   vec3 oc = ray.origin() - center_at_time(ray.time());
   vec3 d = ray.direction();
@@ -160,15 +211,15 @@ __device__ bool MovingSphere::hit(const Ray& ray, float t_min, float t_max, hit_
       hrec.t = t;
       hrec.p = ray.point_at_t(t);
       hrec.n = normal_at_p(hrec.p, center_at_time(ray.time()));
-      hrec.material_ptr = material_ptr;
+      hrec.material = material;
       return true;
     }
   }
   return false;
 }
 
-__device__
-bool MovingSphere::get_bbox(float t0, float t1, AABB& output_bbox) const
+__device__ bool MovingSphere::get_bbox(float t0, float t1,
+				       AABB& output_bbox) const
 {
   AABB bbox0(center_at_time(t0) - vec3(radius, radius, radius),
 	     center_at_time(t0) + vec3(radius, radius, radius));
@@ -178,14 +229,13 @@ bool MovingSphere::get_bbox(float t0, float t1, AABB& output_bbox) const
   return true;
 }
 
-__device__
-vec3 MovingSphere::normal_at_p(const vec3& point, const vec3& center) const
+__device__ vec3 MovingSphere::normal_at_p(const vec3& point,
+					  const vec3& center) const
 {
   return normalize(point - center);
 }
 
-__device__
-vec3 MovingSphere::center_at_time(float timestamp) const
+__device__ vec3 MovingSphere::center_at_time(float timestamp) const
 {
   return center0 + ((timestamp - time0)/(time1 - time0))*(center1 - center0);
 }
@@ -194,10 +244,9 @@ vec3 MovingSphere::center_at_time(float timestamp) const
 // code rewritten to do tests on the sign of the determinant
 // the division is before the test of the sign of the det
 // based on variant intersect_triangle2
-__device__
-int intersect_triangle(vec3 orig, vec3 dir,
-		       vec3 vert0, vec3 vert1, vec3 vert2,
-		       float* t, float* u, float* v)
+__device__ int intersect_triangle(vec3 orig, vec3 dir,
+				  vec3 vert0, vec3 vert1, vec3 vert2,
+				  float* t, float* u, float* v)
 {
   const float EPSILON = 0.0001f;
   // find vectors for two edges sharing vert0
@@ -255,9 +304,8 @@ int intersect_triangle(vec3 orig, vec3 dir,
   return 1;
 }
 
-
-__device__
-bool TriangleMesh::hit(const Ray& ray, float t_min, float t_max, hit_record& hrec) const
+__device__ bool TriangleMesh::hit(const Ray& ray, float t_min, float t_max,
+				  hit_record& hrec) const
 {
   // float u, v;
   float t = 3.402823e+38;
@@ -268,7 +316,7 @@ bool TriangleMesh::hit(const Ray& ray, float t_min, float t_max, hit_record& hre
     int v0 = triangle_list[i*3];
     int v1 = triangle_list[i*3 + 1];
     int v2 = triangle_list[i*3 + 2];
-    
+
     vec3 vert0 = point_list[v0];
     vec3 vert1 = point_list[v1];
     vec3 vert2 = point_list[v2];
@@ -298,15 +346,15 @@ bool TriangleMesh::hit(const Ray& ray, float t_min, float t_max, hit_record& hre
 
     hrec.p = ray.point_at_t(t);
     hrec.n = normal_at_p(hrec.p, vert0, vert1, vert2);
-    hrec.material_ptr = material_ptr;
+    hrec.material = material;
     return true;
   }
   return false;
 }
 
 
-__device__
-bool TriangleMesh::get_bbox(float t0, float t1, AABB& output_bbox) const
+__device__ bool TriangleMesh::get_bbox(float t0, float t1,
+				       AABB& output_bbox) const
 {
   printf("get_bbox\n");
   output_bbox = bbox;
@@ -314,22 +362,20 @@ bool TriangleMesh::get_bbox(float t0, float t1, AABB& output_bbox) const
 }
 
 
-__device__
-vec3 TriangleMesh::normal_at_p(const vec3& point,
-			       const vec3 vert0,
-			       const vec3 vert1,
-			       const vec3 vert2) const
+__device__ vec3 TriangleMesh::normal_at_p(const vec3& point,
+					  const vec3 vert0,
+					  const vec3 vert1,
+					  const vec3 vert2) const
 {
   vec3 e0 = vert1 - vert0;
   vec3 e1 = vert2 - vert0;
   vec3 n = cross(e0, e1);
   n = normalize(n);
-  
+
   return n;
 }
 
-__host__
-TriangleMesh::TriangleMesh(pt::ptree mesh)
+__host__ TriangleMesh::TriangleMesh(pt::ptree mesh)
 {
   std::string ply_filepath = mesh.get<std::string>("source.<xmlattr>.value");
   vec3 bmin, bmax;
@@ -340,20 +386,21 @@ TriangleMesh::TriangleMesh(pt::ptree mesh)
   bbox = AABB(bmin, bmax);
 }
 
-__global__
-void create_triangle_mesh(Object** obj_list, int list_offset,
-			  vec3* point_list, int num_points,
-			  int* triangle_list, int num_triangles,
-			  AABB* bbox)
+__global__ void create_triangle_mesh(Object** obj_list, int list_offset,
+				     vec3* point_list, int num_points,
+				     int* triangle_list, int num_triangles,
+				     AABB* bbox)
 {
   obj_list[list_offset] = new TriangleMesh(point_list, num_points,
 					   triangle_list, num_triangles,
-					   new Lambertian(vec3(1.0f, 0.3f, 0.5f)),
+					   new Lambertian(vec3(1.0f,
+							       0.3f,
+							       0.5f)),
 					   *bbox);
 }
 
-__host__
-void TriangleMesh::copyToDevice(Object** d_obj_list, int list_offset) const
+__host__ void TriangleMesh::copy_to_device(Object** d_obj_list,
+					   int list_offset) const
 {
   vec3 *d_point_list;
   checkCudaErrors(cudaMalloc((void**)&d_point_list, num_points*sizeof(vec3)));
@@ -369,10 +416,10 @@ void TriangleMesh::copyToDevice(Object** d_obj_list, int list_offset) const
 
   AABB *d_bbox;
   checkCudaErrors(cudaMalloc((void**)&d_bbox, sizeof(AABB)));
-  checkCudaErrors(cudaMemcpy(d_bbox, &(bbox), sizeof(AABB), cudaMemcpyHostToDevice));
+  checkCudaErrors(cudaMemcpy(d_bbox, &(bbox), sizeof(AABB),
+			     cudaMemcpyHostToDevice));
 
   create_triangle_mesh<<<1,1>>>(d_obj_list, list_offset,
 				d_point_list, num_points,
 				d_triangle_list, num_triangles, d_bbox);
 }
-

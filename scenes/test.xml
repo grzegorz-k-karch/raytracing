@@ -1,3 +1,4 @@
+
 <!-- based on https://github.com/mitsuba-renderer -->
 <!-- check /home/gkk/dev/pbrt/scenes/room-whitted.xml -->
 <!-- XML was used in Vulkan Skeleton -->
@@ -13,13 +14,21 @@
     <aperture value="0.125"/>
     <focus_distance value="-1.0"/>
     <time0 value="0.0"/>
-    <time1 value="1.0"/>    
-    <res_x value="1920" />
-    <res_y value="1080" />
+    <time1 value="1.0"/>
+    <res_x value="3" />
+    <res_y value="2" />
   </camera>
 
   <triangle_mesh>
     <source value="../models/bunny.ply"/>
   </triangle_mesh>
-    
+
+  <sphere>
+    <center value="2.0 1.0 0.0"/>
+    <radius value="1.0"/>
+    <material value="Lambertian">
+      <albedo value="0.4 0.5 0.5"/>
+    </material>
+  </sphere>
+
 </scene>

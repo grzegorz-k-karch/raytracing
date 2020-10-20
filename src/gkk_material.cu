@@ -1,5 +1,45 @@
 #include "gkk_material.cuh"
 #include "gkk_random.cuh"
+#include "gkk_xmlreader.h"
+
+#include <string>
+
+__host__ Material* Material::create(pt::ptree tree)
+{
+  std::string materialType =
+    tree.get<std::string>("<xmlattr>.value");
+  Material *material = nullptr;
+
+  if (materialType == "Lambertian") {
+     material = new Lambertian(tree);
+  }
+  else if (materialType == "Metal") {
+    material = new Metal(tree);
+  }
+  else if (materialType == "Dielectric") {
+    material = new Dielectric(tree);
+  }
+  else {
+    std::cerr << "|||| Unknown material" << std::endl;
+  }
+  return material;
+}
+
+__host__ Lambertian::Lambertian(pt::ptree tree) {
+  albedo = string2vec3(tree.get<std::string>("albedo.<xmlattr>.value"));
+}
+
+__host__ void Lambertian::print() const
+{
+  std::cout << "Lambertian" << std::endl;  
+  std::cout << "\talbedo: " << albedo << std::endl;
+}
+
+__device__ void Lambertian::d_print() const
+{
+  printf("Lambertian\n\talbedo: %f %f %f\n",
+	 albedo.x(), albedo.y(), albedo.z());
+}
 
 __device__ bool Lambertian::scatter(const Ray& in_ray, const hit_record& hrec,
 				    vec3& attenuation, Ray& out_rays,
@@ -11,17 +51,49 @@ __device__ bool Lambertian::scatter(const Ray& in_ray, const hit_record& hrec,
   return true;
 }
 
+__host__ Metal::Metal(pt::ptree tree) {
+  albedo = string2vec3(tree.get<std::string>("albedo.<xmlattr>.value"));
+  fuzz = tree.get<float>("fuzz.<xmlattr>.value");
+}
+
+__host__ void Metal::print() const
+{
+  std::cout << "Metal" << std::endl;    
+  std::cout << "\talbedo: " << albedo << std::endl
+	    << "\tfuzz: " << fuzz << std::endl;
+}
+
+__device__ void Metal::d_print() const
+{
+  printf("Metal\n\talbedo: %f %f %f\n\tfuzz: %f\n",
+	 albedo.x(), albedo.y(), albedo.z(), fuzz);
+}
 
 __device__ bool Metal::scatter(const Ray& in_ray, const hit_record& hrec,
 			       vec3& attenuation, Ray& out_rays,
 			       curandState* local_rand_state) const
 {
   vec3 reflected = reflect(normalize(in_ray.direction()), hrec.n);
-  out_rays = Ray(hrec.p, reflected + fuzz*random_in_unit_sphere(local_rand_state), in_ray.time());
+  out_rays = Ray(hrec.p, reflected +
+		 fuzz*random_in_unit_sphere(local_rand_state), in_ray.time());
   attenuation = albedo;
   return (dot(out_rays.direction(), hrec.n) > 0.0f);
 }
 
+__host__ Dielectric::Dielectric(pt::ptree tree) {
+  ref_idx = tree.get<float>("fuzz.<xmlattr>.value");
+}
+
+__host__ void Dielectric::print() const
+{
+  std::cout << "Dielectric" << std::endl;    
+  std::cout << "\tref_idx: " << ref_idx << std::endl;
+}
+
+__device__ void Dielectric::d_print() const
+{
+  printf("Dielectric\n\tref_idx: %f\n", ref_idx);
+}
 
 __device__ bool Dielectric::scatter(const Ray& in_ray, const hit_record& hrec,
 				    vec3& attenuation, Ray& out_rays,
@@ -39,7 +111,8 @@ __device__ bool Dielectric::scatter(const Ray& in_ray, const hit_record& hrec,
   if (dot(in_ray.direction(), hrec.n) > 0.0f) {
     outward_normal = -hrec.n;
     n1_over_n2 = ref_idx;
-    cosine = ref_idx*dot(in_ray.direction(), hrec.n)/in_ray.direction().length();
+    cosine = ref_idx*dot(in_ray.direction(),
+			 hrec.n)/in_ray.direction().length();
   }
   else {
     outward_normal = hrec.n;

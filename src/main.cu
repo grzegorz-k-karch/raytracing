@@ -6,6 +6,7 @@
 #include "gkk_camera.cuh"
 #include "gkk_xmlreader.h"
 #include "gkk_aabb.cuh"
+#include "gkk_material.cuh"
 
 #include <curand_kernel.h>
 #include <iostream>
@@ -29,7 +30,9 @@ int write_ppm(vec3* raw_image,
       size_t pixel_idx = i + j*nx;
       vec3 color = raw_image[pixel_idx];
       // gamma correction
-      color = vec3(std::sqrt(color.r()), std::sqrt(color.g()), std::sqrt(color.b()));
+      color = vec3(std::sqrt(color.r()),
+		   std::sqrt(color.g()),
+		   std::sqrt(color.b()));
       int ir = int(255.99f*color.r());
       int ig = int(255.99f*color.g());
       int ib = int(255.99f*color.b());
@@ -39,7 +42,6 @@ int write_ppm(vec3* raw_image,
   fs.close();
   return 0;
 }
-
 
 __global__ void init_rand_state(int max_x, int max_y, curandState* rand_state)
 {
@@ -52,7 +54,6 @@ __global__ void init_rand_state(int max_x, int max_y, curandState* rand_state)
   int pixel_idx = i + j*max_x;
   curand_init(1984, pixel_idx, 0, &rand_state[pixel_idx]);
 }
-
 
 __global__ void render(vec3* fb, int max_x, int max_y, int ns,
 		       Object** world, curandState* rand_state,
@@ -77,7 +78,6 @@ __global__ void render(vec3* fb, int max_x, int max_y, int ns,
   fb[pixel_idx] = color/float(ns);
 }
 
-
 __global__
 void create_world(Object** obj_list, Object** world, int n,
 		  curandState* rand_state){
@@ -86,10 +86,18 @@ void create_world(Object** obj_list, Object** world, int n,
 
     obj_list[0] = new Sphere(vec3(0.0f, -1000.0f, 0.0f), 1000.0f,
     			     new Lambertian(vec3(0.5f, 0.5f, 0.5f)));
+    obj_list[1] = new Sphere(vec3(-8.0f, 1.0f, -1.0f), 1.0f,
+    			     new Dielectric(1.5f));
+    obj_list[2] = new Sphere(vec3(-4.0f, 1.0f, 0.0f), 1.0f,
+    			     new Lambertian(vec3(0.4f, 0.2f, 0.1f)));
+    obj_list[3] = new Sphere(vec3(4.0f, 1.0f, 0.0f), 1.0f,
+    			     new Metal(vec3(0.7f, 0.6f, 0.5f), 0.0f));
 
-    obj_list[1] = new Sphere(vec3(-8.0f, 1.0f, -1.0f), 1.0f, new Dielectric(1.5f));
-    obj_list[2] = new Sphere(vec3(-4.0f, 1.0f, 0.0f), 1.0f, new Lambertian(vec3(0.4f, 0.2f, 0.1f)));
-    obj_list[3] = new Sphere(vec3(4.0f, 1.0f, 0.0f), 1.0f, new Metal(vec3(0.7f, 0.6f, 0.5f), 0.0f));
+    for (int i = 0; i < 5; i++) {
+      printf("|||| %p %p %f\n", obj_list[i], ((Sphere*)obj_list[i])->material);
+      ((Sphere*)obj_list[i])->material->d_print();
+    }
+
     *world = new ObjectList(obj_list, n);
   }
 }
@@ -108,7 +116,8 @@ void generate_test_image(vec3* raw_image,
 			 const int nx, const int ny,
 			 const int num_samples,
 			 const Camera& camera,
-			 const TriangleMesh& triangle_mesh)
+			 const TriangleMesh& triangle_mesh,
+			 const Sphere& sphere)
 {
   int tx = 8;
   int ty = 8;
@@ -124,7 +133,8 @@ void generate_test_image(vec3* raw_image,
 
   Camera *d_camera;
   checkCudaErrors(cudaMalloc((void**)&d_camera, sizeof(Camera)));
-  checkCudaErrors(cudaMemcpy(d_camera, &camera, sizeof(Camera), cudaMemcpyHostToDevice));  
+  checkCudaErrors(cudaMemcpy(d_camera, &camera, sizeof(Camera),
+			     cudaMemcpyHostToDevice));  
 
   int num_spheres = 4;
   int num_objects = num_spheres + 1;
@@ -134,13 +144,16 @@ void generate_test_image(vec3* raw_image,
   Object **d_world;
   checkCudaErrors(cudaMalloc((void**)&d_world, sizeof(Object*)));
 
-  triangle_mesh.copyToDevice(d_list, num_spheres);
-  create_world<<<1, 1>>>(d_list, d_world, num_objects, d_rand_state);
+  // triangle_mesh.copy_to_device(d_list, num_spheres);
+  sphere.copy_to_device(d_list, num_spheres);
+
+  create_world<<<1, 1>>>(d_list, d_world, num_objects, d_rand_state); 
 
   checkCudaErrors(cudaGetLastError());
   checkCudaErrors(cudaDeviceSynchronize());
 
-  render<<<blocks, threads>>>(raw_image, nx, ny, num_samples, d_world, d_rand_state, d_camera);
+  render<<<blocks, threads>>>(raw_image, nx, ny, num_samples,
+			      d_world, d_rand_state, d_camera);
   checkCudaErrors(cudaGetLastError());
   checkCudaErrors(cudaDeviceSynchronize());
 
@@ -153,7 +166,6 @@ void generate_test_image(vec3* raw_image,
   checkCudaErrors(cudaFree(d_camera));  
 }
 
-
 int main(int argc, char** argv)
 {
   std::string output = "";
@@ -164,9 +176,12 @@ int main(int argc, char** argv)
     po::options_description desc{"Options"};
     desc.add_options()
       ("help,h", "Help screen")
-      ("output,o", po::value<std::string>(&output)->required(), "Filename for the output figure")
-      ("num-samples,s", po::value<int>(&ns)->default_value(64), "Number of samples per pixel")
-      ("config", po::value<std::string>(&config_filepath)->required(), "File with scene config");
+      ("output,o", po::value<std::string>(&output)->required(),
+       "Filename for the output figure")
+      ("num-samples,s", po::value<int>(&ns)->default_value(64),
+       "Number of samples per pixel")
+      ("config", po::value<std::string>(&config_filepath)->required(),
+       "File with scene config");
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
 
@@ -189,6 +204,8 @@ int main(int argc, char** argv)
   pt::ptree triangle_mesh_tree = scene_tree.get_child("scene.triangle_mesh");
   TriangleMesh triangle_mesh(triangle_mesh_tree);
 
+  pt::ptree sphere_tree = scene_tree.get_child("scene.sphere");
+  Sphere sphere(sphere_tree);
 
   int nx = camera.res_x;
   int ny = camera.res_y;
@@ -198,7 +215,7 @@ int main(int argc, char** argv)
   vec3 *framebuffer;
   checkCudaErrors(cudaMallocManaged((void**)&framebuffer, framebuffer_size));
 
-  generate_test_image(framebuffer, nx, ny, ns, camera, triangle_mesh);
+  generate_test_image(framebuffer, nx, ny, ns, camera, triangle_mesh, sphere);
 
   write_ppm(framebuffer, nx, ny, output);
 
