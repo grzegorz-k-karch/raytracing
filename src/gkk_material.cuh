@@ -8,6 +8,7 @@
 #include <boost/property_tree/ptree.hpp>
 namespace pt = boost::property_tree;
 
+enum class MaterialType { Lambertian, Metal, Dielectric };
 
 class Material {
  public:

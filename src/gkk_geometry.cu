@@ -122,35 +122,43 @@ __host__ Sphere::Sphere(pt::ptree tree)
   this->material = material;
 }
 
-__global__ void test(Object** obj_list, int list_offset,
-		     Material* material)
+__global__ void create_sphere(Object** obj_list, int list_offset,
+			      const vec3& center, const float radius,
+			      Material* material, MaterialType material_type)
 {
-  printf("|||| test %p\n", obj_list[list_offset]);
-  // obj_list[list_offset] = new  Sphere(vec3(0.0f, 1.0f, 0.0f), 1.0f,
-  //  new Lambertian(vec3(0.95f, 0.5f, 0.5f)));
-  material->d_print();
+  switch(material_type) {
+  case Lambertian:
+    obj_list[list_offset] = new Sphere(center, radius, (Lambertian*)material, material_type);
+    break;
+  }
+  // TODO: or create material on device directly?
 }
 
 __host__ void Sphere::copy_to_device(Object** d_obj_list, int list_offset) const
 {
-  Material *d_material;
-  std::cout << "MATERIAL size " << material->size() << std::endl;
-  checkCudaErrors(cudaMalloc((void**)&d_material, material->size()));
-  checkCudaErrors(cudaMemcpy(d_material, material,
-  			     material->size(), cudaMemcpyHostToDevice));
-  test<<<1,1>>>(d_obj_list, list_offset, d_material);
-  Sphere *d_sphere;
-  checkCudaErrors(cudaMalloc((void**)&d_sphere, sizeof(Sphere)));
-  checkCudaErrors(cudaMemcpy(d_sphere, this, sizeof(Sphere),
-  			     cudaMemcpyHostToDevice));
-  checkCudaErrors(cudaMemcpy(&(d_sphere->material), &d_material,
-			     sizeof(Material*), cudaMemcpyHostToDevice));
-
-  test<<<1,1>>>(d_obj_list, list_offset, d_material);
-  checkCudaErrors(cudaMemcpy(&(d_obj_list[list_offset]), &d_sphere,
-  			     sizeof(Sphere*), cudaMemcpyHostToDevice));
-  test<<<1,1>>>(d_obj_list, list_offset, d_material);
+  create_sphere<<<1,1>>>(center, radius, material, material_type);  
 }
+
+// __host__ void Sphere::copy_to_device(Object** d_obj_list, int list_offset) const
+// {
+//   Material *d_material;
+//   std::cout << "MATERIAL size " << material->size() << std::endl;
+//   checkCudaErrors(cudaMalloc((void**)&d_material, material->size()));
+//   checkCudaErrors(cudaMemcpy(d_material, material,
+//   			     material->size(), cudaMemcpyHostToDevice));
+//   test<<<1,1>>>(d_obj_list, list_offset, d_material);
+//   Sphere *d_sphere;
+//   checkCudaErrors(cudaMalloc((void**)&d_sphere, sizeof(Sphere)));
+//   checkCudaErrors(cudaMemcpy(d_sphere, this, sizeof(Sphere),
+//   			     cudaMemcpyHostToDevice));
+//   checkCudaErrors(cudaMemcpy(&(d_sphere->material), &d_material,
+// 			     sizeof(Material*), cudaMemcpyHostToDevice));
+
+//   test<<<1,1>>>(d_obj_list, list_offset, d_material);
+//   checkCudaErrors(cudaMemcpy(&(d_obj_list[list_offset]), &d_sphere,
+//   			     sizeof(Sphere*), cudaMemcpyHostToDevice));
+//   test<<<1,1>>>(d_obj_list, list_offset, d_material);
+// }
 
 __device__ bool Sphere::hit(const Ray& ray, float t_min,
 			    float t_max, hit_record& hrec) const

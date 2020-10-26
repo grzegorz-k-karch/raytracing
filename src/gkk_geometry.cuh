@@ -11,8 +11,9 @@
 class Sphere: public Object {
 public:
   __device__ Sphere(const vec3& center, const float radius,
-		    Material* material) :
-    center(center), radius(radius), material(material) {}
+		    Material* material, MaterialType material_type) :
+    center(center), radius(radius), material(material),
+    material_type(material_type) {}
   __host__ Sphere(pt::ptree mesh);
   __host__ void copy_to_device(Object** d_obj_list, int list_offset) const;
   __device__ bool hit(const Ray& ray, float t_min,
@@ -23,6 +24,7 @@ public:
   vec3 center;
   float radius;
   Material *material;
+  MaterialType material_type;
 };
 
 
