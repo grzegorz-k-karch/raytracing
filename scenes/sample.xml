@@ -1,0 +1,34 @@
+
+<!-- based on https://github.com/mitsuba-renderer -->
+<!-- check /home/gkk/dev/pbrt/scenes/room-whitted.xml -->
+<!-- XML was used in Vulkan Skeleton -->
+
+<!-- TODO MAKE IT SIMPLER - no attributes? -->
+<scene version="0.0.1">
+
+  <camera>
+    <lookFrom value="0.0 4.0 6.0"/>
+    <lookAt value="-1.0 1.0 0.0"/>
+    <up value="0.0 1.0 0.0"/>
+    <fov value="60.0"/>
+    <aperture value="0.125"/>
+    <focus_distance value="-1.0"/>
+    <time0 value="0.0"/>
+    <time1 value="1.0"/>
+    <res_x value="960" />
+    <res_y value="540" />
+  </camera>
+
+  <triangle_mesh>
+    <source value="../models/bunny.ply"/>
+  </triangle_mesh>
+
+  <sphere>
+    <center value="2.0 1.0 0.0"/>
+    <radius value="1.0"/>
+    <material value="Lambertian">
+      <albedo value="0.4 0.5 0.5"/>
+    </material>
+  </sphere>
+
+</scene>

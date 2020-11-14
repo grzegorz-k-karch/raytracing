@@ -1,0 +1,58 @@
+problem definition:
+  - I want to gain experience in writing raytracers that render images on GPUs, and in writing good code, based on the knowledge I gained from the book "Code Complete" by Steve McConnell. Since I know CUDA, I'll start with this technology. Clean and well-thought code has priority over optimizations.
+ 
+requirements:
+  - produce file with raytraced image
+  - accept scene description in a form of a file
+  - accept render parameters from command-line arguments
+  - scene description
+    - triangle-mesh objects, e.g., publicly available meshes
+    - math objects, e.g., spheres
+    - camera aperture
+    - etc.
+  - render parameters
+    - resolution
+    - samples per pixel
+    - etc.
+    - render image on a GPU
+    - anticipate new obect types, new materials, etc.
+    
+architecture (todo: fill each point with sub-bullets):
+  - building blocks 
+    (should cover items in requirements, decoupled from other blocks, one area of responsibility)
+  - major classes 
+    (their responsibilities, interactions with other classes, class hierarchies, state transitions, alternative class design)
+  - data design
+  - user interface design
+  - input/output
+  - erro processing
+  - change strategy
+    - changing from CUDA to Vulkan
+
+design:
+  - 
+
+classes:
+  - renderable objects:
+    - Object
+      - TriangleMesh
+      - Procedural
+        - Sphere
+    - World - composite
+  - materials
+    - Material
+      - Lambertian
+      - Metal
+      - Dielectric
+
+load scene from file
+  load all objects from file and store them in a list
+
+pass the objects to device
+  for each object create a correspoding object on device;
+  can't use polymorphism based on CPU objects so an alternative solution is
+  necessary
+
+render scene
+  create world object as a composite and iterate through it's elements
+
