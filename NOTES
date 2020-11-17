@@ -1,3 +1,4 @@
+TODO - resolve object creation before diving into this project
 problem definition:
   - I want to gain experience in writing raytracers that render images on GPUs, and in writing good code, based on the knowledge I gained from the book "Code Complete" by Steve McConnell. Since I know CUDA, I'll start with this technology. Clean and well-thought code has priority over optimizations.
  
@@ -20,10 +21,27 @@ requirements:
 architecture (todo: fill each point with sub-bullets):
   - building blocks 
     (should cover items in requirements, decoupled from other blocks, one area of responsibility)
+	- command-line parser
+	- scene parser - should accept scene description and produce list of objects -> objects
+	- objects - classes containing objects <- list of objects from scene parser
+	- renderer - takes command line arguments and renders objects <- objects, render params; -> rendered image
+	- file output manager - saves the rendered image <- rendered image
   - major classes 
     (their responsibilities, interactions with other classes, class hierarchies, state transitions, alternative class design)
+	- object
+	  - math object
+	  - triangle-mesh object
+	- material
+	- arg parser
+	- scene parser
+	- renderer
+	  - CUDA renderer
+	- image writer
+	  - ppm writer
+	  - jpeg writer
   - data design
   - user interface design
+    - command line, config files
   - input/output
   - erro processing
   - change strategy
