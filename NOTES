@@ -2,7 +2,7 @@ TODO - resolve object creation before diving into this project
 problem definition:
   - I want to gain experience in writing raytracers that render images on GPUs, and in writing good code, based on the knowledge I gained from the book "Code Complete" by Steve McConnell. Since I know CUDA, I'll start with this technology. Clean and well-thought code has priority over optimizations.
  
-requirements:
+Requirements:
   - produce file with raytraced image
   - accept scene description in a form of a file
   - accept render parameters from command-line arguments
@@ -18,7 +18,7 @@ requirements:
     - render image on a GPU
     - anticipate new obect types, new materials, etc.
     
-architecture (todo: fill each point with sub-bullets):
+Architecture:
   - building blocks 
     (should cover items in requirements, decoupled from other blocks, one area of responsibility)
 	- command-line parser
@@ -47,15 +47,14 @@ architecture (todo: fill each point with sub-bullets):
   - change strategy
     - changing from CUDA to Vulkan
 
-design:
+Design:
   - 
 
-classes:
+Classes:
   - renderable objects:
     - Object
       - TriangleMesh
-      - Procedural
-        - Sphere
+      - Sphere
     - World - composite
   - materials
     - Material
@@ -73,4 +72,3 @@ pass the objects to device
 
 render scene
   create world object as a composite and iterate through it's elements
-
