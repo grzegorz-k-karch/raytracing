@@ -1,7 +1,3 @@
-@startuml
-
-@enduml
-
 Architecture:
   - building blocks 
     (should cover items in requirements, decoupled from other blocks, one area of responsibility)
@@ -30,3 +26,5 @@ Architecture:
   - erro processing
   - change strategy
     - changing from CUDA to Vulkan
+
+![Class diagram](/figures/figures.svg)
