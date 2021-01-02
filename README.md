@@ -28,3 +28,19 @@ Architecture:
     - changing from CUDA to Vulkan
 
 ![Class diagram](/figures/figures.svg)
+
+
+### Code convention
+
+Example names with case specified:
+
+```bash
+* functionName(arg1, arg2)
+* variableName
+* StructName
+* StructMemberName
+* StructMethodName(varName)
+* ClassName
+* MemberName
+* MethodName(varName)
+```

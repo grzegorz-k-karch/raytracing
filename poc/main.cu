@@ -287,7 +287,6 @@ int main()
   cudaMalloc((void**)&d_genMatList, numObjects*sizeof(GenericMaterial));
   cudaMemcpy(d_genMatList, h_genMatList, numObjects*sizeof(GenericMaterial), cudaMemcpyHostToDevice);
   //~copy genMatList to device
-
   
   Object **d_list;
   cudaMalloc((void**)&d_list, numObjects*sizeof(Object*));
