@@ -23,7 +23,7 @@ Architecture:
   - user interface design
     - command line, config files
   - input/output
-  - erro processing
+  - error processing
   - change strategy
     - changing from CUDA to Vulkan
 

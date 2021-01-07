@@ -5,7 +5,7 @@
 
 class SceneParser {
  public:
-  SceneParser(std::string filepath) {}
+  SceneParser(std::string filepath);
 };
 
 #endif//SCENE_PARSER_H

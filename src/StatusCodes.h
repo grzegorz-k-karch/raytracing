@@ -2,7 +2,9 @@
 #define STATUS_CODES_H
 
 enum class StatusCodes {
-  NoError, FileError, CmdLineError
+  NoError, FileError, CmdLineError, UnknownError
     };
+
+void exitIfError(const StatusCodes& status);
 
 #endif//STATUS_CODES_H
