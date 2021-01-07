@@ -2,23 +2,20 @@
 abstract Object {
  +hit() : bool
  +getBBox() : bool
+ Material* material 
+ AABB* bbox
 }
 class World {
  +hit() : bool
  +getBBox() : bool
- AABB* bbox
 }
 class Mesh{
  +hit() : bool
  +getBBox() : bool 
- Material* material
- AABB* bbox 
 }
 class Sphere{
  +hit() : bool
  +getBBox() : bool 
- Material* material
- AABB* bbox 
 }
 
 World o-- Object
@@ -43,11 +40,12 @@ Material <|-- Lambertian
 Material <|-- Metal
 Material <|-- Dielectric
 
+Object *.. Material
+
 class GenericObject
 
 Mesh <.. GenericObject
 Sphere <.. GenericObject
-
 
 class GenericMaterial
 
@@ -56,7 +54,7 @@ Metal <.. GenericMaterial
 Dielectric <.. GenericMaterial
 
 class Renderer {
- +render(World* world, Camera* camera)
+ +render(in World* world, Camera* camera)
 }
 
 Object <.. Renderer
@@ -64,6 +62,14 @@ Object <.. Renderer
 class Camera
 
 Camera <.. Renderer
+
+class SceneDescriptorParser
+
+class WorldCreator
+
+class CommandLineArgumentParser
+
+class SceneParameters
 
 @enduml
 
