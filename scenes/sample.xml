@@ -1,9 +1,3 @@
-
-<!-- based on https://github.com/mitsuba-renderer -->
-<!-- check /home/gkk/dev/pbrt/scenes/room-whitted.xml -->
-<!-- XML was used in Vulkan Skeleton -->
-
-<!-- TODO MAKE IT SIMPLER - no attributes? -->
 <scene version="0.0.1">
 
   <camera>
@@ -32,3 +26,4 @@
   </sphere>
 
 </scene>
+

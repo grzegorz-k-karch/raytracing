@@ -61,15 +61,17 @@ void parseArgsFromCmdLine(int argc, char** argv, ProgramArgs& args,
 
     po::notify(vm);
 
-    std::ifstream ifs(configFilePath.c_str());
-    if (!ifs) {
-      std::cerr << "Cannot open config file: " << configFilePath << std::endl;
-      status = StatusCodes::FileError;
-      return;
-    }
-    else {
-      po::store(po::parse_config_file(ifs, configFileOptions), vm);
-      po::notify(vm);
+    if (!configFilePath.empty()) {
+      std::ifstream ifs(configFilePath.c_str());
+      if (!ifs) {
+	std::cerr << "Cannot open config file: " << configFilePath << std::endl;
+	status = StatusCodes::FileError;
+	return;
+      }
+      else {
+	po::store(po::parse_config_file(ifs, configFileOptions), vm);
+	po::notify(vm);
+      }
     }
   }
   catch(const po::required_option& ex) {
@@ -87,11 +89,6 @@ void parseArgsFromCmdLine(int argc, char** argv, ProgramArgs& args,
     std::cerr << ex.what() << std::endl;
     status = StatusCodes::CmdLineError;
   }
-}
-
-void parseArgsFromFile(const std::string configFile)
-{
-
 }
 
 void parseArgs(int argc, char** argv, ProgramArgs& args,

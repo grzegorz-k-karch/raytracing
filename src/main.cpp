@@ -6,8 +6,9 @@
 
 int main(int argc, char** argv)
 {
-  ProgramArgs programArgs;
   StatusCodes status = StatusCodes::NoError;
+
+  ProgramArgs programArgs;
 
   // parse command line arguments
   parseArgs(argc, argv, programArgs, status);
