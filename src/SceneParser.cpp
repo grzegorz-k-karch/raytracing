@@ -8,36 +8,48 @@
 
 namespace pt = boost::property_tree;
 
-SceneParser::SceneParser(const std::string filepath)
+bool checkRequiredObjects(const pt::ptree& sceneTree)
 {
+  bool cameraPresent = false;
+  bool renderableObjectPresent = false;
+  std::set<std::string> renderableObjects = {"sphere",
+					      "triangle_mesh"};
+
+  for (auto& it: sceneTree) {
+    if (it.first == "camera") {
+      cameraPresent = true;
+    }
+    if (std::find(renderableObjects.begin(), renderableObjects.end(), it.first)
+	!= renderableObjects.end()) {
+      renderableObjectPresent = true;
+    }
+  }
+  return cameraPresent && renderableObjectPresent;
+}
+
+SceneParser::SceneParser(const std::string filepath, StatusCodes& status)
+{
+  status = StatusCodes::NoError;
   // read XML file
-  pt::ptree scene_tree;
+  pt::ptree fileTree;
   try {
-    pt::read_xml(filepath, scene_tree);
+    pt::read_xml(filepath, fileTree);
   }
   catch(pt::ptree_error& e) {
     std::cerr << e.what() << std::endl;
+    status = StatusCodes::FileError;
+    return;
   }
+
+  pt::ptree sceneTree = fileTree.get_child("scene");
   
   // check if required objects are present in the scene:
-  // - camera
-  // - renderable object
-  // TODO put this test in a function
-  bool camera_present = false;
-  bool renderable_object_present = false;
-  std::set<std::string> renderable_objects = {"sphere", "triangle_mesh"};
-  for (auto& it: scene_tree) {
-    for (auto& it2: it.second) {
-      std::cout << "tree: " << it2.first << std::endl;
-      if (it2.first == "camera") {
-  	camera_present = true;
-      }
-      if (std::find(renderable_objects.begin(), renderable_objects.end(), it2.first) != renderable_objects.end()) {
-	renderable_object_present = true;
-      }
-    }
+  // - camera, a renderable object
+  bool requiredObjectsPresent = checkRequiredObjects(sceneTree);
+  if (!requiredObjectsPresent) {
+    status = StatusCodes::SceneError;
+    return;
   }
-  if (camera_present && renderable_object_present) {
-    std::cout << "required objects are present in the scene" << std::endl;
-  }
+
+  
 }

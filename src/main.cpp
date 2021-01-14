@@ -14,7 +14,8 @@ int main(int argc, char** argv)
   parseArgs(argc, argv, programArgs, status);
   exitIfError(status);
 
-  SceneParser sceneParser(programArgs.SceneFilePath);
+  SceneParser sceneParser(programArgs.SceneFilePath, status);
+  exitIfError(status);
 
   // load scene objects to object list
   // pass those objects to device

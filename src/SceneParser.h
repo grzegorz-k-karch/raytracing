@@ -3,9 +3,11 @@
 
 #include <string>
 
+#include "StatusCodes.h"
+
 class SceneParser {
  public:
-  SceneParser(const std::string filepath);
+  SceneParser(const std::string filepath, StatusCodes& status);
 };
 
 #endif//SCENE_PARSER_H
