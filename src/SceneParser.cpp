@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <memory>
 
+#include "logging.h"
 #include "SceneParser.h"
 
 namespace pt = boost::property_tree;
@@ -48,7 +49,7 @@ SceneParser::SceneParser(const std::string filepath,
     pt::read_xml(filepath, fileTree);
   }
   catch(pt::ptree_error& e) {
-    std::cerr << e.what() << std::endl;
+    BOOST_LOG_TRIVIAL(error) << e.what();
     status = StatusCodes::FileError;
     return;
   }
@@ -86,8 +87,7 @@ SceneParser::SceneParser(const std::string filepath,
       }
     }
     else {
-      std::cout << "Unknown object " << objectType << std::endl;
-      
+      BOOST_LOG_TRIVIAL(warning) << "Unknown object " << objectType;
     }
   }
 }

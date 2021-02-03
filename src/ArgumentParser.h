@@ -2,12 +2,15 @@
 #define ARGUMENT_PARSER_H
 
 #include <string>
+#include <boost/log/trivial.hpp>
+
 #include "StatusCodes.h"
 
 struct ProgramArgs {
   std::string SceneFilePath;
   std::string PictureFilePath;
   int SampleCount;
+  boost::log::trivial::severity_level logLevel;
   void Print();
 };
 
