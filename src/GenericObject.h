@@ -4,6 +4,8 @@
 #include <vector_types.h>
 #include <boost/property_tree/xml_parser.hpp>
 
+#include "logging.h"
+
 namespace pt = boost::property_tree;
 
 enum class ObjectType { None, Mesh, Sphere };

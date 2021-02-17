@@ -3,6 +3,9 @@
 
 #include <boost/log/trivial.hpp>
 
+#define	LOG_TRIVIAL(lvl) \
+	BOOST_LOG_TRIVIAL(lvl) << "[" << __FILE__ << ":" << __LINE__ << "] "
+
 void initLogger(const boost::log::trivial::severity_level logLevel);
 
 #endif//LOGGING_H

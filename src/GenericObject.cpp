@@ -1,14 +1,18 @@
 #include <string>
 
+#include "logging.h"
 #include "GenericObject.h"
+#include "MeshLoader.h"
 
 void GenericObject::parseMesh(const pt::ptree object)
 {
   std::string filepath = object.get<std::string>("source.<xmlattr>.value");
-  // std::cout << "filepath " << filepath << std::endl;
-  // MeshLoader meshLoader = MeshLoader(filepath);
-  // meshloader.loadMesh(filepath, m_numScalars, m_scalars, m_numVectors, m_vectors)
-    ;
+  LOG_TRIVIAL(debug) << "Mesh filepath: " << filepath;
+
+  // TODO: load mesh
+  MeshLoader meshLoader = MeshLoader();
+  meshLoader.loadMesh(filepath);
+
   // int m_numScalars;
   // float *m_scalars;
   // int m_numVectors;

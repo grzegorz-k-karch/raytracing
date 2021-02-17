@@ -49,7 +49,7 @@ SceneParser::SceneParser(const std::string filepath,
     pt::read_xml(filepath, fileTree);
   }
   catch(pt::ptree_error& e) {
-    BOOST_LOG_TRIVIAL(error) << e.what();
+    LOG_TRIVIAL(error) << e.what();
     status = StatusCodes::FileError;
     return;
   }
@@ -73,21 +73,25 @@ SceneParser::SceneParser(const std::string filepath,
       sceneObjects.camera = std::make_unique<Camera>(it.second);
     }
     else if (foundAny(objectType, renderableObjects)) {
-      sceneObjects.objects.push_back(GenericObject(objectType, it.second));
-      // get material for the current oject - one of object's attributes
+
+      // before we store the object, get it's material - one of object's attributes
       pt::ptree::const_assoc_iterator material_it = it.second.find("material");
-      if (material_it != it.second.not_found()) {
+      bool materialFound = material_it != it.second.not_found();
+      if (materialFound) {
+	// we're good to go - store the object
+	sceneObjects.objects.push_back(GenericObject(objectType, it.second));
 	pt::ptree material = material_it->second;
 	std::string materialType = material.get<std::string>("<xmlattr>.value");
+	// store object's material
 	sceneObjects.materials.push_back(GenericMaterial(materialType, material));
       }
       else {
-	status = StatusCodes::SceneError;
-	return;
+	LOG_TRIVIAL(warning) << "No material found for an object of type " << objectType
+			   << ". Skipping the object.";		
       }
     }
     else {
-      BOOST_LOG_TRIVIAL(warning) << "Unknown object " << objectType;
+      LOG_TRIVIAL(warning) << "Unknown object " << objectType;
     }
   }
 }
