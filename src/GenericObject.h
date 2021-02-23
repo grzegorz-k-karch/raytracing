@@ -1,6 +1,7 @@
 #ifndef GENERIC_OBJECT_H
 #define GENERIC_OBJECT_H
 
+#include <vector>
 #include <vector_types.h>
 #include <boost/property_tree/xml_parser.hpp>
 
@@ -30,10 +31,14 @@ private:
   void parseSphere(const pt::ptree object);
 
   ObjectType m_objectType;
-  int m_numScalars;
-  float *m_scalars;
-  int m_numVectors;
-  float3 *m_vectors;
+  // sphere members
+  std::vector<float> m_scalars;
+  std::vector<float3> m_vectors;
+  // mesh members
+  std::vector<float3> m_vertices;
+  std::vector<float3> m_vertexColors;
+  std::vector<float3> m_vertexNormals;
+  std::vector<int>    m_triangleIndices;  
 };
 
 #endif//GENERIC_OBJECT_H

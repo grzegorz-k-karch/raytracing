@@ -1,27 +1,24 @@
-#include <string>
-
 #include "logging.h"
 #include "GenericObject.h"
 #include "MeshLoader.h"
+#include "SphereLoader.h"
 
 void GenericObject::parseMesh(const pt::ptree object)
 {
-  std::string filepath = object.get<std::string>("source.<xmlattr>.value");
-  LOG_TRIVIAL(debug) << "Mesh filepath: " << filepath;
-
   // TODO: load mesh
   MeshLoader meshLoader = MeshLoader();
-  meshLoader.loadMesh(filepath);
+  meshLoader.loadMesh(object);
 
-  // int m_numScalars;
-  // float *m_scalars;
-  // int m_numVectors;
-  // float3 *m_vectors;
+  m_vertices = meshLoader.getVertices();
+  m_vertexColors = meshLoader.getVertexColors();
+  m_vertexNormals = meshLoader.getVertexNormals();
+  m_triangleIndices = meshLoader.getTriangleIndices();
 }
 
 void GenericObject::parseSphere(const pt::ptree object)
 {
-  
+  SphereLoader sphereLoader = SphereLoader();
+  sphereLoader.loadSphere(object);
 }
 
 /*
