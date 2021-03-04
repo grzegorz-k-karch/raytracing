@@ -6,10 +6,13 @@
 
 void SphereLoader::loadSphere(const pt::ptree object)
 {
-  m_center = string2float3(object.get<std::string>("center.<xmlattr>.value"));
-  m_radius = object.get<float>("radius.<xmlattr>.value");
-  
+  float3 center = string2float3(object.get<std::string>("center.<xmlattr>.value"));
+  m_vectors = {center};
+
+  float radius = object.get<float>("radius.<xmlattr>.value");
+  m_scalars = {radius};
+
   LOG_TRIVIAL(debug)
-    << "Sphere center: (" << m_center.x << "," << m_center.y << "," << m_center.z << ")";
-  LOG_TRIVIAL(debug) << "Sphere radius: " << m_radius;
+    << "Sphere center: (" << center.x << "," << center.y << "," << center.z << ")";
+  LOG_TRIVIAL(debug) << "Sphere radius: " << radius;
 }

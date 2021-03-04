@@ -16,7 +16,8 @@ void initLogger(const boost::log::trivial::severity_level logLevel)
   logging::register_simple_formatter_factory<
     logging::trivial::severity_level, char>("Severity");
 
-  std::string msgFormatCout = "[%TimeStamp%] [%LineID%] [%Severity%] %Message%";
+  // std::string msgFormatCout = "[%TimeStamp%] [%LineID%] [%Severity%] %Message%";
+  std::string msgFormatCout = "[%TimeStamp%] [%Severity%] %Message%";  
   std::string msgFormatFile = msgFormatCout;
   logging::add_file_log
     (

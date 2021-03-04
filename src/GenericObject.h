@@ -42,3 +42,5 @@ private:
 };
 
 #endif//GENERIC_OBJECT_H
+
+// TODO change vectors to unique pointers

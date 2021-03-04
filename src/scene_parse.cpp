@@ -6,7 +6,11 @@
 #include <memory>
 
 #include "logging.h"
-#include "SceneParser.h"
+#include "scene_parse.h"
+
+#include "GenericObject.h"
+#include "GenericMaterial.h"
+#include "Camera.h"
 
 namespace pt = boost::property_tree;
 
@@ -38,11 +42,12 @@ bool checkRequiredObjects(const pt::ptree& sceneTree)
   return cameraPresent && renderableObjectPresent;
 }
 
-SceneParser::SceneParser(const std::string filepath,
-			 SceneObjects& sceneObjects,
-			 StatusCodes& status)
+void parseScene(const std::string filepath,
+		SceneObjects& sceneObjects,
+		StatusCodes& status)
 {
   status = StatusCodes::NoError;
+
   // read XML file
   pt::ptree fileTree;
   try {
@@ -67,6 +72,7 @@ SceneParser::SceneParser(const std::string filepath,
   // get all objects in the scene and put them into appropriate lists
   std::set<std::string> renderableObjects = {"Sphere", "Mesh"};
   std::set<std::string> otherObjects = {"Camera"};
+
   for (auto& it: sceneTree) {
     std::string objectType = it.first;
     if (objectType == "Camera") {

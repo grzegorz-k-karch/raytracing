@@ -2,8 +2,9 @@
 
 #include "logging.h"
 #include "ArgumentParser.h"
-#include "SceneParser.h"
 #include "StatusCodes.h"
+#include "scene_parse.h"
+#include "SceneObjects.h"
 
 int main(int argc, char** argv)
 {
@@ -17,7 +18,7 @@ int main(int argc, char** argv)
   initLogger(programArgs.logLevel);
 
   SceneObjects sceneObjects;
-  SceneParser sceneParser(programArgs.SceneFilePath, sceneObjects, status);
+  parseScene(programArgs.SceneFilePath, sceneObjects, status);
   exitIfError(status);
 
   // load scene objects to object list
