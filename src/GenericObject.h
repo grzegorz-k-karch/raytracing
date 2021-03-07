@@ -41,6 +41,29 @@ private:
   std::vector<int>    m_triangleIndices;  
 };
 
-#endif//GENERIC_OBJECT_H
+struct GenericObjectDevice {
 
-// TODO change vectors to unique pointers
+  ObjectType objectType;
+  
+  // sphere members
+  float  *scalars;
+  int    numScalars;
+  
+  float3 *vectors;
+  int    numVectors;
+
+  // mesh members
+  float3 *vertices;
+  int    numVertices;
+
+  float3 *vertexColors;
+  int    numVertexColors;
+
+  float3 *vertexNormals;
+  int    numVertexNormals;
+
+  int    *triangleIndices;  
+  int    numTriangleIndices;  
+};
+
+#endif//GENERIC_OBJECT_H

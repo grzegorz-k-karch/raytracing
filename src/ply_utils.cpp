@@ -1,5 +1,6 @@
 #include <vector_types.h>
 #include <vector_functions.h>
+#include <string>
 
 #include "ply_io.h"
 

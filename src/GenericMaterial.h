@@ -34,4 +34,15 @@ private:
   std::vector<float3> m_vectors;
 };
 
+struct GenericMaterialDevice {
+
+  MaterialType materialType;
+
+  float  *scalars;
+  int    numScalars;
+  
+  float3 *vectors;
+  int    numVectors;
+};
+
 #endif//GENERIC_MATERIAL_H

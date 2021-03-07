@@ -6,6 +6,20 @@
 #include "scene_parse.h"
 #include "SceneObjects.h"
 
+void copySceneObjectsDataToDevice(const SceneObjects& sceneObjects)
+{
+  // copy camera
+  
+  // copy objects data
+  for (auto& object : sceneObjects.objects) {
+    
+  }
+  // copy materials data
+  for (auto& material : sceneObjects.materials) {
+    
+  }
+}
+
 int main(int argc, char** argv)
 {
   StatusCodes status = StatusCodes::NoError;
@@ -17,12 +31,14 @@ int main(int argc, char** argv)
 
   initLogger(programArgs.logLevel);
 
+  // get all objects into SceneObjects struct
   SceneObjects sceneObjects;
   parseScene(programArgs.SceneFilePath, sceneObjects, status);
   exitIfError(status);
 
-  // load scene objects to object list
   // pass those objects to device
+  copySceneObjectsDataToDevice(sceneObjects);
+  
   // render scene
   // save the rendered image to file
 

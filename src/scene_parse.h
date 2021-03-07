@@ -10,4 +10,5 @@
 void parseScene(const std::string filepath,
 		SceneObjects& sceneObjects,
 		StatusCodes& status);
+
 #endif//SCENE_PARSER_H
