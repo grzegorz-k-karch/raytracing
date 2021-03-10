@@ -10,7 +10,7 @@
 
 #include "GenericObject.h"
 #include "GenericMaterial.h"
-#include "Camera.h"
+#include "Camera.cuh"
 
 namespace pt = boost::property_tree;
 

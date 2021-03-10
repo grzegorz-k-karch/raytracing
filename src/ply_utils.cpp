@@ -81,6 +81,8 @@ void loadPlyObject(const char* filepath,
   char **element_name_list = get_element_list_ply(ply, &num_elems);
   LOG_TRIVIAL(debug) << "PLY: num_elems " << num_elems;
 
+  
+
   // list of property information for a vertex
   PlyProperty vert_props[] = {{"x", Float32, Float32, offsetof(vertex_t,x), 0, 0, 0, 0},
   			      {"y", Float32, Float32, offsetof(vertex_t,y), 0, 0, 0, 0},

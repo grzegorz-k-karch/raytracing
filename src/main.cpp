@@ -5,20 +5,7 @@
 #include "StatusCodes.h"
 #include "scene_parse.h"
 #include "SceneObjects.h"
-
-void copySceneObjectsDataToDevice(const SceneObjects& sceneObjects)
-{
-  // copy camera
-  
-  // copy objects data
-  for (auto& object : sceneObjects.objects) {
-    
-  }
-  // copy materials data
-  for (auto& material : sceneObjects.materials) {
-    
-  }
-}
+#include "device_utils.cuh"
 
 int main(int argc, char** argv)
 {
@@ -37,7 +24,7 @@ int main(int argc, char** argv)
   exitIfError(status);
 
   // pass those objects to device
-  copySceneObjectsDataToDevice(sceneObjects);
+  // copySceneObjectsDataToDevice(sceneObjects);
   
   // render scene
   // save the rendered image to file
