@@ -8,7 +8,7 @@
 #include "Camera.cuh"
 #include "StatusCodes.h"
 
-struct SceneObjectsDevice {
+struct SceneRawObjectsDevice {
   Camera* camera;
   GenericObjectDevice* objects;
   int numObjects;
@@ -16,13 +16,13 @@ struct SceneObjectsDevice {
   int numMaterials;
 };
 
-class SceneObjects {
+class SceneRawObjects {
  public:
   std::unique_ptr<Camera> m_camera;
   std::vector<GenericObject> m_objects;
   std::vector<GenericMaterial> m_materials;
 
-  void copyToDevice(SceneObjectsDevice** sceneObjectsDevice,
+  void copyToDevice(SceneRawObjectsDevice** sceneObjectsDevice,
 		    StatusCodes& status);
 };
 

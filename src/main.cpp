@@ -4,7 +4,7 @@
 #include "ArgumentParser.h"
 #include "StatusCodes.h"
 #include "scene_parse.h"
-#include "SceneObjects.h"
+#include "SceneRawObjects.h"
 
 int main(int argc, char** argv)
 {
@@ -17,13 +17,13 @@ int main(int argc, char** argv)
 
   initLogger(programArgs.logLevel);
 
-  // get all objects into SceneObjects struct
-  SceneObjects sceneObjects;
+  // get all objects into SceneRawObjects struct
+  SceneRawObjects sceneObjects;
   parseScene(programArgs.SceneFilePath, sceneObjects, status);
   exitIfError(status);
 
   // pass those objects to device
-  SceneObjectsDevice *sceneObjectsDevice;
+  SceneRawObjectsDevice *sceneObjectsDevice;
   sceneObjects.copyToDevice(&sceneObjectsDevice, status);
   exitIfError(status);
 

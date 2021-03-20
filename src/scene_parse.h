@@ -4,11 +4,11 @@
 #include <string>
 #include <vector>
 
-#include "SceneObjects.h"
+#include "SceneRawObjects.h"
 #include "StatusCodes.h"
 
 void parseScene(const std::string filepath,
-		SceneObjects& sceneObjects,
+		SceneRawObjects& sceneObjects,
 		StatusCodes& status);
 
 #endif//SCENE_PARSER_H

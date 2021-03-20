@@ -1,14 +1,14 @@
 #include "logging.h"
 #include "cuda_utils.cuh"
-#include "SceneObjects.h"
+#include "SceneRawObjects.h"
 
-void SceneObjects::copyToDevice(SceneObjectsDevice** sceneObjectsDevice,
+void SceneRawObjects::copyToDevice(SceneRawObjectsDevice** sceneObjectsDevice,
 				StatusCodes& status)
 {
   status = StatusCodes::NoError;
 
   // allocate pointer to sceneObjectsDevice on host -> h_sceneObjectsDevice
-  SceneObjectsDevice *h_sceneObjectsDevice = new SceneObjectsDevice;
+  SceneRawObjectsDevice *h_sceneObjectsDevice = new SceneRawObjectsDevice;
 
   // copy objects
   int numObjects = m_objects.size();
@@ -55,12 +55,12 @@ void SceneObjects::copyToDevice(SceneObjectsDevice** sceneObjectsDevice,
   }
 
   // allocate pointer to sceneObjectsDevice on device
-  status = CCE(cudaMalloc((void**)sceneObjectsDevice, sizeof(SceneObjectsDevice)));
+  status = CCE(cudaMalloc((void**)sceneObjectsDevice, sizeof(SceneRawObjectsDevice)));
   if (status != StatusCodes::NoError) {
     return;
   }
   status = CCE(cudaMemcpy(*sceneObjectsDevice, h_sceneObjectsDevice,
-			  sizeof(SceneObjectsDevice), cudaMemcpyHostToDevice));
+			  sizeof(SceneRawObjectsDevice), cudaMemcpyHostToDevice));
   if (status != StatusCodes::NoError) {
     return;
   }

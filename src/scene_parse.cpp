@@ -43,7 +43,7 @@ bool checkRequiredObjects(const pt::ptree& sceneTree)
 }
 
 void parseScene(const std::string filepath,
-		SceneObjects& sceneObjects,
+		SceneRawObjects& sceneObjects,
 		StatusCodes& status)
 {
   status = StatusCodes::NoError;
