@@ -24,7 +24,8 @@ int main(int argc, char** argv)
 
   // pass those objects to device
   SceneObjectsDevice *sceneObjectsDevice;
-  sceneObjects.copyToDevice(&sceneObjectsDevice);
+  sceneObjects.copyToDevice(&sceneObjectsDevice, status);
+  exitIfError(status);
 
   // construct scene on device
 

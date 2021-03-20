@@ -6,6 +6,7 @@
 #include <boost/property_tree/xml_parser.hpp>
 
 #include "logging.h"
+#include "StatusCodes.h"
 
 namespace pt = boost::property_tree;
 
@@ -51,7 +52,8 @@ class GenericObject {
     }
   }
 
-  void copyToDevice(GenericObjectDevice* genericObjectDevice);
+  void copyToDevice(GenericObjectDevice* genericObjectDevice,
+		    StatusCodes& status);
 
 private:
 

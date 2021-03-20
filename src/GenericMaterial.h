@@ -6,7 +6,7 @@
 #include <boost/property_tree/xml_parser.hpp>
 
 #include "logging.h"
-
+#include "StatusCodes.h"
 namespace pt = boost::property_tree;
 
 enum class MaterialType { None, Lambertian, Metal };
@@ -37,7 +37,8 @@ public:
     }
   }
 
-  void copyToDevice(GenericMaterialDevice* genericMaterialDevice);
+  void copyToDevice(GenericMaterialDevice* genericMaterialDevice,
+		    StatusCodes& status);
 
 private:
   void parseLambertian(const pt::ptree material);

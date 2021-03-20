@@ -6,6 +6,7 @@
 #include "GenericObject.h"
 #include "GenericMaterial.h"
 #include "Camera.cuh"
+#include "StatusCodes.h"
 
 struct SceneObjectsDevice {
   Camera* camera;
@@ -21,9 +22,8 @@ class SceneObjects {
   std::vector<GenericObject> m_objects;
   std::vector<GenericMaterial> m_materials;
 
-  void copyToDevice(SceneObjectsDevice** sceneObjectsDevice);
+  void copyToDevice(SceneObjectsDevice** sceneObjectsDevice,
+		    StatusCodes& status);
 };
-
-void test(SceneObjectsDevice* sceneObjectsDevice);
 
 #endif//SCENE_OBJECTS_H

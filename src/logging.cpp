@@ -9,7 +9,6 @@
 #include "logging.h"
 
 namespace logging = boost::log;
-namespace keywords = boost::log::keywords;
 
 void initLogger(const boost::log::trivial::severity_level logLevel)
 {
@@ -19,15 +18,17 @@ void initLogger(const boost::log::trivial::severity_level logLevel)
   // std::string msgFormatCout = "[%TimeStamp%] [%LineID%] [%Severity%] %Message%";
   std::string msgFormatCout = "[%TimeStamp%] [%Severity%] %Message%";  
   std::string msgFormatFile = msgFormatCout;
+
   logging::add_file_log
     (
-     keywords::file_name = "sample.log",
-     keywords::format = msgFormatCout
+     boost::log::keywords::file_name = "sample.log",
+     boost::log::keywords::format = msgFormatCout
      );
 
   logging::add_console_log
     (
-     std::cout, keywords::format = msgFormatFile
+     std::cout,
+     boost::log::keywords::format = msgFormatFile
      );
 
   logging::core::get()->set_filter
