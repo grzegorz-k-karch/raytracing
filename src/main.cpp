@@ -5,7 +5,6 @@
 #include "StatusCodes.h"
 #include "scene_parse.h"
 #include "SceneObjects.h"
-#include "device_utils.cuh"
 
 int main(int argc, char** argv)
 {
@@ -24,9 +23,15 @@ int main(int argc, char** argv)
   exitIfError(status);
 
   // pass those objects to device
-  // copySceneObjectsDataToDevice(sceneObjects);
-  
+  SceneObjectsDevice *sceneObjectsDevice;
+  sceneObjects.copyToDevice(&sceneObjectsDevice);
+
+  // construct scene on device
+
+
   // render scene
+
+
   // save the rendered image to file
 
   return 0;

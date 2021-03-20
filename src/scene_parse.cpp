@@ -76,7 +76,7 @@ void parseScene(const std::string filepath,
   for (auto& it: sceneTree) {
     std::string objectType = it.first;
     if (objectType == "Camera") {
-      sceneObjects.camera = std::make_unique<Camera>(it.second);
+      sceneObjects.m_camera = std::make_unique<Camera>(it.second);
     }
     else if (foundAny(objectType, renderableObjects)) {
 
@@ -85,11 +85,11 @@ void parseScene(const std::string filepath,
       bool materialFound = material_it != it.second.not_found();
       if (materialFound) {
 	// we're good to go - store the object
-	sceneObjects.objects.push_back(GenericObject(objectType, it.second));
+	sceneObjects.m_objects.push_back(GenericObject(objectType, it.second));
 	pt::ptree material = material_it->second;
 	std::string materialType = material.get<std::string>("<xmlattr>.value");
 	// store object's material
-	sceneObjects.materials.push_back(GenericMaterial(materialType, material));
+	sceneObjects.m_materials.push_back(GenericMaterial(materialType, material));
       }
       else {
 	LOG_TRIVIAL(warning) << "No material found for an object of type " << objectType

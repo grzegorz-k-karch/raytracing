@@ -3,7 +3,7 @@
 
 #include "Camera.cuh"
 #include "vector_utils.h"
-
+#include "cuda_utils.cuh"
 
 Camera::Camera(pt::ptree camera)
 {
@@ -18,8 +18,8 @@ Camera::Camera(pt::ptree camera)
   float focus_distance = camera.get<float>("focus_distance.<xmlattr>.value");
   if (focus_distance < 0.0f) {
     focus_distance = length(lookFrom-lookAt);
-  }    
-    
+  }
+
   Init(lookFrom, lookAt, up, fov, aspect,
        aperture, focus_distance, time0, time1);
 }
@@ -40,11 +40,17 @@ void Camera::Init(float3 lookfrom, float3 lookat, float3 up, float fov,
   float3 u = normalize(cross(up, w));
   m_horizontal = 2.0f*half_width*focus_dist*u;
 
-  float3 v = cross(w, u);  
-  m_vertical = 2.0f*half_height*focus_dist*v;  
+  float3 v = cross(w, u);
+  m_vertical = 2.0f*half_height*focus_dist*v;
 
   m_lower_left_corner = m_origin
     - half_width*focus_dist*u
     - half_height*focus_dist*v
     - focus_dist*w;
+}
+
+void Camera::copyToDevice(Camera* cameraDevice)
+{
+  CCE(cudaMemcpy(cameraDevice, this,
+		 sizeof(Camera), cudaMemcpyHostToDevice));
 }

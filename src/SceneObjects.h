@@ -7,16 +7,23 @@
 #include "GenericMaterial.h"
 #include "Camera.cuh"
 
-struct SceneObjects {
-  std::unique_ptr<Camera> camera;
-  std::vector<GenericObject> objects;
-  std::vector<GenericMaterial> materials;
-};
-
 struct SceneObjectsDevice {
   Camera* camera;
   GenericObjectDevice* objects;
+  int numObjects;
   GenericMaterialDevice* materials;
+  int numMaterials;
 };
+
+class SceneObjects {
+ public:
+  std::unique_ptr<Camera> m_camera;
+  std::vector<GenericObject> m_objects;
+  std::vector<GenericMaterial> m_materials;
+
+  void copyToDevice(SceneObjectsDevice** sceneObjectsDevice);
+};
+
+void test(SceneObjectsDevice* sceneObjectsDevice);
 
 #endif//SCENE_OBJECTS_H

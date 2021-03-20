@@ -11,6 +11,18 @@ namespace pt = boost::property_tree;
 
 enum class MaterialType { None, Lambertian, Metal };
 
+struct GenericMaterialDevice {
+
+  MaterialType materialType;
+
+  float  *scalars;
+  int numScalars;
+
+  float3 *vectors;
+  int numVectors;
+};
+
+
 class GenericMaterial {
 public:
 
@@ -25,6 +37,8 @@ public:
     }
   }
 
+  void copyToDevice(GenericMaterialDevice* genericMaterialDevice);
+
 private:
   void parseLambertian(const pt::ptree material);
   void parseMetal(const pt::ptree material);
@@ -32,17 +46,6 @@ private:
   MaterialType m_materialType;
   std::vector<float> m_scalars;
   std::vector<float3> m_vectors;
-};
-
-struct GenericMaterialDevice {
-
-  MaterialType materialType;
-
-  float  *scalars;
-  int    numScalars;
-  
-  float3 *vectors;
-  int    numVectors;
 };
 
 #endif//GENERIC_MATERIAL_H
