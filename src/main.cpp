@@ -23,15 +23,16 @@ int main(int argc, char** argv)
   exitIfError(status);
 
   // pass those objects to device
-  SceneRawObjectsDevice *sceneObjectsDevice;
-  sceneObjects.copyToDevice(&sceneObjectsDevice, status);
+  SceneRawObjectsDevice *sceneRawObjectsDevice;
+  sceneObjects.copyToDevice(&sceneRawObjectsDevice, status);
   exitIfError(status);
 
-  // construct scene on device
-
+  // construct scene on device using class hierarchy
+  // for objects and materials
+  SceneDevice *sceneDevice = new SceneDevice(sceneRawObjectsDevice);
 
   // render scene
-
+  
 
   // save the rendered image to file
 
