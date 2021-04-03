@@ -49,8 +49,11 @@ void Camera::Init(float3 lookfrom, float3 lookat, float3 up, float fov,
     - focus_dist*w;
 }
 
-void Camera::copyToDevice(Camera* cameraDevice)
+void Camera::copyToDevice(Camera* cameraDevice,
+			  StatusCodes& status)
 {
-  CCE(cudaMemcpy(cameraDevice, this,
-		 sizeof(Camera), cudaMemcpyHostToDevice));
+  status = StatusCodes::NoError;
+
+  status = CCE(cudaMemcpy(cameraDevice, this,
+			  sizeof(Camera), cudaMemcpyHostToDevice));
 }

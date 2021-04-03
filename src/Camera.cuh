@@ -14,7 +14,8 @@ class Camera {
 	    float2 aspect, float aperture, float focus_dist,
 	    float time0, float time1);
 
-  void copyToDevice(Camera* cameraDevice);
+  void copyToDevice(Camera* cameraDevice,
+		    StatusCodes& status);
 
  private:
   float3 m_origin;

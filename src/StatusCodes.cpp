@@ -13,3 +13,12 @@ void exitIfError(const StatusCodes& status)
     exit(EXIT_FAILURE);
   }
 }
+
+void returnIfError(const StatusCodes& status)
+{
+  if (status != StatusCodes::NoError) {
+    BOOST_LOG_TRIVIAL(error) << "Error: "
+			     << static_cast<std::underlying_type<StatusCodes>::type>(status);
+    BOOST_LOG_TRIVIAL(error) << "Exiting.";
+  }
+}

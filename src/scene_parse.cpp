@@ -76,7 +76,7 @@ void parseScene(const std::string filepath,
   for (auto& it: sceneTree) {
     std::string objectType = it.first;
     if (objectType == "Camera") {
-      sceneObjects.m_camera = std::make_unique<Camera>(it.second);
+      sceneObjects.m_camera = Camera(it.second);
     }
     else if (foundAny(objectType, renderableObjects)) {
 

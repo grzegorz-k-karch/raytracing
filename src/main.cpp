@@ -5,6 +5,7 @@
 #include "StatusCodes.h"
 #include "scene_parse.h"
 #include "SceneRawObjects.h"
+#include "SceneDevice.cuh"
 
 int main(int argc, char** argv)
 {
@@ -18,18 +19,19 @@ int main(int argc, char** argv)
   initLogger(programArgs.logLevel);
 
   // get all objects into SceneRawObjects struct
-  SceneRawObjects sceneObjects;
-  parseScene(programArgs.SceneFilePath, sceneObjects, status);
+  SceneRawObjects sceneRawObjects;
+  parseScene(programArgs.SceneFilePath, sceneRawObjects, status);
   exitIfError(status);
 
   // pass those objects to device
   SceneRawObjectsDevice *sceneRawObjectsDevice;
-  sceneObjects.copyToDevice(&sceneRawObjectsDevice, status);
+  sceneRawObjects.copyToDevice(&sceneRawObjectsDevice, status);
   exitIfError(status);
 
   // construct scene on device using class hierarchy
   // for objects and materials
-  SceneDevice *sceneDevice = new SceneDevice(sceneRawObjectsDevice);
+  SceneDevice sceneDevice(sceneRawObjectsDevice);
+
 
   // render scene
   

@@ -16,9 +16,10 @@ struct SceneRawObjectsDevice {
   int numMaterials;
 };
 
+
 class SceneRawObjects {
  public:
-  std::unique_ptr<Camera> m_camera;
+  Camera m_camera;
   std::vector<GenericObject> m_objects;
   std::vector<GenericMaterial> m_materials;
 

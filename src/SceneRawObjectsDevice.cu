@@ -3,7 +3,7 @@
 #include "SceneRawObjects.h"
 
 void SceneRawObjects::copyToDevice(SceneRawObjectsDevice** sceneObjectsDevice,
-				StatusCodes& status)
+				   StatusCodes& status)
 {
   status = StatusCodes::NoError;
 
@@ -52,6 +52,14 @@ void SceneRawObjects::copyToDevice(SceneRawObjectsDevice** sceneObjectsDevice,
     if (status != StatusCodes::NoError) {
       return;
     }
+  }
+
+  // copy camera to device
+  status = CCE(cudaMalloc((void**)&(h_sceneObjectsDevice->camera),
+			  sizeof(Camera)));
+  m_camera.copyToDevice(h_sceneObjectsDevice->camera, status);
+  if (status != StatusCodes::NoError) {
+    return;
   }
 
   // allocate pointer to sceneObjectsDevice on device
