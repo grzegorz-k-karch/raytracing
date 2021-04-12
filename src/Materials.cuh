@@ -1,6 +1,8 @@
 #ifndef MATERIALS_CUH
 #define MATERIALS_CUH
 
+#include <assert.h>
+
 #include "GenericMaterial.h"
 
 class Material {
@@ -12,8 +14,8 @@ public:
 
 class Lambertian : public Material {
 public:
-  __device__ Lambertian() {}
-  __device__ Lambertian(const float3& a) : albedo(a) {}
+  __device__ Lambertian(const GenericMaterialDevice* genMatDev)
+    : albedo(genMatDev->vectors[0]) {}
   // __device__ virtual bool scatter(const Ray& inRay, const hit_record& hitRec,
   // 				  float3& attenuation, Ray& outRays,
   // 				  curandState* localRandState) const;
@@ -22,8 +24,9 @@ public:
 
 class Metal : public Material {
 public:
-  __device__ Metal() {}
-  __device__ Metal(const float3& a, float fuzz) : albedo(a), fuzz(fuzz) {}
+  __device__ Metal(const GenericMaterialDevice* genMatDev)
+    : albedo(genMatDev->vectors[0]),
+      fuzz(genMatDev->scalars[0]) {}
   // __device__ virtual bool scatter(const Ray& inRay, const hit_record& hitRec,
   // 				  float3& attenuation, Ray& outRays,
   // 				  curandState* localRandState) const;
@@ -31,14 +34,15 @@ public:
   float fuzz;
 };
 
-// class Dielectric : public Material {
-// public:
-//   __device__ Dielectric(float refIdx) : refIdx(refIdx) {}
-//   __device__ virtual bool scatter(const Ray& inRay, const hit_record& hitRec,
-// 				  float3& attenuation, Ray& outRays,
-// 				  curandState* localRandState) const;
-//   float refIdx;
-// };
+class Dielectric : public Material {
+public:
+  __device__ Dielectric(const GenericMaterialDevice* genMatDev)
+    : refIdx(genMatDev->scalars[0]) {}
+  // __device__ virtual bool scatter(const Ray& inRay, const hit_record& hitRec,
+  // 				  float3& attenuation, Ray& outRays,
+  // 				  curandState* localRandState) const;
+  float refIdx;
+};
 
 // __device__ float schlick(float cosine, float refIdx);
 

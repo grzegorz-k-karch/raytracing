@@ -86,6 +86,7 @@ void GenericObject::copyToDevice(GenericObjectDevice* genericObjectDevice,
   h_genericObject->numVertexColors = m_vertexColors.size();
   h_genericObject->numVertexNormals = m_vertexNormals.size();
   h_genericObject->numTriangleIndices = m_triangleIndices.size();
+  h_genericObject->objectType = m_objectType;
 
   // whole object
   status = CCE(cudaMemcpy(genericObjectDevice, h_genericObject,

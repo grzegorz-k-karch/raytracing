@@ -1,5 +1,5 @@
-#ifndef SCENE_OBJECTS_H
-#define SCENE_OBJECTS_H
+#ifndef SCENE_RAW_OBJECTS_H
+#define SCENE_RAW_OBJECTS_H
 
 #include <vector>
 
@@ -19,6 +19,7 @@ struct SceneRawObjectsDevice {
 
 class SceneRawObjects {
  public:
+  
   Camera m_camera;
   std::vector<GenericObject> m_objects;
   std::vector<GenericMaterial> m_materials;
@@ -27,4 +28,4 @@ class SceneRawObjects {
 		    StatusCodes& status);
 };
 
-#endif//SCENE_OBJECTS_H
+#endif//SCENE_RAW_OBJECTS_H

@@ -23,15 +23,17 @@ int main(int argc, char** argv)
   parseScene(programArgs.SceneFilePath, sceneRawObjects, status);
   exitIfError(status);
 
-  // pass those objects to device
-  SceneRawObjectsDevice *sceneRawObjectsDevice;
-  sceneRawObjects.copyToDevice(&sceneRawObjectsDevice, status);
+  // d_sceneRawObjectsDevice resides on device
+  SceneRawObjectsDevice *d_sceneRawObjectsDevice;
+  // pass scene objects to device
+  sceneRawObjects.copyToDevice(&d_sceneRawObjectsDevice, status);
   exitIfError(status);
 
   // construct scene on device using class hierarchy
   // for objects and materials
-  SceneDevice sceneDevice(sceneRawObjectsDevice);
-
+  SceneDevice sceneDevice;
+  sceneDevice.constructScene(d_sceneRawObjectsDevice, status);
+  exitIfError(status);
 
   // render scene
   

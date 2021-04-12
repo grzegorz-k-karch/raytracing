@@ -31,6 +31,7 @@ void GenericMaterial::copyToDevice(GenericMaterialDevice* genericMaterialDevice,
 
   h_genericMaterial->numScalars = m_scalars.size();
   h_genericMaterial->numVectors = m_vectors.size();
+  h_genericMaterial->materialType = m_materialType;
   
   // whole material
   status = CCE(cudaMemcpy(genericMaterialDevice, h_genericMaterial,

@@ -9,7 +9,7 @@
 #include "StatusCodes.h"
 namespace pt = boost::property_tree;
 
-enum class MaterialType { None, Lambertian, Metal };
+enum class MaterialType { None, Lambertian, Metal, Dielectric };
 
 struct GenericMaterialDevice {
 
