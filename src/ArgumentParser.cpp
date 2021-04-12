@@ -9,17 +9,12 @@
 
 namespace po = boost::program_options;
 
-std::ostream& exception_header(std::ostream& os)
-{
-  os << "[Program option exception]: ";
-  return os;
-}
-
 void parseArgsFromCmdLine(int argc, char** argv, ProgramArgs& args,
 			  StatusCodes& status)
 {
   status = StatusCodes::NoError;
   std::string configFilePath;
+  std::string logLevel;
   try {
     // add options for cmd line only
     po::options_description generic("Generic options");
@@ -28,6 +23,9 @@ void parseArgsFromCmdLine(int argc, char** argv, ProgramArgs& args,
       ("config,c",
        po::value<std::string>(&configFilePath),
        "Filename for the program config file")
+      ("log-level",
+       po::value<std::string>(&logLevel)->default_value("info"),
+       "Logging level")
       ;
 
     // add options for both cmd line and config file
@@ -54,17 +52,27 @@ void parseArgsFromCmdLine(int argc, char** argv, ProgramArgs& args,
     po::store(po::command_line_parser(argc, argv).options(cmdLineOptions).run(), vm);
 
     if (vm.count("help")) {
-      std::cout << cmdLineOptions << std::endl;
+      BOOST_LOG_TRIVIAL(info) << cmdLineOptions;
       status = StatusCodes::NoError;
       exit(EXIT_SUCCESS);
     }
 
     po::notify(vm);
 
+    if (vm.count("log-level")) {
+      bool success = boost::log::trivial::from_string(logLevel.c_str(),
+						      logLevel.length(),
+						      args.logLevel);
+      if (!success) {
+	BOOST_LOG_TRIVIAL(warning) << "Invalidy logging level. Setting to debug.";
+	args.logLevel = boost::log::trivial::debug;
+      }
+    }
+
     if (!configFilePath.empty()) {
       std::ifstream ifs(configFilePath.c_str());
       if (!ifs) {
-	std::cerr << "Cannot open config file: " << configFilePath << std::endl;
+	BOOST_LOG_TRIVIAL(error) << "Cannot open config file: " << configFilePath;
 	status = StatusCodes::FileError;
 	return;
       }
@@ -75,18 +83,15 @@ void parseArgsFromCmdLine(int argc, char** argv, ProgramArgs& args,
     }
   }
   catch(const po::required_option& ex) {
-    exception_header(std::cerr);
-    std::cerr << ex.what() << std::endl;
+    BOOST_LOG_TRIVIAL(error) << ex.what();
     status = StatusCodes::CmdLineError;
   }
   catch(const po::unknown_option& ex) {
-    exception_header(std::cerr);
-    std::cerr << ex.what() << std::endl;
+    BOOST_LOG_TRIVIAL(error) << ex.what();
     status = StatusCodes::CmdLineError;
   }
   catch(const po::error& ex) {
-    exception_header(std::cerr);
-    std::cerr << ex.what() << std::endl;
+    BOOST_LOG_TRIVIAL(error) << ex.what();
     status = StatusCodes::CmdLineError;
   }
 }

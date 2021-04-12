@@ -1,14 +1,24 @@
 #include <cstdlib>
 #include <iostream>
 
+#include "logging.h"
 #include "StatusCodes.h"
 
 void exitIfError(const StatusCodes& status)
 {
   if (status != StatusCodes::NoError) {
-    std::cerr << "Error: "
-	      << static_cast<std::underlying_type<StatusCodes>::type>(status)
-	      << std::endl << "Exiting." << std::endl;
+    BOOST_LOG_TRIVIAL(error) << "Error: "
+			     << static_cast<std::underlying_type<StatusCodes>::type>(status);
+    BOOST_LOG_TRIVIAL(error) << "Exiting.";
     exit(EXIT_FAILURE);
+  }
+}
+
+void returnIfError(const StatusCodes& status)
+{
+  if (status != StatusCodes::NoError) {
+    BOOST_LOG_TRIVIAL(error) << "Error: "
+			     << static_cast<std::underlying_type<StatusCodes>::type>(status);
+    BOOST_LOG_TRIVIAL(error) << "Exiting.";
   }
 }
