@@ -1,3 +1,4 @@
+#include "logging.h"
 #include "cuda_utils.cuh"
 #include "GenericObject.h"
 
@@ -8,7 +9,16 @@ void GenericObject::copyToDevice(GenericObjectDevice* genericObjectDevice,
 
   GenericObjectDevice *h_genericObject = new GenericObjectDevice;
 
-  // scalars
+  // copy all sizes and object type ------------------------------------------
+  h_genericObject->numScalars = m_scalars.size();
+  h_genericObject->numVectors = m_vectors.size();
+  h_genericObject->numVertices = m_vertices.size();
+  h_genericObject->numVertexColors = m_vertexColors.size();
+  h_genericObject->numVertexNormals = m_vertexNormals.size();
+  h_genericObject->numTriangleIndices = m_triangleIndices.size();
+  h_genericObject->objectType = m_objectType;
+
+  // scalars -----------------------------------------------------------------
   int dataSize = m_scalars.size()*sizeof(float);
   status = CCE(cudaMalloc((void**)&(h_genericObject->scalars), dataSize));
   if (status != StatusCodes::NoError) {
@@ -20,7 +30,7 @@ void GenericObject::copyToDevice(GenericObjectDevice* genericObjectDevice,
     return;
   }
 
-  // vectors
+  // vectors -----------------------------------------------------------------
   dataSize = m_vectors.size()*sizeof(float3);
   status = CCE(cudaMalloc((void**)&(h_genericObject->vectors), dataSize));
   if (status != StatusCodes::NoError) {
@@ -32,7 +42,7 @@ void GenericObject::copyToDevice(GenericObjectDevice* genericObjectDevice,
     return;
   }
 
-  // vertices
+  // vertices ----------------------------------------------------------------
   dataSize = m_vertices.size()*sizeof(float3);
   status = CCE(cudaMalloc((void**)&(h_genericObject->vertices), dataSize));
   if (status != StatusCodes::NoError) {
@@ -44,7 +54,7 @@ void GenericObject::copyToDevice(GenericObjectDevice* genericObjectDevice,
     return;
   }
 
-  // vertex colors
+  // vertex colors -----------------------------------------------------------
   dataSize = m_vertexColors.size()*sizeof(float3);
   status = CCE(cudaMalloc((void**)&(h_genericObject->vertexColors), dataSize));
   if (status != StatusCodes::NoError) {
@@ -56,7 +66,7 @@ void GenericObject::copyToDevice(GenericObjectDevice* genericObjectDevice,
     return;
   }
 
-  // vertex normals
+  // vertex normals ----------------------------------------------------------
   dataSize = m_vertexNormals.size()*sizeof(float3);
   status = CCE(cudaMalloc((void**)&(h_genericObject->vertexNormals), dataSize));
   if (status != StatusCodes::NoError) {
@@ -68,7 +78,7 @@ void GenericObject::copyToDevice(GenericObjectDevice* genericObjectDevice,
     return;
   }
 
-  // triangle indices
+  // triangle indices --------------------------------------------------------
   dataSize = m_triangleIndices.size()*sizeof(int);
   status = CCE(cudaMalloc((void**)&(h_genericObject->triangleIndices), dataSize));
   if (status != StatusCodes::NoError) {
@@ -80,15 +90,7 @@ void GenericObject::copyToDevice(GenericObjectDevice* genericObjectDevice,
     return;
   }
 
-  h_genericObject->numScalars = m_scalars.size();
-  h_genericObject->numVectors = m_vectors.size();
-  h_genericObject->numVertices = m_vertices.size();
-  h_genericObject->numVertexColors = m_vertexColors.size();
-  h_genericObject->numVertexNormals = m_vertexNormals.size();
-  h_genericObject->numTriangleIndices = m_triangleIndices.size();
-  h_genericObject->objectType = m_objectType;
-
-  // whole object
+  // whole object ------------------------------------------------------------
   status = CCE(cudaMemcpy(genericObjectDevice, h_genericObject,
 			  sizeof(GenericObjectDevice), cudaMemcpyHostToDevice));
   if (status != StatusCodes::NoError) {

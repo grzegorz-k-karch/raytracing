@@ -7,15 +7,7 @@
 #include "GenericMaterial.h"
 #include "Camera.cuh"
 #include "StatusCodes.h"
-
-struct SceneRawObjectsDevice {
-  Camera* camera;
-  GenericObjectDevice* objects;
-  int numObjects;
-  GenericMaterialDevice* materials;
-  int numMaterials;
-};
-
+#include "SceneRawObjectsDevice.cuh"
 
 class SceneRawObjects {
  public:

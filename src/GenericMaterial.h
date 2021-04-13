@@ -7,21 +7,9 @@
 
 #include "logging.h"
 #include "StatusCodes.h"
+#include "GenericMaterialDevice.cuh"
+
 namespace pt = boost::property_tree;
-
-enum class MaterialType { None, Lambertian, Metal, Dielectric };
-
-struct GenericMaterialDevice {
-
-  MaterialType materialType;
-
-  float  *scalars;
-  int numScalars;
-
-  float3 *vectors;
-  int numVectors;
-};
-
 
 class GenericMaterial {
 public:

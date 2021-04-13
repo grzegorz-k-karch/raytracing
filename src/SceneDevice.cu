@@ -18,7 +18,6 @@ void constructScene_kernel(SceneRawObjectsDevice *sceneRawObjectsDevice,
     GenericObjectDevice *genObjDev =
       &(sceneRawObjectsDevice->objects[objIdx]);    
     objectList[objIdx] = ObjectFactory::createObject(genObjDev, mat);
-    objectList[objIdx]->print();
   }
   *world = new ObjectList(objectList, numObjects);
 }

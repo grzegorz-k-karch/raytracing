@@ -14,7 +14,6 @@ struct HitRecord {
 
 class Object {
  public:
-  __device__ virtual void print() const = 0;
 };
 
 
@@ -25,8 +24,6 @@ class ObjectList: public Object {
 
 //   __device__ virtual bool hit(const Ray& ray, float tMin, float tMax, HitRecord& hitRec) const;
 //   __device__ virtual bool get_bbox(float t0, float t1, AABB& output_bbox) const;
-
-  __device__ virtual void print() const {};
 
   Object **objects;
   int num_objects;
@@ -79,9 +76,6 @@ public:
       triangleIndices(genObjDev->triangleIndices),
       numTriangleIndices(genObjDev->numTriangleIndices) {}
 
-  __device__ virtual void print() const {
-  };
-
   float3 *vertices;
   int    numVertices;
   float3 *vertexColors;
@@ -99,12 +93,6 @@ public:
 		    const Material* mat)
     : center(genObjDev->vectors[0]),
       radius(genObjDev->scalars[0]) {}
-  
-  __device__ virtual void print() const {
-#if __CUDA_ARCH__ >= 200    
-    printf("|||| radius = %f\n", radius);
-#endif
-  };
   
   float3 center;
   float radius;
