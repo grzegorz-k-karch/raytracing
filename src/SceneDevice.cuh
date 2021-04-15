@@ -61,7 +61,7 @@ public:
 class SceneDevice {
 public:
 
-  void constructScene(SceneRawObjectsDevice* sceneRawObjectsDevice,
+  void constructScene(const SceneRawObjectsDevice* sceneRawObjectsDevice,
 		      StatusCodes& status);
   
   Camera *m_camera;

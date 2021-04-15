@@ -2,30 +2,29 @@
 #include "cuda_utils.cuh"
 #include "SceneRawObjects.h"
 
-void SceneRawObjects::copyToDevice(SceneRawObjectsDevice** sceneObjectsDevice,
-				   StatusCodes& status)
+void SceneRawObjects::copyToDevice(StatusCodes& status)
 {
   status = StatusCodes::NoError;
 
   // allocate pointer to sceneObjectsDevice on host -> h_sceneObjectsDevice
-  SceneRawObjectsDevice *h_sceneObjectsDevice = new SceneRawObjectsDevice;
+  SceneRawObjectsDevice h_sceneRawObjectsDevice;
 
   // copy objects
   int numObjects = m_objects.size();
-  h_sceneObjectsDevice->numObjects = numObjects;
+  h_sceneRawObjectsDevice.numObjects = numObjects;
 
   //   allocate buffer for GenericObjectDevice struct
-  status = CCE(cudaMalloc((void**)&(h_sceneObjectsDevice->objects),
+  status = CCE(cudaMalloc((void**)&(h_sceneRawObjectsDevice.objects),
 			  numObjects*sizeof(GenericObjectDevice)));
   if (status != StatusCodes::NoError) {
     return;
   }
 
   // go over all generic objects and copy them to the allocated
-  // buffer h_sceneObjectsDevice->objects
+  // buffer h_sceneRawObjectsDevice.objects
   for (int objIdx = 0; objIdx < numObjects; objIdx++) {
     LOG_TRIVIAL(trace) << "Copying object " << objIdx;
-    GenericObjectDevice *currGenericObject = &(h_sceneObjectsDevice->objects[objIdx]);
+    GenericObjectDevice *currGenericObject = &(h_sceneRawObjectsDevice.objects[objIdx]);
     m_objects[objIdx].copyToDevice(currGenericObject, status);
     if (status != StatusCodes::NoError) {
       return;
@@ -34,20 +33,20 @@ void SceneRawObjects::copyToDevice(SceneRawObjectsDevice** sceneObjectsDevice,
 
   // copy material to device
   int numMaterials = m_materials.size();
-  h_sceneObjectsDevice->numMaterials = numMaterials;
+  h_sceneRawObjectsDevice.numMaterials = numMaterials;
 
   //   allocate buffer for GenericMaterialDevice struct
-  status = CCE(cudaMalloc((void**)&(h_sceneObjectsDevice->materials),
+  status = CCE(cudaMalloc((void**)&(h_sceneRawObjectsDevice.materials),
 			  numMaterials*sizeof(GenericMaterialDevice)));
   if (status != StatusCodes::NoError) {
     return;
   }
 
   // go over all generic materials and copy them to the allocated
-  // buffer h_sceneObjectsDevice->materials
+  // buffer h_sceneRawObjectsDevice.materials
   for (int objIdx = 0; objIdx < numMaterials; objIdx++) {
     LOG_TRIVIAL(trace) << "Copying material " << objIdx;
-    GenericMaterialDevice *currGenericMaterial = &(h_sceneObjectsDevice->materials[objIdx]);
+    GenericMaterialDevice *currGenericMaterial = &(h_sceneRawObjectsDevice.materials[objIdx]);
     m_materials[objIdx].copyToDevice(currGenericMaterial, status);
     if (status != StatusCodes::NoError) {
       return;
@@ -55,23 +54,21 @@ void SceneRawObjects::copyToDevice(SceneRawObjectsDevice** sceneObjectsDevice,
   }
 
   // copy camera to device
-  status = CCE(cudaMalloc((void**)&(h_sceneObjectsDevice->camera),
+  status = CCE(cudaMalloc((void**)&(h_sceneRawObjectsDevice.camera),
 			  sizeof(Camera)));
-  m_camera.copyToDevice(h_sceneObjectsDevice->camera, status);
+  m_camera.copyToDevice(h_sceneRawObjectsDevice.camera, status);
   if (status != StatusCodes::NoError) {
     return;
   }
 
-  // allocate pointer to sceneObjectsDevice on device
-  status = CCE(cudaMalloc((void**)sceneObjectsDevice, sizeof(SceneRawObjectsDevice)));
+  // allocate pointer to sceneRawObjectsDevice on device
+  status = CCE(cudaMalloc((void**)&m_sceneRawObjectsDevice, sizeof(SceneRawObjectsDevice)));
   if (status != StatusCodes::NoError) {
     return;
   }
-  status = CCE(cudaMemcpy(*sceneObjectsDevice, h_sceneObjectsDevice,
+  status = CCE(cudaMemcpy(m_sceneRawObjectsDevice, &h_sceneRawObjectsDevice,
 			  sizeof(SceneRawObjectsDevice), cudaMemcpyHostToDevice));
   if (status != StatusCodes::NoError) {
     return;
   }
-
-  delete h_sceneObjectsDevice;
 }

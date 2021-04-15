@@ -5,7 +5,7 @@
 #include <assert.h>
 
 __global__
-void constructScene_kernel(SceneRawObjectsDevice *sceneRawObjectsDevice,
+void constructScene_kernel(const SceneRawObjectsDevice *sceneRawObjectsDevice,
 			   Object** world)
 {
   int numObjects = sceneRawObjectsDevice->numObjects;
@@ -20,9 +20,11 @@ void constructScene_kernel(SceneRawObjectsDevice *sceneRawObjectsDevice,
     objectList[objIdx] = ObjectFactory::createObject(genObjDev, mat);
   }
   *world = new ObjectList(objectList, numObjects);
+
+  printf("GenericMaterialDevice destructor on device\n");
 }
 
-void SceneDevice::constructScene(SceneRawObjectsDevice *sceneRawObjectsDevice,
+void SceneDevice::constructScene(const SceneRawObjectsDevice *sceneRawObjectsDevice,
 				 StatusCodes& status)
 {
   status = StatusCodes::NoError;

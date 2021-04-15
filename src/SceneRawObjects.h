@@ -10,14 +10,35 @@
 #include "SceneRawObjectsDevice.cuh"
 
 class SceneRawObjects {
- public:
-  
+public:
+  SceneRawObjects() :
+    m_sceneRawObjectsDevice(nullptr) {
+    //TODO: do logging
+  }
+
+  // TODO: understand move operator
+  void setCamera(Camera&& camera) {
+    m_camera = std::move(camera);
+  }
+  void addObject(GenericObject&& obj) {
+    m_objects.push_back(std::move(obj));
+  }
+  void addMaterial(GenericMaterial&& mat) {
+    m_materials.push_back(std::move(mat));
+  }
+
+  SceneRawObjectsDevice *getObjectsOnDevice() {
+    return m_sceneRawObjectsDevice;
+  }
+
+  void copyToDevice(StatusCodes &status);
+
+private:
   Camera m_camera;
   std::vector<GenericObject> m_objects;
   std::vector<GenericMaterial> m_materials;
-
-  void copyToDevice(SceneRawObjectsDevice** sceneObjectsDevice,
-		    StatusCodes& status);
+  
+  SceneRawObjectsDevice *m_sceneRawObjectsDevice;
 };
 
 #endif//SCENE_RAW_OBJECTS_H

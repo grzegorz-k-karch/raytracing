@@ -5,6 +5,35 @@ enum class ObjectType { None, Mesh, Sphere };
 
 struct GenericObjectDevice {
 
+  GenericObjectDevice() :
+    scalars(nullptr), numScalars(0),
+    vectors(nullptr), numVectors(0),
+    vertices(nullptr), numVertices(0),
+    vertexColors(nullptr), numVertexColors(0),
+    vertexNormals(nullptr), numVertexNormals(0),
+    triangleIndices(nullptr), numTriangleIndices(0) {}
+
+  ~GenericObjectDevice() {
+    // if (scalars != nullptr) {
+    //   CCE(cudaFree(scalars));
+    // }
+    // if (vectors != nullptr) {
+    //   CCE(cudaFree(vectors));
+    // }        
+    // if (vertices != nullptr) {
+    //   CCE(cudaFree(vertices));
+    // }        
+    // if (vertexColors != nullptr) {
+    //   CCE(cudaFree(vertexColors));
+    // }        
+    // if (vertexNormals != nullptr) {
+    //   CCE(cudaFree(vertexNormals));
+    // }        
+    // if (triangleIndices != nullptr) {
+    //   CCE(cudaFree(triangleIndices));
+    // }        
+  }
+
   ObjectType objectType;
 
   // sphere members
