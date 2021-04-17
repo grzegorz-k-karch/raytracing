@@ -11,13 +11,10 @@
 
 class SceneRawObjects {
 public:
-  SceneRawObjects() :
-    m_sceneRawObjectsDevice(nullptr) {
-    //TODO: do logging
-  }
+  // default constructor
+  SceneRawObjects() {}
 
-  // TODO: understand move operator
-  void setCamera(Camera&& camera) {
+  void setCamera(const Camera& camera) {
     m_camera = std::move(camera);
   }
   void addObject(GenericObject&& obj) {
@@ -27,18 +24,17 @@ public:
     m_materials.push_back(std::move(mat));
   }
 
-  SceneRawObjectsDevice *getObjectsOnDevice() {
-    return m_sceneRawObjectsDevice;
+  SceneRawObjectsDevice* getObjectsOnDevice(StatusCodes &status) const {
+    SceneRawObjectsDevice* sceneRawObjectsDevice = copyToDevice(status);
+    return sceneRawObjectsDevice;
   }
 
-  void copyToDevice(StatusCodes &status);
-
 private:
+  SceneRawObjectsDevice* copyToDevice(StatusCodes &status) const;
+
   Camera m_camera;
   std::vector<GenericObject> m_objects;
   std::vector<GenericMaterial> m_materials;
-  
-  SceneRawObjectsDevice *m_sceneRawObjectsDevice;
 };
 
 #endif//SCENE_RAW_OBJECTS_H

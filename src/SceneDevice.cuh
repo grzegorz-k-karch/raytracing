@@ -38,15 +38,15 @@ class ObjectFactory {
 public:
   __device__  
   static Object* createObject(const GenericObjectDevice* genObjDev,
-			      const Material* mat) {
+			      const Material* material) {
 
     Object *obj = nullptr;
     switch (genObjDev->objectType) {
     case ObjectType::Mesh:
-      obj = new Mesh(genObjDev, mat);
+      obj = new Mesh(genObjDev, material);
       break;
     case ObjectType::Sphere:
-      obj = new Sphere(genObjDev, mat);
+      obj = new Sphere(genObjDev, material);
       break;
     case ObjectType::None:
       break;
@@ -61,7 +61,7 @@ public:
 class SceneDevice {
 public:
 
-  void constructScene(const SceneRawObjectsDevice* sceneRawObjectsDevice,
+  void constructScene(const SceneRawObjects& sceneRawObjects,
 		      StatusCodes& status);
   
   Camera *m_camera;

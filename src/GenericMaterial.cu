@@ -2,7 +2,7 @@
 #include "GenericMaterial.h"
 
 void GenericMaterial::copyToDevice(GenericMaterialDevice* genericMaterialDevice,
-				   StatusCodes& status)
+				   StatusCodes& status) const
 {
   status = StatusCodes::NoError;
 

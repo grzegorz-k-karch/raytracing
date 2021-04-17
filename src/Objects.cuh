@@ -98,5 +98,4 @@ public:
   float radius;
 };
 
-
 #endif//OBJECTS_CUH

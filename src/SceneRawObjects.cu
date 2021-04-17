@@ -2,7 +2,7 @@
 #include "cuda_utils.cuh"
 #include "SceneRawObjects.h"
 
-void SceneRawObjects::copyToDevice(StatusCodes& status)
+SceneRawObjectsDevice* SceneRawObjects::copyToDevice(StatusCodes& status) const
 {
   status = StatusCodes::NoError;
 
@@ -17,7 +17,7 @@ void SceneRawObjects::copyToDevice(StatusCodes& status)
   status = CCE(cudaMalloc((void**)&(h_sceneRawObjectsDevice.objects),
 			  numObjects*sizeof(GenericObjectDevice)));
   if (status != StatusCodes::NoError) {
-    return;
+    return nullptr;
   }
 
   // go over all generic objects and copy them to the allocated
@@ -27,7 +27,7 @@ void SceneRawObjects::copyToDevice(StatusCodes& status)
     GenericObjectDevice *currGenericObject = &(h_sceneRawObjectsDevice.objects[objIdx]);
     m_objects[objIdx].copyToDevice(currGenericObject, status);
     if (status != StatusCodes::NoError) {
-      return;
+      return nullptr;
     }
   }
 
@@ -39,7 +39,7 @@ void SceneRawObjects::copyToDevice(StatusCodes& status)
   status = CCE(cudaMalloc((void**)&(h_sceneRawObjectsDevice.materials),
 			  numMaterials*sizeof(GenericMaterialDevice)));
   if (status != StatusCodes::NoError) {
-    return;
+    return nullptr;
   }
 
   // go over all generic materials and copy them to the allocated
@@ -49,7 +49,7 @@ void SceneRawObjects::copyToDevice(StatusCodes& status)
     GenericMaterialDevice *currGenericMaterial = &(h_sceneRawObjectsDevice.materials[objIdx]);
     m_materials[objIdx].copyToDevice(currGenericMaterial, status);
     if (status != StatusCodes::NoError) {
-      return;
+      return nullptr;
     }
   }
 
@@ -58,17 +58,19 @@ void SceneRawObjects::copyToDevice(StatusCodes& status)
 			  sizeof(Camera)));
   m_camera.copyToDevice(h_sceneRawObjectsDevice.camera, status);
   if (status != StatusCodes::NoError) {
-    return;
+    return nullptr;
   }
 
   // allocate pointer to sceneRawObjectsDevice on device
-  status = CCE(cudaMalloc((void**)&m_sceneRawObjectsDevice, sizeof(SceneRawObjectsDevice)));
+  SceneRawObjectsDevice *d_sceneRawObjectsDevice;
+  status = CCE(cudaMalloc((void**)&d_sceneRawObjectsDevice, sizeof(SceneRawObjectsDevice)));
   if (status != StatusCodes::NoError) {
-    return;
+    return nullptr;
   }
-  status = CCE(cudaMemcpy(m_sceneRawObjectsDevice, &h_sceneRawObjectsDevice,
+  status = CCE(cudaMemcpy(d_sceneRawObjectsDevice, &h_sceneRawObjectsDevice,
 			  sizeof(SceneRawObjectsDevice), cudaMemcpyHostToDevice));
   if (status != StatusCodes::NoError) {
-    return;
+    return nullptr;
   }
+  return d_sceneRawObjectsDevice;
 }

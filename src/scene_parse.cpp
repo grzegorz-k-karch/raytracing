@@ -14,17 +14,18 @@
 
 namespace pt = boost::property_tree;
 
-bool foundAny(const std::string objectType, std::set<std::string> &renderableObjects) {
-  return std::find(renderableObjects.begin(), renderableObjects.end(), objectType)
-         != renderableObjects.end();
+bool foundAny(const std::string objectType,
+	      std::set<std::string> &renderableObjects)
+{
+  return std::find(renderableObjects.begin(),
+		   renderableObjects.end(), objectType) != renderableObjects.end();
 }
 
-bool checkRequiredObjects(const pt::ptree &sceneTree) {
+bool checkRequiredObjects(const pt::ptree &sceneTree)
+{
   bool cameraPresent = false;
   bool renderableObjectPresent = false;
-  std::set<std::string> renderableObjects = {"Sphere",
-                                             "Mesh"
-                                            };
+  std::set<std::string> renderableObjects = {"Sphere", "Mesh"};
   pt::ptree::const_iterator node = sceneTree.begin();
 
   while ((!cameraPresent || !renderableObjectPresent) &&
@@ -34,11 +35,9 @@ bool checkRequiredObjects(const pt::ptree &sceneTree) {
     if (objectType == "Camera") {
       cameraPresent = true;
     }
-
     if (foundAny(objectType, renderableObjects)) {
       renderableObjectPresent = true;
     }
-
     node++;
   }
 
@@ -78,7 +77,7 @@ void parseScene(const std::string filepath,
     std::string objectType = it.first;
 
     if (objectType == "Camera") {
-      sceneObjects.setCamera(std::move(Camera(it.second)));
+      sceneObjects.setCamera(Camera(it.second));
     } else if (foundAny(objectType, renderableObjects)) {
       // before we store the object, get it's material - one of object's attributes
       pt::ptree::const_assoc_iterator material_it = it.second.find("material");
@@ -86,11 +85,11 @@ void parseScene(const std::string filepath,
 
       if (materialFound) {
         // we're good to go - store the object
-        sceneObjects.addObject(std::move(GenericObject(objectType, it.second)));
+        sceneObjects.addObject(GenericObject(objectType, it.second));
         pt::ptree material = material_it->second;
         std::string materialType = material.get<std::string>("<xmlattr>.value");
         // store object's material
-        sceneObjects.addMaterial(std::move(GenericMaterial(materialType, material)));
+        sceneObjects.addMaterial(GenericMaterial(materialType, material));
       } else {
         LOG_TRIVIAL(warning) << "No material found for an object of type " << objectType
                              << ". Skipping the object.";

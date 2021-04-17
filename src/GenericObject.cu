@@ -3,7 +3,7 @@
 #include "GenericObject.h"
 
 void GenericObject::copyToDevice(GenericObjectDevice* genericObjectDevice,
-				 StatusCodes& status)
+				 StatusCodes& status) const
 {
   status = StatusCodes::NoError;
 

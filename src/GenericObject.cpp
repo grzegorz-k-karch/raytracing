@@ -3,6 +3,29 @@
 #include "MeshLoader.h"
 #include "SphereLoader.h"
 
+GenericObject::GenericObject(const std::string objectType, const pt::ptree object)
+{
+  if (objectType == "Mesh") {
+    m_objectType = ObjectType::Mesh;
+    parseMesh(object);
+  }
+  else if (objectType  == "Sphere") {
+    m_objectType = ObjectType::Sphere;
+    parseSphere(object);
+  }
+}
+
+GenericObject::GenericObject(GenericObject&& other) noexcept :
+  m_objectType(other.m_objectType),
+  m_scalars(other.m_scalars),
+  m_vectors(other.m_vectors),
+  m_vertices(other.m_vertices),
+  m_vertexColors(other.m_vertexColors),
+  m_vertexNormals(other.m_vertexNormals),
+  m_triangleIndices(other.m_triangleIndices)
+{
+}
+
 void GenericObject::parseMesh(const pt::ptree object)
 {
   MeshLoader meshLoader = MeshLoader();

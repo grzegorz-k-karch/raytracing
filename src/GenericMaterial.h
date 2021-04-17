@@ -5,7 +5,6 @@
 #include <vector_types.h>
 #include <boost/property_tree/xml_parser.hpp>
 
-#include "logging.h"
 #include "StatusCodes.h"
 #include "GenericMaterialDevice.cuh"
 
@@ -13,20 +12,21 @@ namespace pt = boost::property_tree;
 
 class GenericMaterial {
 public:
-
-  GenericMaterial(const std::string materialType, const pt::ptree material) {
-    if (materialType == "Lambertian") {
-      m_materialType = MaterialType::Lambertian;
-      parseLambertian(material);      
-    }
-    else if (materialType  == "Metal") {
-      m_materialType = MaterialType::Metal;
-      parseMetal(material);      
-    }
-  }
+  // default constructor
+  GenericMaterial() = delete;
+  // explicit constructor
+  GenericMaterial(const std::string materialType, const pt::ptree material);
+  // move constructor
+  GenericMaterial(GenericMaterial&& other) noexcept;
+  // copy constructor
+  GenericMaterial(const GenericMaterial& other) = delete;
+  // copy assignment operator
+  GenericMaterial& operator=(const GenericMaterial& other) = delete;
+  // move assignment operator
+  GenericMaterial& operator=(const GenericMaterial&& other) = delete;
 
   void copyToDevice(GenericMaterialDevice* genericMaterialDevice,
-		    StatusCodes& status);
+		    StatusCodes& status) const;
 
 private:
   void parseLambertian(const pt::ptree material);

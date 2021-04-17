@@ -13,20 +13,21 @@ namespace pt = boost::property_tree;
 
 class GenericObject {
  public:
-
-  GenericObject(const std::string objectType, const pt::ptree object) {
-    if (objectType == "Mesh") {
-      m_objectType = ObjectType::Mesh;
-      parseMesh(object);
-    }
-    else if (objectType  == "Sphere") {
-      m_objectType = ObjectType::Sphere;
-      parseSphere(object);
-    }
-  }
-
+  // default constructor
+  GenericObject() = delete;
+  // explicit constructor
+  GenericObject(const std::string objectType, const pt::ptree object);
+  // move constructor
+  GenericObject(GenericObject&& other) noexcept;
+  // copy constructor
+  GenericObject(const GenericObject& other) = delete;
+  // copy assignment operator
+  GenericObject& operator=(const GenericObject& other) = delete;
+  // move assignment operator
+  GenericObject& operator=(const GenericObject&& other) = delete;
+  
   void copyToDevice(GenericObjectDevice* genericObjectDevice,
-		    StatusCodes& status);
+		    StatusCodes& status) const;
 
 private:
 

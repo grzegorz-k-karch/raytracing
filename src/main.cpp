@@ -6,6 +6,7 @@
 #include "scene_parse.h"
 #include "SceneRawObjects.h"
 #include "SceneDevice.cuh"
+#include "Renderer.cuh"
 
 int main(int argc, char** argv)
 {
@@ -23,21 +24,20 @@ int main(int argc, char** argv)
   parseScene(programArgs.SceneFilePath, sceneRawObjects, status);
   exitIfError(status);
 
-  // pass scene objects to device
-  sceneRawObjects.copyToDevice(status);
-  exitIfError(status);
-
   // construct scene on device using class hierarchy
   // for objects and materials
-  const SceneRawObjectsDevice *d_sceneRawObjectsDevice = sceneRawObjects.getObjectsOnDevice();
   SceneDevice sceneDevice;
-  sceneDevice.constructScene(d_sceneRawObjectsDevice, status);
+  sceneDevice.constructScene(sceneRawObjects, status);
   exitIfError(status);
 
   // render scene
-  
+  Renderer renderer;
+  renderer.renderScene(sceneDevice, status);
+  exitIfError(status);
 
-  // save the rendered image to file
+  // // save the rendered image to file
+  // PictureSaver pictureSaver(render.getImageOnHost(status));
+  // exitIfError(status);
 
   return 0;
 }
