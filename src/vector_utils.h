@@ -21,7 +21,8 @@ inline float2 operator*(float2 a, float b)
     return make_float2(a.x * b, a.y * b);
 }
 
-inline float3 make_float3(float s)
+
+__host__ __device__ inline float3 make_float3(float s)
 {
     return make_float3(s, s, s);
 }
@@ -38,7 +39,7 @@ inline void operator+=(float3 &a, float3 b)
     a.z += b.z;
 }
 
-inline float3 operator/(float3 a, float b)
+__host__ __device__ inline float3 operator/(float3 a, float b)
 {
     return make_float3(a.x / b, a.y / b, a.z / b);
 }

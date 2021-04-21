@@ -7,6 +7,9 @@
 #include "SceneRawObjects.h"
 #include "SceneDevice.cuh"
 #include "Renderer.cuh"
+#include "ImageSaver.h"
+
+#include <vector> // TODO delete
 
 int main(int argc, char** argv)
 {
@@ -21,7 +24,7 @@ int main(int argc, char** argv)
 
   // get all objects into SceneRawObjects struct
   SceneRawObjects sceneRawObjects;
-  parseScene(programArgs.SceneFilePath, sceneRawObjects, status);
+  parseScene(programArgs.sceneFilePath, sceneRawObjects, status);
   exitIfError(status);
 
   // construct scene on device using class hierarchy
@@ -30,14 +33,25 @@ int main(int argc, char** argv)
   sceneDevice.constructScene(sceneRawObjects, status);
   exitIfError(status);
 
+  Renderer renderer(programArgs.imageWidth, programArgs.imageHeight,
+		    programArgs.sampleCount);
+  // initialize random state and image buffer
+  renderer.initBuffers(status);
+  exitIfError(status);
   // render scene
-  Renderer renderer;
   renderer.renderScene(sceneDevice, status);
   exitIfError(status);
 
-  // // save the rendered image to file
-  // PictureSaver pictureSaver(render.getImageOnHost(status));
-  // exitIfError(status);
+  std::vector<float3> image;
+  renderer.getImageOnHost(image, status);
+
+  ImageSaver imageSaver;
+  // save the rendered image to file
+  imageSaver.saveImage(image, programArgs.imageWidth,
+		       programArgs.imageHeight,
+		       programArgs.pictureFilePath,
+		       status);
+  exitIfError(status);
 
   return 0;
 }

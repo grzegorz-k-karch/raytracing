@@ -12,17 +12,9 @@ namespace pt = boost::property_tree;
 class Camera {
 public:
   // default constructor
-  Camera() {};
+  Camera() = default;
   // explicit constructor
   Camera(pt::ptree camera);
-  // copy constructor
-  Camera(const Camera& other) = delete;
-  // move constructor
-  Camera(Camera&& other);
-  // copy assignment operator
-  Camera& operator=(const Camera& other) = delete;
-  // move assignment operator
-  Camera& operator=(const Camera&& other);
 
   void Init(float3 lookfrom, float3 lookat, float3 up, float fov, float2 aspect,
             float aperture, float focus_dist, float time0, float time1);

@@ -32,13 +32,19 @@ void parseArgsFromCmdLine(int argc, char** argv, ProgramArgs& args,
     po::options_description config("Configuration");
     config.add_options()
       ("scene",
-       po::value<std::string>(&args.SceneFilePath)->default_value(""),
+       po::value<std::string>(&args.sceneFilePath)->default_value(""),
        "File with scene description")
       ("num-samples,s",
-       po::value<int>(&args.SampleCount)->default_value(64),
+       po::value<int>(&args.sampleCount)->default_value(64),
        "Number of samples per pixel")
+      ("res-x,x",
+       po::value<int>(&args.imageWidth)->default_value(600),
+       "Horizontal resolution")
+      ("res-y,y",
+       po::value<int>(&args.imageHeight)->default_value(400),
+       "Vertical resolution")
       ("output,o",
-       po::value<std::string>(&args.PictureFilePath)->default_value(""),
+       po::value<std::string>(&args.pictureFilePath)->default_value(""),
        "Filename for the output picture")
       ;
 
@@ -105,7 +111,7 @@ void parseArgs(int argc, char** argv, ProgramArgs& args,
 void ProgramArgs::Print()
 {
   std::cout << "ProgramArgs instance: " << std::endl
-	    << "\tscene description: " << SceneFilePath << std::endl
-	    << "\toutput picture:    " << PictureFilePath << std::endl
-	    << "\tnumber of samples: " << SampleCount << std::endl;
+	    << "\tscene description: " << sceneFilePath << std::endl
+	    << "\toutput picture:    " << pictureFilePath << std::endl
+	    << "\tnumber of samples: " << sampleCount << std::endl;
 }

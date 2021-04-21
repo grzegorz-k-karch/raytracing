@@ -6,41 +6,6 @@
 #include "vector_utils.h"
 #include "cuda_utils.cuh"
 
-Camera::Camera(Camera&& other)
-  : m_origin(make_float3(0.0f)),
-    m_lower_left_corner(make_float3(0.0f)),
-    m_horizontal(make_float3(0.0f)),
-    m_vertical(make_float3(0.0f)),
-    m_lens_radius(0.0f),
-    m_time0(0.0f),
-    m_time1(0.0f)
-{
-  LOG_TRIVIAL(trace) << "move constructor";
-
-  m_origin = other.m_origin;
-  m_lower_left_corner = other.m_lower_left_corner;
-  m_horizontal = other.m_horizontal;
-  m_vertical = other.m_vertical;
-  m_lens_radius = other.m_lens_radius;
-  m_time0 = other.m_time0;
-  m_time1 = other.m_time1;
-}
-
-Camera& Camera::operator=(const Camera &&other)
-{
-  LOG_TRIVIAL(trace) << "move assignment operator";
-
-  if (this != &other) {
-    m_origin = other.m_origin;
-    m_lower_left_corner = other.m_lower_left_corner;
-    m_horizontal = other.m_horizontal;
-    m_vertical = other.m_vertical;
-    m_lens_radius = other.m_lens_radius;
-    m_time0 = other.m_time0;
-    m_time1 = other.m_time1;
-  }
-  return *this;
-}
 
 Camera::Camera(pt::ptree camera)
 {

@@ -7,9 +7,11 @@
 #include "StatusCodes.h"
 
 struct ProgramArgs {
-  std::string SceneFilePath;
-  std::string PictureFilePath;
-  int SampleCount;
+  std::string sceneFilePath;
+  std::string pictureFilePath;
+  int sampleCount;
+  int imageWidth;
+  int imageHeight;
   boost::log::trivial::severity_level logLevel;
   void Print();
 };
