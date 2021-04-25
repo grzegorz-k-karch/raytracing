@@ -1,16 +1,11 @@
 #include <boost/property_tree/xml_parser.hpp>
-#include <iostream>
 // for checking presense of required objects in the scene
 #include <set>
 #include <algorithm>
 #include <memory>
 
 #include "logging.h"
-#include "scene_parse.h"
-
-#include "GenericObject.h"
-#include "GenericMaterial.h"
-#include "Camera.cuh"
+#include "SceneRawObjects.h"
 
 namespace pt = boost::property_tree;
 
@@ -44,9 +39,8 @@ bool checkRequiredObjects(const pt::ptree &sceneTree)
   return cameraPresent && renderableObjectPresent;
 }
 
-void parseScene(const std::string filepath,
-                SceneRawObjects &sceneObjects,
-                StatusCodes &status) {
+void SceneRawObjects::parseScene(const std::string filepath,
+				 StatusCodes &status) {
   status = StatusCodes::NoError;
   // read XML file
   pt::ptree fileTree;
@@ -77,7 +71,7 @@ void parseScene(const std::string filepath,
     std::string objectType = it.first;
 
     if (objectType == "Camera") {
-      sceneObjects.setCamera(Camera(it.second));
+      setCamera(Camera(it.second));
     } else if (foundAny(objectType, renderableObjects)) {
       // before we store the object, get it's material - one of object's attributes
       pt::ptree::const_assoc_iterator material_it = it.second.find("material");
@@ -85,11 +79,11 @@ void parseScene(const std::string filepath,
 
       if (materialFound) {
         // we're good to go - store the object
-        sceneObjects.addObject(GenericObject(objectType, it.second));
+        addObject(GenericObject(objectType, it.second));
         pt::ptree material = material_it->second;
         std::string materialType = material.get<std::string>("<xmlattr>.value");
         // store object's material
-        sceneObjects.addMaterial(GenericMaterial(materialType, material));
+        addMaterial(GenericMaterial(materialType, material));
       } else {
         LOG_TRIVIAL(warning) << "No material found for an object of type " << objectType
                              << ". Skipping the object.";

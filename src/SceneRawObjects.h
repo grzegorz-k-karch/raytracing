@@ -14,6 +14,8 @@ public:
   // default constructor
   SceneRawObjects() {}
 
+  void parseScene(const std::string filepath, StatusCodes& status);
+
   void setCamera(const Camera& camera) {
     m_camera = std::move(camera);
   }

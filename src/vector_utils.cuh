@@ -11,77 +11,96 @@ float3 string2float3(const std::string& s);
 
 float2 string2float2(const std::string& s);
 
-inline float2 operator*(float b, float2 a)
+__host__ __device__ inline
+float2 operator*(float b, float2 a)
 {
     return make_float2(b * a.x, b * a.y);
 }
 
-inline float2 operator*(float2 a, float b)
+__host__ __device__ inline
+float2 operator*(float2 a, float b)
 {
     return make_float2(a.x * b, a.y * b);
 }
 
-
-__host__ __device__ inline float3 make_float3(float s)
+__host__ __device__ inline
+float3 make_float3(float s)
 {
     return make_float3(s, s, s);
 }
 
-inline float3 operator+(float3 a, float3 b)
+__host__ __device__ inline
+float3 operator+(float3 a, float3 b)
 {
     return make_float3(a.x + b.x, a.y + b.y, a.z + b.z);
 }
 
-inline void operator+=(float3 &a, float3 b)
+__host__ __device__ inline
+void operator+=(float3 &a, float3 b)
 {
     a.x += b.x;
     a.y += b.y;
     a.z += b.z;
 }
 
-__host__ __device__ inline float3 operator/(float3 a, float b)
+__host__ __device__ inline
+float3 operator/(float3 a, float b)
 {
     return make_float3(a.x / b, a.y / b, a.z / b);
 }
 
-inline void operator/=(float3 &a, float b)
+__host__ __device__ inline
+void operator/=(float3 &a, float b)
 {
     a.x /= b;
     a.y /= b;
     a.z /= b;
 }
 
-inline float3 operator-(float3 a, float3 b)
+__host__ __device__ inline
+float3 operator-(float3 a, float3 b)
 {
     return make_float3(a.x - b.x, a.y - b.y, a.z - b.z);
 }
 
-inline float3 operator-(float3 &a)
+__host__ __device__ inline
+float3 operator-(float3 &a)
 {
     return make_float3(-a.x, -a.y, -a.z);
 }
 
-inline float3 operator*(float b, float3 a)
+__host__ __device__ inline
+float3 operator*(float b, float3 a)
 {
     return make_float3(b * a.x, b * a.y, b * a.z);
 }
 
-inline float3 operator*(float3 a, float b)
+__host__ __device__ inline
+float3 operator*(float3 a, float b)
 {
     return make_float3(a.x * b, a.y * b, a.z * b);
 }
 
-inline float dot(float3 a, float3 b)
+__host__ __device__ inline
+float dot(float3 a, float3 b)
 {
     return a.x * b.x + a.y * b.y + a.z * b.z;
 }
 
-inline float length(float3 v)
+__host__ __device__ inline
+float squared_length(float3 v)
+{
+  return dot(v, v);
+}
+
+__host__ __device__ inline
+float length(float3 v)
 {
   return std::sqrt(dot(v, v));
 }
 
-inline float3 normalize(float3 v)
+__host__ __device__ inline
+float3 normalize(float3 v)
 {
   float len = length(v);
   if (len == 0.0f) {
@@ -90,7 +109,8 @@ inline float3 normalize(float3 v)
   return v/len;
 }
 
-inline float3 cross(float3 a, float3 b)
+__host__ __device__ inline
+float3 cross(float3 a, float3 b)
 {
   return make_float3(a.y*b.z - a.z*b.y,
 		     a.z*b.x - a.x*b.z,

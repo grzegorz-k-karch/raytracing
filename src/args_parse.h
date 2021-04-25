@@ -1,5 +1,5 @@
-#ifndef ARGUMENT_PARSER_H
-#define ARGUMENT_PARSER_H
+#ifndef ARGS_PARSE_H
+#define ARGS_PARSE_H
 
 #include <string>
 #include <boost/log/trivial.hpp>
@@ -13,15 +13,8 @@ struct ProgramArgs {
   int imageWidth;
   int imageHeight;
   boost::log::trivial::severity_level logLevel;
-  void Print();
 };
 
-// Parse arguments from command line
-// argc: in
-// argv: in
-// args: out
-void parseArgs(int argc, char** argv, ProgramArgs& args,
-	       StatusCodes& status);
+ProgramArgs parseArgs(int argc, char** argv, StatusCodes& status);
 
-
-#endif//ARGUMENT_PARSER_H
+#endif//ARGS_PARSE_H

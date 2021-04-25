@@ -1,30 +1,26 @@
 #include <iostream>
 
 #include "logging.h"
-#include "ArgumentParser.h"
+#include "args_parse.h"
 #include "StatusCodes.h"
-#include "scene_parse.h"
 #include "SceneRawObjects.h"
 #include "SceneDevice.cuh"
 #include "Renderer.cuh"
 #include "ImageSaver.h"
 
-#include <vector> // TODO delete
-
 int main(int argc, char** argv)
 {
-  StatusCodes status = StatusCodes::NoError;
+  StatusCodes status{StatusCodes::NoError};
 
   // parse command line arguments
-  ProgramArgs programArgs;
-  parseArgs(argc, argv, programArgs, status);
+  ProgramArgs args = parseArgs(argc, argv, status);
   exitIfError(status);
 
-  initLogger(programArgs.logLevel);
+  initLogger(args.logLevel);
 
   // get all objects into SceneRawObjects struct
   SceneRawObjects sceneRawObjects;
-  parseScene(programArgs.sceneFilePath, sceneRawObjects, status);
+  sceneRawObjects.parseScene(args.sceneFilePath, status);
   exitIfError(status);
 
   // construct scene on device using class hierarchy
@@ -33,8 +29,7 @@ int main(int argc, char** argv)
   sceneDevice.constructScene(sceneRawObjects, status);
   exitIfError(status);
 
-  Renderer renderer(programArgs.imageWidth, programArgs.imageHeight,
-		    programArgs.sampleCount);
+  Renderer renderer{args.imageWidth, args.imageHeight, args.sampleCount};
   // initialize random state and image buffer
   renderer.initBuffers(status);
   exitIfError(status);
@@ -47,10 +42,8 @@ int main(int argc, char** argv)
 
   ImageSaver imageSaver;
   // save the rendered image to file
-  imageSaver.saveImage(image, programArgs.imageWidth,
-		       programArgs.imageHeight,
-		       programArgs.pictureFilePath,
-		       status);
+  imageSaver.saveImage(image, args.imageWidth, args.imageHeight,
+		       args.pictureFilePath, status);
   exitIfError(status);
 
   return 0;

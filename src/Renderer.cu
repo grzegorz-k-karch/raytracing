@@ -18,8 +18,8 @@ void initRandState_kernel(int imageWidth, int imageHeight, curandState* randStat
 
 void Renderer::initRandState(StatusCodes &status)
 {
-  const int tx = 8;
-  const int ty = 8;
+  const int tx{8};
+  const int ty{8};
 
   dim3 numThreads(tx, ty);
   dim3 numBlocks((m_imageWidth + tx - 1)/tx,
@@ -69,15 +69,16 @@ void renderScene_kernel(Camera* camera, Object** world,
 
     int pixelIdx = pixelX + pixelY*imageWidth;
     curandState localRandState = randState[pixelIdx];
-    float3 color = make_float3(float(pixelIdx*2)/(imageWidth*imageHeight)); // make_float3(0.0f);
-    if (pixelY < 200)
-      color = make_float3(1.0f, 0.0f, 0.0f);
-    // for (int sample = 0; sample < sampleCount; sample++) {
-    //   float u = float(i + curand_uniform(&local_rand_state))/float(max_x);
-    //   float v = float(j + curand_uniform(&local_rand_state))/float(max_y);
-    //   Ray ray = camera->get_ray(u, v, &local_rand_state);
-    //   color += get_color(ray, *world, &local_rand_state);
-    // }
+    float3 color = make_float3(0.0f, 0.0f, 0.0f);
+    
+    for (int sample = 0; sample < sampleCount; sample++) {
+      float u = float(pixelX +
+		      curand_uniform(&localRandState))/float(imageWidth);
+      float v = float(pixelY +
+		      curand_uniform(&localRandState))/float(imageHeight);
+      Ray ray = camera->getRay(u, v, &localRandState);
+      // color += getColor(ray, *world, &localRandState);
+    }
     framebuffer[pixelIdx] = color/float(sampleCount);
   }
 }

@@ -4,49 +4,64 @@
 #include <string>
 #include <boost/program_options.hpp>
 
-#include "ArgumentParser.h"
+#include "args_parse.h"
 #include "StatusCodes.h"
 
 namespace po = boost::program_options;
 
-void parseArgsFromCmdLine(int argc, char** argv, ProgramArgs& args,
-			  StatusCodes& status)
+void add_generic_options(po::options_description& generic,
+			 std::string* configFilePath,
+			 std::string* logLevel)
 {
+  generic.add_options()
+    ("help,h", "Help screen")
+    ("config,c",
+     po::value<std::string>(configFilePath),
+     "Filename for the program config file")
+    ("log-level",
+     po::value<std::string>(logLevel)->default_value("info"),
+     "Logging level")
+    ;
+}
+
+void add_config_options(po::options_description& config,
+			ProgramArgs* args)
+{
+  config.add_options()
+    ("scene",
+     po::value<std::string>(&(args->sceneFilePath))->default_value(""),
+     "File with scene description")
+    ("num-samples,s",
+     po::value<int>(&(args->sampleCount))->default_value(64),
+     "Number of samples per pixel")
+    ("res-x,x",
+     po::value<int>(&(args->imageWidth))->default_value(600),
+     "Horizontal resolution")
+    ("res-y,y",
+     po::value<int>(&(args->imageHeight))->default_value(400),
+     "Vertical resolution")
+    ("output,o",
+     po::value<std::string>(&(args->pictureFilePath))->default_value(""),
+     "Filename for the output picture")
+    ;
+}
+
+ProgramArgs parseArgsFromCmdLine(int argc, char** argv,
+				 StatusCodes& status)
+{
+  ProgramArgs args;
+
   status = StatusCodes::NoError;
   std::string configFilePath;
   std::string logLevel;
   try {
     // add options for cmd line only
     po::options_description generic("Generic options");
-    generic.add_options()
-      ("help,h", "Help screen")
-      ("config,c",
-       po::value<std::string>(&configFilePath),
-       "Filename for the program config file")
-      ("log-level",
-       po::value<std::string>(&logLevel)->default_value("info"),
-       "Logging level")
-      ;
+    add_generic_options(generic, &configFilePath, &logLevel);
 
     // add options for both cmd line and config file
     po::options_description config("Configuration");
-    config.add_options()
-      ("scene",
-       po::value<std::string>(&args.sceneFilePath)->default_value(""),
-       "File with scene description")
-      ("num-samples,s",
-       po::value<int>(&args.sampleCount)->default_value(64),
-       "Number of samples per pixel")
-      ("res-x,x",
-       po::value<int>(&args.imageWidth)->default_value(600),
-       "Horizontal resolution")
-      ("res-y,y",
-       po::value<int>(&args.imageHeight)->default_value(400),
-       "Vertical resolution")
-      ("output,o",
-       po::value<std::string>(&args.pictureFilePath)->default_value(""),
-       "Filename for the output picture")
-      ;
+    add_config_options(config, &args);
 
     po::options_description cmdLineOptions;
     cmdLineOptions.add(generic).add(config);
@@ -80,7 +95,7 @@ void parseArgsFromCmdLine(int argc, char** argv, ProgramArgs& args,
       if (!ifs) {
 	BOOST_LOG_TRIVIAL(error) << "Cannot open config file: " << configFilePath;
 	status = StatusCodes::FileError;
-	return;
+	return args;
       }
       else {
 	po::store(po::parse_config_file(ifs, configFileOptions), vm);
@@ -100,18 +115,10 @@ void parseArgsFromCmdLine(int argc, char** argv, ProgramArgs& args,
     BOOST_LOG_TRIVIAL(error) << ex.what();
     status = StatusCodes::CmdLineError;
   }
+  return args;
 }
 
-void parseArgs(int argc, char** argv, ProgramArgs& args,
-	       StatusCodes& status)
+ProgramArgs parseArgs(int argc, char** argv, StatusCodes& status)
 {
-  parseArgsFromCmdLine(argc, argv, args, status);
-}
-
-void ProgramArgs::Print()
-{
-  std::cout << "ProgramArgs instance: " << std::endl
-	    << "\tscene description: " << sceneFilePath << std::endl
-	    << "\toutput picture:    " << pictureFilePath << std::endl
-	    << "\tnumber of samples: " << sampleCount << std::endl;
+  return parseArgsFromCmdLine(argc, argv, status);
 }
