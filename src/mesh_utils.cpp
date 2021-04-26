@@ -2,7 +2,7 @@
 #include <vector_functions.h>
 
 #include "mesh_utils.h"
-#include "vector_utils.h"
+#include "nvidia/helper_math.h"
 
 void setColor(const float3 defaultColor,
 	      std::vector<float3>& vertexColors)

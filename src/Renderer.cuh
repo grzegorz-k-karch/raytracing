@@ -14,11 +14,11 @@ public:
         m_sampleCount(sampleCount),
 	m_framebuffer(nullptr),
 	m_randState(nullptr) {
-    LOG_TRIVIAL(trace) << "Renderer constructor";
+    LOG_TRIVIAL(trace) << "Renderer::Renderer";
   }
 
   ~Renderer() {
-    LOG_TRIVIAL(trace) << "Renderer destructor";
+    LOG_TRIVIAL(trace) << "Renderer::~Renderer";
     if (m_framebuffer) {
       LOG_TRIVIAL(trace) << "\treleasing m_framebuffer";
       cudaFree(m_framebuffer);

@@ -6,8 +6,10 @@
 
 __global__
 void constructScene_kernel(const SceneRawObjectsDevice *sceneRawObjectsDevice,
-			   Object** world)
+			   Camera* camera, Object** world)
 {
+  *camera = *(sceneRawObjectsDevice->camera);
+  
   int numObjects = sceneRawObjectsDevice->numObjects;
   Object **objects = new Object*[numObjects];
 
@@ -39,7 +41,11 @@ void SceneDevice::constructScene(const SceneRawObjects& sceneRawObjects,
   if (status != StatusCodes::NoError) {
     return;
   }
-  constructScene_kernel<<<1,1>>>(d_sceneRawObjectsDevice, m_world);
+  status = CCE(cudaMalloc((void**)&m_camera, sizeof(Camera)));
+  if (status != StatusCodes::NoError) {
+    return;
+  }
+  constructScene_kernel<<<1,1>>>(d_sceneRawObjectsDevice, m_camera, m_world);
   status = CCE(cudaDeviceSynchronize());
   if (status != StatusCodes::NoError) {
     return;

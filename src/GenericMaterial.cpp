@@ -1,7 +1,7 @@
 #include "logging.h"
 #include "GenericMaterial.h"
-
-#include "vector_utils.h"
+#include "nvidia/helper_math.h"
+#include "vector_utils.cuh"
 
 GenericMaterial::GenericMaterial(const std::string materialType,
 				 const pt::ptree material)

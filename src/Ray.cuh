@@ -2,11 +2,19 @@
 #define RAY_CUH
 
 #include <curand_kernel.h>
-#include "vector_utils.h"
+#include "nvidia/helper_math.h"
+
+class Material;
+
+struct HitRecord {
+  float t; // time
+  float3 p; // position
+  float3 n; // normal at p
+  Material *material;
+};
 
 class Ray {
  public:
-  __device__ Ray() {}
   __device__ Ray(float3 origin,
 		 float3 direction,
 		 float timestamp=0.0f) :

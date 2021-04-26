@@ -1,7 +1,8 @@
 #include <string>
 
 #include "SphereLoader.h"
-#include "vector_utils.h"
+#include "nvidia/helper_math.h"
+#include "vector_utils.cuh"
 #include "logging.h"
 
 void SphereLoader::loadSphere(const pt::ptree object)

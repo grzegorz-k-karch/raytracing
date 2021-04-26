@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include "vector_utils.h"
+#include "nvidia/helper_math.h"
 #include "StatusCodes.h"
 
 class ImageSaver {

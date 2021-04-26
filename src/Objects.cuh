@@ -4,16 +4,11 @@
 class Material;
 
 
-struct HitRecord {
-  float t; // time
-  float3 p; // position
-  float3 n; // normal at p
-  Material *material;
-};
-
-
 class Object {
  public:
+  __device__ virtual
+  bool hit(const Ray& ray, float tMin,
+	   float tMax, HitRecord& hitRec) const = 0;
 };
 
 
@@ -22,7 +17,9 @@ class ObjectList: public Object {
   __device__ ObjectList(Object** objects, int num_objects) :
     objects(objects), num_objects(num_objects) {}
 
-//   __device__ virtual bool hit(const Ray& ray, float tMin, float tMax, HitRecord& hitRec) const;
+  __device__ virtual
+  bool hit(const Ray& ray, float tMin,
+	   float tMax, HitRecord& hitRec) const;
 //   __device__ virtual bool get_bbox(float t0, float t1, AABB& output_bbox) const;
 
   Object **objects;
@@ -76,6 +73,10 @@ public:
       triangleIndices(genObjDev->triangleIndices),
       numTriangleIndices(genObjDev->numTriangleIndices) {}
 
+  __device__ virtual
+  bool hit(const Ray& ray, float tMin,
+	   float tMax, HitRecord& hitRec) const;
+
   float3 *vertices;
   int    numVertices;
   float3 *vertexColors;
@@ -94,6 +95,10 @@ public:
     : center(genObjDev->vectors[0]),
       radius(genObjDev->scalars[0]) {}
   
+  __device__ virtual
+  bool hit(const Ray& ray, float tMin,
+	   float tMax, HitRecord& hitRec) const;
+
   float3 center;
   float radius;
 };

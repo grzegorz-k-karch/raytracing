@@ -1,5 +1,6 @@
 #include "logging.h"
 #include "Camera.cuh"
+#include "vector_utils.cuh"
 
 Camera::Camera(pt::ptree camera)
 {

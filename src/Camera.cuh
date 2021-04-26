@@ -4,6 +4,7 @@
 #include <boost/property_tree/xml_parser.hpp>
 #include <vector_types.h>
 #include <vector_functions.h>
+#include "vector_utils.cuh"
 
 #include "Ray.cuh"
 #include "StatusCodes.h"
@@ -14,6 +15,12 @@ class Camera {
 public:
   // default constructor
   Camera() = default;
+  // copy constructor
+  Camera(const Camera &other) {
+#if __CUDA_ARCH__ >= 200
+    printf("camera copy constructor\n");
+#endif
+  }
   // explicit constructor
   Camera(pt::ptree camera);
 
@@ -24,9 +31,10 @@ public:
 
   void copyToDevice(Camera *cameraDevice, StatusCodes &status) const;
 
-  __device__ Ray getRay(float s, float t, curandState* localRandState) const {
-    float3 rd = m_lensRadius*randomInUnitDisk(localRandState);
-    float3 offset = m_u*rd.x + m_v*rd.y;
+  __device__
+  Ray getRay(float s, float t, curandState* localRandState) const {
+    float3 randomInLensDisk = m_lensRadius*randomInUnitDisk(localRandState);
+    float3 offset = m_u*randomInLensDisk.x + m_v*randomInLensDisk.y;
     float timestamp = m_time0 + curand_uniform(localRandState)*(m_time1 - m_time0);
     return Ray(m_origin + offset, m_lowerLeftCorner +
 	       s*m_horizontal + t*m_vertical - m_origin - offset,
@@ -34,7 +42,6 @@ public:
   }
 
 private:
-  __device__ float3 randomInUnitDisk(curandState* localRandState) const;
 
   float3 m_origin;
   float3 m_lowerLeftCorner;

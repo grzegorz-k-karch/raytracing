@@ -1,4 +1,4 @@
-#include "vector_utils.h"
+#include "vector_utils.cuh"
 
 float3 string2float3(const std::string& s)
 {

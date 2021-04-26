@@ -16,6 +16,8 @@ target_compile_features(raytracing-cuda PUBLIC cxx_std_14)
 
 target_include_directories(raytracing-cuda PRIVATE "/usr/local/cuda/include")
 
+# nvidia sdk
+target_include_directories(raytracing-cuda PRIVATE ${CMAKE_SOURCE_DIR}/src/external/)
 # ply_io
 target_include_directories(raytracing-cuda PRIVATE ${CMAKE_SOURCE_DIR}/src/external/ply_io/include)
 target_link_directories(raytracing-cuda PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src/external/ply_io/build)
