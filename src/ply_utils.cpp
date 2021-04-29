@@ -117,7 +117,7 @@ void loadPlyObject(const char* filepath,
       for (int vertex_idx = 0; vertex_idx < nelems; vertex_idx++) {
 	vertex_t vertex;
 	ply_get_element(ply, (void*)&vertex);
-	vertices.push_back(make_float3(vertex.x, vertex.y, vertex.z));
+	vertices.push_back(make_float3(vertex.x*40.0f, vertex.y*40.0f, vertex.z*40.0f));
 	bool colors_present = vert_props_present[3] != 0 &&
 	  vert_props_present[4] != 0 &&
 	  vert_props_present[5] != 0;

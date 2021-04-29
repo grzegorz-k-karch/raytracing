@@ -14,11 +14,11 @@ bool checkIfPlyFile(const std::string& filepath)
   std::ifstream file(filepath, std::ios::in);
   bool headerIsPly = false;
   if (file.is_open() && file.good()) {
-    
+
     std::string line;
     while (std::getline(file, line)) {
       if (!line.empty()) {
-	
+
   	headerIsPly = line.compare("ply") == 0;
   	if (headerIsPly) {
   	  break;
@@ -33,7 +33,7 @@ void MeshLoader::loadMesh(const pt::ptree object)
 {
   std::string filepath = object.get<std::string>("source.<xmlattr>.value");
   LOG_TRIVIAL(debug) << "Mesh filepath: " << filepath;
-  
+
   bool fileIsPly = checkIfPlyFile(filepath);
   LOG_TRIVIAL(debug) << "File is PLY: " << fileIsPly;
   if (fileIsPly) {
@@ -42,10 +42,25 @@ void MeshLoader::loadMesh(const pt::ptree object)
 		  m_vertexNormals, m_triangleIndices);
     LOG_TRIVIAL(debug) << "Num vertices: " << m_vertices.size()
 		       << " num colors: " << m_vertexColors.size()
-		       << " num normals: " << m_vertexNormals.size()      
+		       << " num normals: " << m_vertexNormals.size()
 		       << " num indices: " << m_triangleIndices.size();
   }
-  
+
+  float3 bmax = m_vertices[0];
+  float3 bmin = m_vertices[0];
+  for (auto& v : m_vertices) {
+    if (v.x < bmin.x) bmin.x = v.x;
+    if (v.y < bmin.y) bmin.y = v.y;
+    if (v.z < bmin.z) bmin.z = v.z;
+    if (bmax.x < v.x) bmax.x = v.x;
+    if (bmax.y < v.y) bmax.y = v.y;
+    if (bmax.z < v.z) bmax.z = v.z;
+  }
+
+  LOG_TRIVIAL(debug) << "BBox: ("
+		     << bmin.x << ", " << bmin.y << ", " << bmin.z << ") - ("
+		     << bmax.x << ", " << bmax.y << ", " << bmax.z << ")";
+
   mergeVertices(m_triangleIndices, m_vertices);
   LOG_TRIVIAL(debug) << "After mergeVertices: num vertices: " << m_vertices.size()
 		     << " num indices: " << m_triangleIndices.size();
@@ -62,5 +77,5 @@ void MeshLoader::loadMesh(const pt::ptree object)
     // computeNormals resizes and sets the default value of m_vertexNormals
     computeNormals(m_vertices, m_triangleIndices, m_vertexNormals);
   }
-  LOG_TRIVIAL(debug) << "After computeNormals: num normals: " << m_vertexNormals.size();  
+  LOG_TRIVIAL(debug) << "After computeNormals: num normals: " << m_vertexNormals.size();
 }

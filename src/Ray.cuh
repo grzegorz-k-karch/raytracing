@@ -10,20 +10,17 @@ struct HitRecord {
   float t; // time
   float3 p; // position
   float3 n; // normal at p
-  Material *material;
+  const Material *material;
 };
 
 class Ray {
- public:
-  __device__ Ray(float3 origin,
-		 float3 direction,
-		 float timestamp=0.0f) :
-    m_origin(origin),
-    m_direction(direction),
-    m_timestamp(timestamp) {}
+public:
+  __device__ Ray() {}
+  __device__ Ray(float3 origin, float3 direction, float timestamp = 0.0f)
+    : m_origin(origin), m_direction(direction), m_timestamp(timestamp) {}
 
   __device__ float3 pointAtT(float t) const {
-    return m_origin + t*m_direction;
+    return m_origin + t * m_direction;
   }
 
   float3 m_origin;

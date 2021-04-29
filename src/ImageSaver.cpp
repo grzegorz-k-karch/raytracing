@@ -1,6 +1,9 @@
 #include "ImageSaver.h"
 #include <fstream>
 #include <cmath>
+#include <algorithm>
+#include <climits>
+#include <iostream>
 
 void ImageSaver::saveImage(const std::vector<float3>& image,
 			   int imageWidth, int imageHeight,
@@ -22,8 +25,11 @@ void ImageSaver::saveImage(const std::vector<float3>& image,
 			  std::sqrt(color.z));
       
       int ir = int(255.99f*color.x);
+      ir = std::clamp(ir, 0, UCHAR_MAX);
       int ig = int(255.99f*color.y);
+      ig = std::clamp(ig, 0, UCHAR_MAX);
       int ib = int(255.99f*color.z);
+      ib = std::clamp(ib, 0, UCHAR_MAX);
       
       fs << ir << " " << ig << " " << ib << "\n";
     }

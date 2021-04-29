@@ -1,6 +1,9 @@
 #ifndef OBJECTS_CUH
 #define OBJECTS_CUH
 
+#include "Ray.cuh"
+#include "GenericObjectDevice.cuh"
+
 class Material;
 
 
@@ -71,7 +74,8 @@ public:
       vertexNormals(genObjDev->vertexNormals),
       numVertexNormals(genObjDev->numVertexNormals),
       triangleIndices(genObjDev->triangleIndices),
-      numTriangleIndices(genObjDev->numTriangleIndices) {}
+      numTriangleIndices(genObjDev->numTriangleIndices),
+      m_material(mat) {}
 
   __device__ virtual
   bool hit(const Ray& ray, float tMin,
@@ -85,6 +89,14 @@ public:
   int    numVertexNormals;
   int *triangleIndices;
   int numTriangleIndices;
+  const Material *m_material;
+
+private:
+  __device__
+  float3 normalAtP(float3 point,
+		   float3 vert0,
+		   float3 vert1,
+		   float3 vert2) const;
 };
 
 
@@ -92,15 +104,21 @@ class Sphere : public Object {
 public:
   __device__ Sphere(const GenericObjectDevice* genObjDev,
 		    const Material* mat)
-    : center(genObjDev->vectors[0]),
-      radius(genObjDev->scalars[0]) {}
+    : m_center(genObjDev->vectors[0]),
+      m_radius(genObjDev->scalars[0]),
+      m_material(mat) {}
   
   __device__ virtual
   bool hit(const Ray& ray, float tMin,
 	   float tMax, HitRecord& hitRec) const;
 
-  float3 center;
-  float radius;
+  float3 m_center;
+  float m_radius;
+  const Material *m_material;
+
+private:
+  __device__
+  float3 normalAtP(float3 point) const;
 };
 
 #endif//OBJECTS_CUH

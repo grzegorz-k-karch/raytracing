@@ -68,26 +68,26 @@ __device__ float3 getBackgroundColor(const Ray& ray)
 __device__ float3 getColor(const Ray& ray, Object* world,
 			   curandState* localRandState)
 {
-  // hit_record hrec;
+  HitRecord hitRec;
   float3 color;
   Ray inRay = ray;
   float3 attenuationTotal = make_float3(1.0f, 1.0f, 1.0f);
 
-  // for (int i = 0; i < 50; i++) {
-  //   if (world->hit(in_ray, 0.001f, GKK_FLOAT_MAX, hrec)) {
-  //     float3 attenuation;
-  //     Ray scattered;
-  //     if (hrec.material->scatter(inRay, hrec, attenuation,
-  // 				 scattered, localRandState)) {
-  //   	attenuationTotal *= attenuation;
-  //   	inRay = scattered;
-  //     }
-  //   }
-  //   else {
+  for (int i = 0; i < 50; i++) {
+    if (world->hit(inRay, 0.001f, GKK_FLOAT_MAX, hitRec)) {
+      float3 attenuation;
+      Ray scattered;
+      if (hitRec.material->scatter(inRay, hitRec, attenuation,
+      				   scattered, localRandState)) {
+      	attenuationTotal *= attenuation;
+      	inRay = scattered;
+      }
+    }
+    else {
       color = getBackgroundColor(inRay);
-  //     break;
-  //   }
-  // }
+      break;
+    }
+  }
 
   color *= attenuationTotal;
 
