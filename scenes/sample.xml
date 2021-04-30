@@ -15,9 +15,11 @@
   <Mesh>
     <source value="../models/bunny.ply"/>
     <material value="Metal">
-      <albedo value="0.7 0.7 0.7"/>
+      <albedo value="0.0 0.7 0.7"/>
       <fuzz value="0.1"/>
     </material>
+    <world_pos value="-6.0 0.0 -1.0"/>
+    <scale value=""/>
   </Mesh>
 
   <Sphere>
