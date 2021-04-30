@@ -13,10 +13,10 @@
   </Camera>
 
   <Mesh>
-    <source value="../models/bunny_small.ply"/>
+    <source value="../models/bunny.ply"/>
     <material value="Metal">
-      <albedo value="0.8 0.2 0.5"/>
-      <fuzz value="0.1"/>      
+      <albedo value="0.7 0.7 0.7"/>
+      <fuzz value="0.1"/>
     </material>
   </Mesh>
 

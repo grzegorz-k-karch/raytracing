@@ -128,8 +128,6 @@ bool Mesh::hit(const Ray& ray, float tMin, float tMax, HitRecord& hitRec) const
     if (isect) {
       if (t_tmp < t) {
 	t = t_tmp;
-	// u = u_tmp;
-	// v = v_tmp;
 	tidx = triangleIdx;
       }
     }

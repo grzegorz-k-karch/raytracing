@@ -49,12 +49,24 @@ void MeshLoader::loadMesh(const pt::ptree object)
   float3 bmax = m_vertices[0];
   float3 bmin = m_vertices[0];
   for (auto& v : m_vertices) {
-    if (v.x < bmin.x) bmin.x = v.x;
-    if (v.y < bmin.y) bmin.y = v.y;
-    if (v.z < bmin.z) bmin.z = v.z;
-    if (bmax.x < v.x) bmax.x = v.x;
-    if (bmax.y < v.y) bmax.y = v.y;
-    if (bmax.z < v.z) bmax.z = v.z;
+    if (v.x < bmin.x) {
+      bmin.x = v.x;
+    }
+    if (v.y < bmin.y) {
+      bmin.y = v.y;
+    }
+    if (v.z < bmin.z) {
+      bmin.z = v.z;
+    }
+    if (bmax.x < v.x) {
+      bmax.x = v.x;
+    }
+    if (bmax.y < v.y) {
+      bmax.y = v.y;
+    }
+    if (bmax.z < v.z) {
+      bmax.z = v.z;
+    }
   }
 
   LOG_TRIVIAL(debug) << "BBox: ("
@@ -67,8 +79,9 @@ void MeshLoader::loadMesh(const pt::ptree object)
   // check if vertex colors and normals were loaded
   //   if no colors - set a default color white
   if (m_vertexColors.empty()) {
+    
     m_vertexColors.resize(m_vertices.size());
-    float3 default_color = make_float3(1.0f, 1.0f, 1.0f);
+    float3 default_color = make_float3(0.0f, 0.4f, 0.8f);
     setColor(default_color, m_vertexColors);
   }
   LOG_TRIVIAL(debug) << "After setColor: num colors: " << m_vertexColors.size();

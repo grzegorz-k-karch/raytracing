@@ -17,8 +17,11 @@ __device__ bool Metal::scatter(const Ray& inRay, const HitRecord& hitRec,
 			       curandState* localRandState) const
 {
   float3 reflected = reflect(normalize(inRay.m_direction), hitRec.n);
+  if (dot(reflected, hitRec.n) < 0.0f) {
+    reflected = -1.0f*reflected;
+  }
   outRays = Ray(hitRec.p, reflected +
-		 m_fuzz*randomInUnitSphere(localRandState), inRay.m_timestamp);
+		m_fuzz*randomInUnitSphere(localRandState), inRay.m_timestamp);
   attenuation = m_albedo;
   return (dot(outRays.m_direction, hitRec.n) > 0.0f);
 }
