@@ -31,6 +31,7 @@ public:
 private:
   void parseLambertian(const pt::ptree material);
   void parseMetal(const pt::ptree material);
+  void parseDielectric(const pt::ptree material);  
 
   MaterialType m_materialType;
   std::vector<float> m_scalars;

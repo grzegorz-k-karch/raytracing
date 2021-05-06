@@ -14,6 +14,10 @@ GenericMaterial::GenericMaterial(const std::string materialType,
     m_materialType = MaterialType::Metal;
     parseMetal(material);
   }
+  else if (materialType  == "Dielectric") {
+    m_materialType = MaterialType::Dielectric;
+    parseDielectric(material);
+  }
 }
 
 GenericMaterial::GenericMaterial(GenericMaterial&& other) noexcept :
@@ -23,11 +27,13 @@ GenericMaterial::GenericMaterial(GenericMaterial&& other) noexcept :
 {
 }
 
+
 void GenericMaterial::parseLambertian(const pt::ptree material)
 {
   float3 albedo = string2float3(material.get<std::string>("albedo.<xmlattr>.value"));
   m_vectors = {albedo};
 }
+
 
 void GenericMaterial::parseMetal(const pt::ptree material)
 {
@@ -36,3 +42,11 @@ void GenericMaterial::parseMetal(const pt::ptree material)
   float fuzz = material.get<float>("fuzz.<xmlattr>.value");
   m_scalars = {fuzz};
 }
+
+
+void GenericMaterial::parseDielectric(const pt::ptree material)
+{
+  float refIdx = material.get<float>("ref_idx.<xmlattr>.value");
+  m_scalars = {refIdx};
+}
+

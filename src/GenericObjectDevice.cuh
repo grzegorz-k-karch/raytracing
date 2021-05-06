@@ -1,6 +1,8 @@
 #ifndef GENERIC_OBJECT_DEVICE_H
 #define GENERIC_OBJECT_DEVICE_H
 
+#include "AABB.cuh"
+
 enum class ObjectType { None, Mesh, Sphere };
 
 struct GenericObjectDevice {
@@ -35,6 +37,9 @@ struct GenericObjectDevice {
   }
 
   ObjectType objectType;
+
+  float3 bmin;
+  float3 bmax;
 
   // sphere members
   float *scalars;

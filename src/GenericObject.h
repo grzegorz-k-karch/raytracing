@@ -7,6 +7,7 @@
 
 #include "logging.h"
 #include "StatusCodes.h"
+#include "AABB.cuh"
 #include "GenericObjectDevice.cuh"
 
 namespace pt = boost::property_tree;
@@ -35,6 +36,9 @@ private:
   void parseSphere(const pt::ptree object);
 
   ObjectType m_objectType;
+
+  AABB m_bbox;
+  
   // sphere members
   std::vector<float> m_scalars;
   std::vector<float3> m_vectors;

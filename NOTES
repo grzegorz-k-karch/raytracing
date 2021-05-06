@@ -72,3 +72,15 @@ pass the objects to device
 
 render scene
   create world object as a composite and iterate through it's elements
+
+
+------------------------------------------------------------------------------
+include hierarchy
+------------------------------------------------------------------------------
+inc std headers
+inc boost headers
+inc cuda headers
+
+inc external headers
+inc project headers
+int own header

@@ -128,7 +128,7 @@ void Renderer::renderScene(const SceneDevice &sceneDevice, StatusCodes &status)
   dim3 numThreads(tx, ty);
   dim3 numBlocks((m_imageWidth + tx - 1)/tx,
 		 (m_imageHeight + ty - 1)/ty);
-  
+
   renderScene_kernel<<<numBlocks, numThreads>>>(sceneDevice.m_camera,
 						sceneDevice.m_world,
 						m_randState, m_imageWidth,

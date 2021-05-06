@@ -3,13 +3,14 @@
 
 #include <vector>
 #include <vector_types.h>
-
-#include "ply_io.h"
+#include <string>
 
 typedef struct {
   unsigned char nindices;
   int *indices;
 } polygon_t;
+
+bool checkIfPlyFile(const std::string& filepath);
 
 void loadPlyObject(const char* filepath,
 		   std::vector<float3>& vertices,

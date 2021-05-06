@@ -23,6 +23,30 @@ public:
     return m_origin + t * m_direction;
   }
 
+  __device__ __inline__ float direction(int d) const {
+    if (d == 0) {
+      return m_direction.x;
+    }
+    else if (d == 1) {
+      return m_direction.y;
+    }
+    else {
+      return m_direction.z;
+    }
+  }
+
+  __device__ __inline__ float origin(int d) const {
+    if (d == 0) {
+      return m_origin.x;
+    }
+    else if (d == 1) {
+      return m_origin.y;
+    }
+    else {
+      return m_origin.z;
+    }
+  }
+
   float3 m_origin;
   float3 m_direction;
   float m_timestamp;

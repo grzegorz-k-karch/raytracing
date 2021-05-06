@@ -5,12 +5,18 @@
 #include <boost/property_tree/xml_parser.hpp>
 #include <vector_types.h>
 
+#include "AABB.cuh"
+
 namespace pt = boost::property_tree;
 
 class SphereLoader {
 public:
   SphereLoader() {}
   void loadSphere(const pt::ptree object);
+
+  AABB getBBox() {
+    return m_bbox;
+  }
 
   std::vector<float>&& getScalars() {
     return std::move(m_scalars);    
@@ -20,6 +26,7 @@ public:
   }  
 
 private:
+  AABB m_bbox;
   std::vector<float3> m_vectors;
   std::vector<float> m_scalars;
 };

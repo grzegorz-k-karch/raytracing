@@ -20,6 +20,28 @@ bool ObjectList::hit(const Ray& ray, float tMin, float tMax, HitRecord& hitRec) 
 
 
 __device__
+bool ObjectList::getBBox(float tMin, float tMax, AABB& outBBox) const
+{
+  if (objects == nullptr) {
+    return false;
+  }
+  bool hasBBox = false;
+  if (!bboxComputed) {
+    AABB objBBox;
+    bool firstBBox = true;
+    for (int i = 0; i < num_objects; i++) {
+      if (objects[i]->getBBox(tMin, tMax, objBBox)) {
+	outBBox = firstBBox ? objBBox : surroundingBBox(outBBox, objBBox);
+        firstBBox = false;
+	hasBBox = true;
+      }
+    }
+  }
+  return hasBBox;  
+}
+
+
+__device__
 float3 Mesh::normalAtP(float3 point,
 		       const float3 vert0,
 		       const float3 vert1,
@@ -102,6 +124,9 @@ __device__ int intersectTriangle(float3 orig, float3 dir,
 __device__
 bool Mesh::hit(const Ray& ray, float tMin, float tMax, HitRecord& hitRec) const
 {
+  if (m_bbox.hit(ray, tMin, tMax)) {
+    return false;
+  }
   // float u, v;
   float t = 3.402823e+38;
   // int isect = 0;
@@ -161,6 +186,9 @@ float3 Sphere::normalAtP(float3 point) const
 __device__
 bool Sphere::hit(const Ray& ray, float tMin, float tMax, HitRecord& hitRec) const
 {
+  if (m_bbox.hit(ray, tMin, tMax)) {
+    return false;
+  }
   float3 oc = ray.m_origin - m_center;
   float3 d = ray.m_direction;
   // computing discriminant for ray-sphere intersection

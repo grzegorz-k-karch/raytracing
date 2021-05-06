@@ -13,6 +13,9 @@ void SphereLoader::loadSphere(const pt::ptree object)
   float radius = object.get<float>("radius.<xmlattr>.value");
   m_scalars = {radius};
 
+  m_bbox = AABB(center - make_float3(radius),
+		center + make_float3(radius));
+
   LOG_TRIVIAL(debug)
     << "Sphere center: (" << center.x << "," << center.y << "," << center.z << ")";
   LOG_TRIVIAL(debug) << "Sphere radius: " << radius;

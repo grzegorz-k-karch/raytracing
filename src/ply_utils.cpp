@@ -1,11 +1,32 @@
+#include <fstream>
+#include <string>
 #include <vector_types.h>
 #include <vector_functions.h>
-#include <string>
 
 #include "ply_io.h"
-
-#include "ply_utils.h"
 #include "logging.h"
+#include "ply_utils.h"
+// CHECK DONE headers follow rules in NOTES
+
+bool checkIfPlyFile(const std::string& filepath)
+{
+  std::ifstream file(filepath, std::ios::in);
+  bool headerIsPly = false;
+  if (file.is_open() && file.good()) {
+
+    std::string line;
+    while (std::getline(file, line)) {
+      if (!line.empty()) {
+
+  	headerIsPly = line.compare("ply") == 0;
+  	if (headerIsPly) {
+  	  break;
+  	}
+      }
+    }
+  }
+  return headerIsPly;
+}
 
 
 PlyFile* loadPlyFile(const char* filepath)
@@ -117,7 +138,7 @@ void loadPlyObject(const char* filepath,
       for (int vertex_idx = 0; vertex_idx < nelems; vertex_idx++) {
 	vertex_t vertex;
 	ply_get_element(ply, (void*)&vertex);
-	vertices.push_back(make_float3(vertex.x*40.0f, vertex.y*40.0f, vertex.z*40.0f));
+	vertices.push_back(make_float3(vertex.x, vertex.y, vertex.z));
 	bool colors_present = vert_props_present[3] != 0 &&
 	  vert_props_present[4] != 0 &&
 	  vert_props_present[5] != 0;
