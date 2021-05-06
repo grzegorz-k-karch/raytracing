@@ -17,35 +17,16 @@ namespace pt = boost::property_tree;
 class MeshLoader {
  public:
   MeshLoader(const pt::ptree object);
-  void loadMesh();
-
-  AABB getBBox() {
-    return m_bbox;
-  }
-
-  std::vector<float3>&& getVertices() {
-    return std::move(m_vertices);
-  }
-  std::vector<float3>&& getVertexColors() {
-    return std::move(m_vertexColors);
-  }
-  std::vector<float3>&& getVertexNormals() {
-    return std::move(m_vertexNormals);
-  }
-  std::vector<int>&& getTriangleIndices() {
-    return std::move(m_triangleIndices);
-  }
+  void loadMesh(AABB& bbox,
+		std::vector<float3>& vertices,
+		std::vector<float3>& vertexColors,
+		std::vector<float3>& vertexNormals,
+		std::vector<int>& triangleIndices) const;
   
 private:
   std::string m_meshFilepath;
   float3 m_worldPos;
   float3 m_scale;
-  AABB m_bbox;
-
-  std::vector<float3> m_vertices;
-  std::vector<float3> m_vertexColors;
-  std::vector<float3> m_vertexNormals;
-  std::vector<int>    m_triangleIndices;
 };
 
 #endif//MESH_LOADER_H
