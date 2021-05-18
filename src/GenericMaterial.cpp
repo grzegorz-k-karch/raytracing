@@ -18,6 +18,10 @@ GenericMaterial::GenericMaterial(const std::string materialType,
     m_materialType = MaterialType::Dielectric;
     parseDielectric(material);
   }
+  else if (materialType  == "Parametric") {
+    m_materialType = MaterialType::Parametric;
+    parseParametric(material);
+  }
 }
 
 GenericMaterial::GenericMaterial(GenericMaterial&& other) noexcept :
@@ -25,6 +29,7 @@ GenericMaterial::GenericMaterial(GenericMaterial&& other) noexcept :
   m_scalars(other.m_scalars),
   m_vectors(other.m_vectors)
 {
+  LOG_TRIVIAL(trace) << "GenericMaterial copy constructor";  
 }
 
 
@@ -48,5 +53,10 @@ void GenericMaterial::parseDielectric(const pt::ptree material)
 {
   float refIdx = material.get<float>("ref_idx.<xmlattr>.value");
   m_scalars = {refIdx};
+}
+
+void GenericMaterial::parseParametric(const pt::ptree material)
+{
+  m_scalars = {0.0f};
 }
 

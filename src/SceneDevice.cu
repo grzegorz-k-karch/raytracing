@@ -1,15 +1,17 @@
+#include <assert.h>
+
 #include "logging.h"
 #include "cuda_utils.cuh"
+#include "Objects.cuh"
 #include "SceneDevice.cuh"
 
-#include <assert.h>
 
 __global__
 void constructScene_kernel(const SceneRawObjectsDevice *sceneRawObjectsDevice,
 			   Camera* camera, Object** world)
 {
   *camera = *(sceneRawObjectsDevice->camera);
-  
+
   int numObjects = sceneRawObjectsDevice->numObjects;
   Object **objects = new Object*[numObjects];
 
@@ -18,11 +20,11 @@ void constructScene_kernel(const SceneRawObjectsDevice *sceneRawObjectsDevice,
       &(sceneRawObjectsDevice->materials[objIdx]);
     Material *material = MaterialFactory::createMaterial(genMatDev);
     GenericObjectDevice *genObjDev =
-      &(sceneRawObjectsDevice->objects[objIdx]);    
+      &(sceneRawObjectsDevice->objects[objIdx]);
     objects[objIdx] = ObjectFactory::createObject(genObjDev, material);
   }
-  
-  *world = new ObjectList(objects, numObjects);
+
+  *world = createBVH(objects, numObjects);
 }
 
 void SceneDevice::constructScene(const SceneRawObjects& sceneRawObjects,
@@ -35,7 +37,7 @@ void SceneDevice::constructScene(const SceneRawObjects& sceneRawObjects,
   if (status != StatusCodes::NoError) {
     return;
   }
-  
+
   // construct the scene on device
   status = CCE(cudaMalloc((void**)&m_world, sizeof(Object*)));
   if (status != StatusCodes::NoError) {

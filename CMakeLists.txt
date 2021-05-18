@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.7.1)
 project(raytracing LANGUAGES CXX CUDA)
 
 find_package(Boost 1.71 REQUIRED COMPONENTS log_setup log)
+find_package(PNGwriter 0.7.0)
 
 file(GLOB_RECURSE CU_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cu)
 file(GLOB CPP_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
@@ -26,4 +27,9 @@ target_link_libraries(raytracing-cuda
   boost_program_options
   ${Boost_LIBRARIES}
   ply_io
+  PNGwriter::PNGwriter
 )
+
+# if(PNGwriter_FOUND)
+#   target_link_libraries(raytracing-cuda PRIVATE PNGwriter::PNGwriter)
+# endif(PNGwriter_FOUND)

@@ -1,0 +1,3 @@
+[submodule "src/external/pngwriter"]
+	path = src/external/pngwriter
+	url = git@github.com:pngwriter/pngwriter.git

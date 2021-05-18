@@ -5,7 +5,7 @@
 
 // #include "cuda_utils.cuh"
 
-enum class MaterialType { None, Lambertian, Metal, Dielectric };
+enum class MaterialType { None, Lambertian, Metal, Dielectric, Parametric };
 
 struct GenericMaterialDevice {
 
@@ -32,6 +32,13 @@ struct GenericMaterialDevice {
     // if (vectors != nullptr) {
     //   CCE(cudaFree(vectors));
     // }    
+  }
+
+  __device__ void print() const {
+#if __CUDA_ARCH__ >= 200
+    printf("GenericMaterialDevice::print() %d %p %d %p\n",
+	   numScalars, scalars, numVectors, vectors);
+#endif    
   }
 
   MaterialType materialType;

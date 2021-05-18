@@ -17,6 +17,7 @@ GenericObject::GenericObject(const std::string objectType, const pt::ptree objec
 
 GenericObject::GenericObject(GenericObject&& other) noexcept :
   m_objectType(other.m_objectType),
+  m_bbox(other.m_bbox),
   m_scalars(other.m_scalars),
   m_vectors(other.m_vectors),
   m_vertices(other.m_vertices),
@@ -24,6 +25,7 @@ GenericObject::GenericObject(GenericObject&& other) noexcept :
   m_vertexNormals(other.m_vertexNormals),
   m_triangleIndices(other.m_triangleIndices)
 {
+  LOG_TRIVIAL(trace) << "GenericObject copy constructor";
 }
 
 void GenericObject::parseMesh(const pt::ptree object)

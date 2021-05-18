@@ -1,4 +1,18 @@
-TODO - resolve object creation before diving into this project
+------------------------------------------------------------------------------
+TODO:
+------------------------------------------------------------------------------
+ - mesh attribute - whether normal is face normal or normal interpolated from vertices
+ - material parametric - attribute to control how it's parametrized (normal, color)
+ - light sources
+ - bvh
+ - textures
+ - ray depth
+ - memory management
+ - volume rendering
+ - member variables - add missing m_
+------------------------------------------------------------------------------
+
+DONE - resolve object creation before diving into this project
 problem definition:
   - I want to gain experience in writing raytracers that render images on GPUs, and in writing good code, based on the knowledge I gained from the book "Code Complete" by Steve McConnell. Since I know CUDA, I'll start with this technology. Clean and well-thought code has priority over optimizations.
  

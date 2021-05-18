@@ -20,7 +20,7 @@ bool ObjectList::hit(const Ray& ray, float tMin, float tMax, HitRecord& hitRec) 
 
 
 __device__
-bool ObjectList::getBBox(float tMin, float tMax, AABB& outBBox) const
+bool ObjectList::getBBox(AABB& outBBox) const
 {
   if (objects == nullptr) {
     return false;
@@ -30,26 +30,140 @@ bool ObjectList::getBBox(float tMin, float tMax, AABB& outBBox) const
     AABB objBBox;
     bool firstBBox = true;
     for (int i = 0; i < num_objects; i++) {
-      if (objects[i]->getBBox(tMin, tMax, objBBox)) {
-	outBBox = firstBBox ? objBBox : surroundingBBox(outBBox, objBBox);
+      if (objects[i]->getBBox(objBBox)) {
+  	outBBox = firstBBox ? objBBox : surroundingBBox(outBBox, objBBox);
         firstBBox = false;
-	hasBBox = true;
+  	hasBBox = true;
       }
     }
   }
-  return hasBBox;  
+  return hasBBox;
+}
+
+
+// __device__
+// void mergeObjects(Object** objects, int start, int mid, int end, int axis)
+// {
+//   int numLeft = mid - start + 1;
+//   int numRight = end - mid;
+
+//   Object **objectsLeft = new Object*[numLeft];
+//   Object **objectsRight = new Object*[numRight];
+
+//   for (int i = 0; i < numLeft; i++) {
+//     objectsLeft[i] = objects[start+i];
+//   }
+//   for (int i = 0; i < numRight; i++) {
+//     objectsRight[i] = objects[mid+1+i];
+//   }
+
+//   int leftIdx = 0;
+//   int rightIdx = 0;
+
+//   int resultIdx = start;
+
+//   while (leftIdx < numLeft && rightIdx < numRight) {
+//     if (compareBBoxes(objectsLeft[leftIdx], objectsRight[rightIdx], axis)) {
+//       objects[resultIdx] = objectsLeft[leftIdx];
+//       leftIdx++;
+//     }
+//     else {
+//       objects[resultIdx] = objectsRight[rightIdx];
+//       rightIdx++;
+//     }
+//     resultIdx++;
+//   }
+
+//   delete [] objectsLeft;
+//   delete [] objectsRight;
+// }
+
+// __device__
+// void sortObjects(Object** objects, int start, int end, int axis)
+// {
+//   if (start < end) {
+//     int mid = start + (end - start)/2;
+//     sortObjects(objects, start, mid, axis);
+//     sortObjects(objects, mid+1, end, axis);
+//     mergeObjects(objects, start, mid, end, axis);
+//   }
+// }
+
+
+// __device__
+// BVHNode::BVHNode(Object** objects, int start, int end, curandState* randState)
+// {
+//   int axis = int(ceilf(curand_uniform(randState)*3.0f) - 1.0f); //  (0:1](1:2](2:3])
+//   int objectSpan = end - start;
+
+//   if (objectSpan == 1) {
+//     m_left = m_right = objects[start];
+//   }
+//   else if (objectSpan == 2) {
+//     if (compareBBoxes(objects[start], objects[start + 1], axis)) {
+//       m_left = objects[start];
+//       m_right = objects[start + 1];
+//     }
+//     else {
+//       m_left = objects[start + 1];
+//       m_right = objects[start];
+//     }
+//   }
+//   else {
+//     sortObjects(objects, start, end-1, axis);
+//     int mid = start + objectSpan/2;
+//     m_left = new BVHNode(objects, start, mid, randState);
+//     m_right = new BVHNode(objects, mid, end, randState);
+//   }
+
+//   AABB boxLeft, boxRight;
+//   if (!m_left->getBBox(boxLeft) || !m_right->getBBox(boxRight))  {
+// #if __CUDA_ARCH__ >= 200
+//     printf("|||| No bounding box in BVHNode constructor.\n");
+// #endif//__CUDA_ARCH__ >= 200
+//   }
+
+//   m_bbox = AABB(surroundingBBox(boxLeft, boxRight));
+//   m_bboxComputed = true;
+// }
+
+
+__device__
+bool BVHNode::hit(const Ray& ray, float tMin, float tMax, HitRecord& hitRec) const
+{
+  if (!(m_bbox.hit(ray, tMin, tMax))) {
+    return false;
+  }
+
+  bool hitLeft = m_left->hit(ray, tMin, tMax, hitRec);
+  bool hitRight = m_right->hit(ray, tMin, hitLeft ? hitRec.t : tMax, hitRec);
+
+  return hitLeft || hitRight;
 }
 
 
 __device__
-float3 Mesh::normalAtP(float3 point,
-		       const float3 vert0,
-		       const float3 vert1,
-		       const float3 vert2) const
+bool BVHNode::getBBox(AABB& outBBox) const
 {
-  float3 e0 = vert1 - vert0;
-  float3 e1 = vert2 - vert0;
-  float3 n = cross(e0, e1);
+  if (m_bboxComputed) {
+    outBBox = m_bbox;
+    return true;
+  }
+  return false;
+}
+
+__device__
+Object* createBVH(Object **objects, int numObjects)
+{
+  return new ObjectList(objects, numObjects);
+}
+
+
+__device__
+float3 Mesh::normalAtP(float u, float v,
+		       float3 n0, float3 n1, float3 n2) const
+{
+  float3 n = (1.0f - u - v)*n0 + u*n1 + v*n2;
   n = normalize(n);
 
   return n;
@@ -124,18 +238,18 @@ __device__ int intersectTriangle(float3 orig, float3 dir,
 __device__
 bool Mesh::hit(const Ray& ray, float tMin, float tMax, HitRecord& hitRec) const
 {
-  if (m_bbox.hit(ray, tMin, tMax)) {
+  if (!(m_bbox.hit(ray, tMin, tMax))) {
     return false;
   }
-  // float u, v;
+  float u, v;
   float t = 3.402823e+38;
   // int isect = 0;
   int tidx;
-  
+
   int numTriangles = numTriangleIndices/3;
   // ensure numTriangleIndices is divisible by 3
   assert(numTriangles*3 == numTriangleIndices);
-  
+
   for (int triangleIdx = 0; triangleIdx < numTriangles; triangleIdx++) {
 
     int v0 = triangleIndices[triangleIdx*3];
@@ -153,6 +267,8 @@ bool Mesh::hit(const Ray& ray, float tMin, float tMax, HitRecord& hitRec) const
     if (isect) {
       if (t_tmp < t) {
 	t = t_tmp;
+	u = u_tmp;
+	v = v_tmp;
 	tidx = triangleIdx;
       }
     }
@@ -160,15 +276,16 @@ bool Mesh::hit(const Ray& ray, float tMin, float tMax, HitRecord& hitRec) const
 
   if (t > tMin && t < tMax) {
     hitRec.t = t;
+    hitRec.p = ray.pointAtT(t);
+
     int v0 = triangleIndices[tidx*3];
     int v1 = triangleIndices[tidx*3 + 1];
     int v2 = triangleIndices[tidx*3 + 2];
-    float3 vert0 = vertices[v0];
-    float3 vert1 = vertices[v1];
-    float3 vert2 = vertices[v2];
+    float3 n0 = vertexNormals[v0];
+    float3 n1 = vertexNormals[v1];
+    float3 n2 = vertexNormals[v2];
+    hitRec.n = normalAtP(u, v, n0, n1, n2);
 
-    hitRec.p = ray.pointAtT(t);
-    hitRec.n = normalAtP(hitRec.p, vert0, vert1, vert2);
     hitRec.material = m_material;
     return true;
   }
@@ -186,7 +303,7 @@ float3 Sphere::normalAtP(float3 point) const
 __device__
 bool Sphere::hit(const Ray& ray, float tMin, float tMax, HitRecord& hitRec) const
 {
-  if (m_bbox.hit(ray, tMin, tMax)) {
+  if (!(m_bbox.hit(ray, tMin, tMax))) {
     return false;
   }
   float3 oc = ray.m_origin - m_center;
@@ -211,3 +328,44 @@ bool Sphere::hit(const Ray& ray, float tMin, float tMax, HitRecord& hitRec) cons
   }
   return false;
 }
+
+
+// __device__
+// Object* createBVH(Object **objects, int numObjects)
+// {
+//   curandState localRandState;
+//   curand_init(1984, 0, 0, &localRandState);
+
+//   int numLeavesPerSubtree = numObjects;
+//   // first, sort objects in divide and conquer manner,
+//   // change sorting axis in each "devide"
+//   while (numLeavesPerSubtree > 0) {
+
+//     int axis = int(ceilf(curand_uniform(&localRandState)*3.0f) - 1.0f);
+
+//     for (int start = 0; start < numObjects; start+=numLeavesPerSubtree) {
+
+//       int objectSpan = start + numLeavesPerSubtree <= numObjects ?
+//   	numLeavesPerSubtree : numObjects - start;
+
+//       if (objectSpan == 2) {
+// #if __CUDA_ARCH__ >= 200
+// 	printf("|||| %p %p %d %d\n", objects[start+1], objects[start], axis, start);
+// #endif
+//       	if (compareBBoxes(objects[start + 1], objects[start], axis)) {
+//       	  // left objects[start] is larger than right objects[start+1]
+//       	  // so we need to swap them
+//       	  // Object *tmp = objects[start];
+//       	  // objects[start] = objects[start+1];
+//       	  // objects[start+1] = tmp;
+//       	}
+//       }
+//       // else {
+//       // 	// sortObjects(objects, start, start+objectSpan-1, axis);
+//       // }
+//     }
+//     numLeavesPerSubtree /= 2;
+//   }
+//   return new ObjectList(objects, numObjects);
+// }
+

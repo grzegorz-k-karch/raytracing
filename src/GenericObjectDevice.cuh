@@ -8,6 +8,8 @@ enum class ObjectType { None, Mesh, Sphere };
 struct GenericObjectDevice {
 
   GenericObjectDevice() :
+    bmin(make_float3(0.0f, 0.0f, 0.0f)),
+    bmax(make_float3(0.0f, 0.0f, 0.0f)),
     scalars(nullptr), numScalars(0),
     vectors(nullptr), numVectors(0),
     vertices(nullptr), numVertices(0),
@@ -36,6 +38,16 @@ struct GenericObjectDevice {
     // }        
   }
 
+  __device__ void print() const {
+#if __CUDA_ARCH__ >= 200
+    printf("GenericObjectDevice::print() %d %p %d %p %d %p %d %p %d %p %d %p\n",
+	   numScalars, scalars, numVectors, vectors,
+	   numVertices, vertices,
+	   numVertexNormals, vertexNormals,
+	   numVertexColors, vertexColors,
+	   numTriangleIndices, triangleIndices);
+#endif    
+  }
   ObjectType objectType;
 
   float3 bmin;

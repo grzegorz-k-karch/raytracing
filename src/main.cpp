@@ -45,7 +45,7 @@ int main(int argc, char** argv)
   ImageSaver imageSaver;
   // save the rendered image to file
   imageSaver.saveImage(image, args.imageWidth, args.imageHeight,
-		       args.pictureFilePath, status);
+  		       args.pictureFilePath, status);
   exitIfError(status);
 
   return 0;
