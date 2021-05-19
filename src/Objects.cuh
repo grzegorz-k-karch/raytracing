@@ -8,32 +8,48 @@ class Material;
 
 
 class Object {
- public:
+public:
   __device__ virtual
   bool hit(const Ray& ray, float tMin,
 	   float tMax, HitRecord& hitRec) const = 0;
   __device__ virtual
-  bool getBBox(float tMin, float tMax, AABB& bbox) const = 0;  
+  bool getBBox(AABB &bbox) const = 0;
 };
 
 
-class ObjectList: public Object {
- public:
-  __device__ ObjectList(Object** objects, int num_objects) :
-    objects(objects), num_objects(num_objects), bboxComputed(false) {}
+class BVHNode : public Object {
+public:
+  __device__ BVHNode(Object** objects, int start, int end,
+  		     curandState* randState);
+  __device__ BVHNode(Object *left, Object *right) {
+    setChildren(left, right);
+  }
+  __device__ BVHNode() :
+    m_left(nullptr), m_right(nullptr), m_bboxComputed(false) {}
 
-  __device__ virtual
-  bool hit(const Ray& ray, float tMin,
-	   float tMax, HitRecord& hitRec) const;
-  __device__ virtual
-  bool getBBox(float tMin, float tMax, AABB& bbox) const;
+  __device__ virtual bool hit(const Ray& ray,
+			      float tMin,
+			      float tMax,
+			      HitRecord& hitRec) const;
+  __device__ virtual bool getBBox(AABB& outBBox) const;
+  __device__ void setChildren(Object* left,
+			      Object* right);
 
-  Object **objects;
-  int num_objects;
+public:
+  Object *m_left;
+  Object *m_right;
 
-  AABB bbox;
-  bool bboxComputed;
+  AABB m_bbox;
+  bool m_bboxComputed;
 };
+
+
+__device__
+Object* createBVH(Object** objects, int numObjects);
+
+
+__device__
+bool compareBBoxes(Object* a, Object* b, int axis);
 
 
 class Mesh : public Object {
@@ -54,8 +70,9 @@ public:
   __device__ virtual
   bool hit(const Ray& ray, float tMin,
 	   float tMax, HitRecord& hitRec) const;
+
   __device__ virtual
-  bool getBBox(float tMin, float tMax, AABB &bbox) const {
+  bool getBBox(AABB &bbox) const {
     bbox = m_bbox;
     return true;
   }
@@ -74,10 +91,8 @@ public:
 
 private:
   __device__
-  float3 normalAtP(float3 point,
-		   float3 vert0,
-		   float3 vert1,
-		   float3 vert2) const;
+  float3 normalAtP(float u, float v,
+		   float3 n0, float3 n1, float3 n2) const;
 };
 
 
@@ -89,12 +104,12 @@ public:
       m_center(genObjDev->vectors[0]),
       m_radius(genObjDev->scalars[0]),
       m_material(mat) {}
-  
+
   __device__ virtual
   bool hit(const Ray& ray, float tMin,
 	   float tMax, HitRecord& hitRec) const;
   __device__ virtual
-  bool getBBox(float tMin, float tMax, AABB &bbox) const {
+  bool getBBox(AABB &bbox) const {
     bbox = m_bbox;
     return true;
   }

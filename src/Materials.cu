@@ -75,3 +75,15 @@ __device__ float schlick(float cosine, float refIdx)
   r0 = r0*r0;
   return r0 + (1.0f - r0)*powf((1.0f - cosine), 5.0f);
 }
+
+
+__device__ bool Parametric::scatter(const Ray& inRay, const HitRecord& hitRec,
+				    float3& attenuation, Ray& outRays,
+				    curandState* localRandState) const
+{
+  float3 target = hitRec.p + hitRec.n + randomInUnitSphere(localRandState);
+  outRays = Ray(hitRec.p, target - hitRec.p, inRay.m_timestamp);
+  attenuation = fabs(hitRec.n);
+  return true;
+}
+

@@ -8,6 +8,8 @@ enum class ObjectType { None, Mesh, Sphere };
 struct GenericObjectDevice {
 
   GenericObjectDevice() :
+    bmin(make_float3(0.0f, 0.0f, 0.0f)),
+    bmax(make_float3(0.0f, 0.0f, 0.0f)),
     scalars(nullptr), numScalars(0),
     vectors(nullptr), numVectors(0),
     vertices(nullptr), numVertices(0),

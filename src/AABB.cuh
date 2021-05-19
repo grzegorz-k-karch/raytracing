@@ -19,6 +19,15 @@ public:
   __device__ AABB(const AABB& bbox) :
     bmin{bbox.bmin[0], bbox.bmin[1], bbox.bmin[2]},
     bmax{bbox.bmax[0], bbox.bmax[1], bbox.bmax[2]} {}
+  __device__ AABB& operator=(const AABB& other) {
+    bmin[0] = other.min().x;
+    bmin[1] = other.min().y;
+    bmin[2] = other.min().z;
+    bmax[0] = other.max().x;
+    bmax[1] = other.max().y;
+    bmax[2] = other.max().z;
+    return *this;
+  }
 
   __device__ __host__ float3 min() const { return make_float3(bmin[0], bmin[1], bmin[2]); }
   __device__ __host__ float3 max() const { return make_float3(bmax[0], bmax[1], bmax[2]); }

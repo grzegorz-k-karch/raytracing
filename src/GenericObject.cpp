@@ -17,6 +17,7 @@ GenericObject::GenericObject(const std::string objectType, const pt::ptree objec
 
 GenericObject::GenericObject(GenericObject&& other) noexcept :
   m_objectType(other.m_objectType),
+  m_bbox(other.m_bbox),
   m_scalars(other.m_scalars),
   m_vectors(other.m_vectors),
   m_vertices(other.m_vertices),
@@ -24,26 +25,18 @@ GenericObject::GenericObject(GenericObject&& other) noexcept :
   m_vertexNormals(other.m_vertexNormals),
   m_triangleIndices(other.m_triangleIndices)
 {
+  LOG_TRIVIAL(trace) << "GenericObject copy constructor";
 }
 
 void GenericObject::parseMesh(const pt::ptree object)
 {
   MeshLoader meshLoader = MeshLoader(object);
-  meshLoader.loadMesh();
-
-  m_bbox = meshLoader.getBBox();
-  m_vertices = meshLoader.getVertices();
-  m_vertexColors = meshLoader.getVertexColors();
-  m_vertexNormals = meshLoader.getVertexNormals();
-  m_triangleIndices = meshLoader.getTriangleIndices();
+  meshLoader.loadMesh(m_bbox, m_vertices, m_vertexColors,
+		      m_vertexNormals, m_triangleIndices);
 }
 
 void GenericObject::parseSphere(const pt::ptree object)
 {
-  SphereLoader sphereLoader = SphereLoader();
-  sphereLoader.loadSphere(object);
-
-  m_bbox = sphereLoader.getBBox();  
-  m_scalars = sphereLoader.getScalars();
-  m_vectors = sphereLoader.getVectors();
+  SphereLoader sphereLoader = SphereLoader(object);
+  sphereLoader.loadSphere(m_bbox, m_vectors, m_scalars);
 }

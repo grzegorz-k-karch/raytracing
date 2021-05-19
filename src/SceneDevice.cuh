@@ -23,6 +23,9 @@ public:
     case MaterialType::Dielectric:
       mat = new Dielectric(genMatDev);
       break;
+    case MaterialType::Parametric:
+      mat = new Parametric(genMatDev);
+      break;
     case MaterialType::None:
       break;
     default:

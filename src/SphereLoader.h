@@ -11,24 +11,13 @@ namespace pt = boost::property_tree;
 
 class SphereLoader {
 public:
-  SphereLoader() {}
-  void loadSphere(const pt::ptree object);
-
-  AABB getBBox() {
-    return m_bbox;
-  }
-
-  std::vector<float>&& getScalars() {
-    return std::move(m_scalars);    
-  }
-  std::vector<float3>&& getVectors() {
-    return std::move(m_vectors);
-  }  
-
+  SphereLoader(const pt::ptree object);
+  void loadSphere(AABB &m_bbox,
+		  std::vector<float3> &m_vectors,
+                  std::vector<float> &m_scalars) const;
 private:
-  AABB m_bbox;
-  std::vector<float3> m_vectors;
-  std::vector<float> m_scalars;
+  float3 m_center;
+  float m_radius;
 };
 
 #endif//SPHERE_LOADER_H

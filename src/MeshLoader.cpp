@@ -15,66 +15,70 @@ MeshLoader::MeshLoader(const pt::ptree object)
   LOG_TRIVIAL(debug) << "Mesh filepath: " << m_meshFilepath;
 }
 
-void MeshLoader::loadMesh()
+void MeshLoader::loadMesh(AABB& bbox,
+			  std::vector<float3>& vertices,
+			  std::vector<float3>& vertexColors,
+			  std::vector<float3>& vertexNormals,
+			  std::vector<int>& triangleIndices) const
 {
   bool fileIsPly = checkIfPlyFile(m_meshFilepath);
   LOG_TRIVIAL(debug) << "File is PLY: " << fileIsPly;
   if (fileIsPly) {
     loadPlyObject(m_meshFilepath.c_str(),
-		  m_vertices, m_vertexColors,
-		  m_vertexNormals, m_triangleIndices);
-    LOG_TRIVIAL(debug) << "Num vertices: " << m_vertices.size()
-		       << " num colors: " << m_vertexColors.size()
-		       << " num normals: " << m_vertexNormals.size()
-		       << " num indices: " << m_triangleIndices.size();
+		  vertices, vertexColors,
+		  vertexNormals, triangleIndices);
+    LOG_TRIVIAL(debug) << "Num vertices: " << vertices.size()
+		       << " num colors: " << vertexColors.size()
+		       << " num normals: " << vertexNormals.size()
+		       << " num indices: " << triangleIndices.size();
   }
 
   // cleanup mesh
   //   merge vertices
   std::vector<int> indicesOfKeptVertices;
-  mergeVertices(m_triangleIndices, m_vertices, indicesOfKeptVertices);
+  mergeVertices(triangleIndices, vertices, indicesOfKeptVertices);
   LOG_TRIVIAL(debug) << "After merging vertices:"
-		     << " num vertices: " << m_vertices.size()
-    		     << " num indices: " << m_triangleIndices.size();
+		     << " num vertices: " << vertices.size()
+    		     << " num indices: " << triangleIndices.size();
 
   //   set vertex colors if not present
-  if (m_vertexColors.empty()) {
+  if (vertexColors.empty()) {
     // if no colors - set a default color // TODO: get color from scene description file
-    m_vertexColors.resize(m_vertices.size());
+    vertexColors.resize(vertices.size());
     float3 default_color = make_float3(0.0f, 0.4f, 0.8f);
-    setColor(default_color, m_vertexColors);
+    setColor(default_color, vertexColors);
   }
   else {
     // if there are colors - merge them according to the merged vertices
-    mergeVectors(indicesOfKeptVertices, m_vertexColors);
+    mergeVectors(indicesOfKeptVertices, vertexColors);
   }
-  LOG_TRIVIAL(debug) << "After colors cleanup: num colors: " << m_vertexColors.size();
+  LOG_TRIVIAL(debug) << "After colors cleanup: num colors: " << vertexColors.size();
 
   //   compute normals if not present
-  if (m_vertexNormals.empty()) {
+  if (vertexNormals.empty()) {
     // if no normals - compute them
-    computeNormals(m_vertices, m_triangleIndices, m_vertexNormals);
+    computeNormals(vertices, triangleIndices, vertexNormals);
   }
   else {
     // if there are normals - merge them according to the merged vertices
-    mergeVectors(indicesOfKeptVertices, m_vertexNormals);
+    mergeVectors(indicesOfKeptVertices, vertexNormals);
   }
-  LOG_TRIVIAL(debug) << "After normals cleanup: num normals: " << m_vertexNormals.size();
+  LOG_TRIVIAL(debug) << "After normals cleanup: num normals: " << vertexNormals.size();
 
   // compute axis-aligned bounding box
   float3 bmin;
   float3 bmax;
-  computeBBox(m_vertices, bmin, bmax);
+  computeBBox(vertices, bmin, bmax);
 
   LOG_TRIVIAL(debug) << "BBox: ("
 		     << bmin.x << ", " << bmin.y << ", " << bmin.z << ") - ("
 		     << bmax.x << ", " << bmax.y << ", " << bmax.z << ")";
 
-  translateAndScale(m_worldPos, m_scale, bmin, bmax, m_vertices);
+  translateAndScale(m_worldPos, m_scale, bmin, bmax, vertices);
 
   LOG_TRIVIAL(debug) << "BBox after translation and scaling: ("
 		     << bmin.x << ", " << bmin.y << ", " << bmin.z << ") - ("
 		     << bmax.x << ", " << bmax.y << ", " << bmax.z << ")";
 
-  m_bbox = AABB(bmin, bmax);
+  bbox = AABB(bmin, bmax);
 }

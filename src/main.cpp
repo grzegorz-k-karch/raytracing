@@ -33,17 +33,19 @@ int main(int argc, char** argv)
   // initialize random state and image buffer
   renderer.initBuffers(status);
   exitIfError(status);
+
   // render scene
   renderer.renderScene(sceneDevice, status);
   exitIfError(status);
 
   std::vector<float3> image;
   renderer.getImageOnHost(image, status);
-
+  exitIfError(status);
+  
   ImageSaver imageSaver;
   // save the rendered image to file
   imageSaver.saveImage(image, args.imageWidth, args.imageHeight,
-		       args.pictureFilePath, status);
+  		       args.pictureFilePath, status);
   exitIfError(status);
 
   return 0;

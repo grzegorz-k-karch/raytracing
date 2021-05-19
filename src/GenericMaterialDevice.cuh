@@ -5,27 +5,15 @@
 
 // #include "cuda_utils.cuh"
 
-enum class MaterialType { None, Lambertian, Metal, Dielectric };
+enum class MaterialType { None, Lambertian, Metal, Dielectric, Parametric };
 
 struct GenericMaterialDevice {
 
   GenericMaterialDevice() :
     scalars(nullptr), numScalars(0),
-    vectors(nullptr), numVectors(0) {
-#if __CUDA_ARCH__ >= 200
-    printf("GenericMaterialDevice constructor on device\n");
-#else
-    LOG_TRIVIAL(trace) << "GenericMaterialDevice constructor on host";
-#endif
-    
-  }
+    vectors(nullptr), numVectors(0) {}
 
   ~GenericMaterialDevice() {
-#if __CUDA_ARCH__ >= 200
-    printf("GenericMaterialDevice destructor on device\n");
-#else
-    LOG_TRIVIAL(trace) << "GenericMaterialDevice destructor on host";
-#endif
     // if (scalars != nullptr) {
     //   CCE(cudaFree(scalars));
     // }

@@ -5,18 +5,24 @@
 #include "vector_utils.cuh"
 #include "logging.h"
 
-void SphereLoader::loadSphere(const pt::ptree object)
+SphereLoader::SphereLoader(const pt::ptree object)
 {
-  float3 center = string2float3(object.get<std::string>("center.<xmlattr>.value"));
-  m_vectors = {center};
+  m_center = string2float3(object.get<std::string>("center.<xmlattr>.value"));
+  m_radius = object.get<float>("radius.<xmlattr>.value");
 
-  float radius = object.get<float>("radius.<xmlattr>.value");
-  m_scalars = {radius};
-
-  m_bbox = AABB(center - make_float3(radius),
-		center + make_float3(radius));
-
-  LOG_TRIVIAL(debug)
-    << "Sphere center: (" << center.x << "," << center.y << "," << center.z << ")";
-  LOG_TRIVIAL(debug) << "Sphere radius: " << radius;
+  LOG_TRIVIAL(debug) << "Sphere center: ("
+    << m_center.x << ","
+    << m_center.y << ","
+    << m_center.z << ")";
+  LOG_TRIVIAL(debug) << "Sphere radius: " << m_radius;
 }
+
+void SphereLoader::loadSphere(AABB &bbox,
+			      std::vector<float3> &vectors,
+			      std::vector<float> &scalars) const {
+  vectors = {m_center};
+  scalars = {m_radius};
+  bbox = AABB(m_center - make_float3(m_radius),
+	      m_center + make_float3(m_radius));  
+}
+

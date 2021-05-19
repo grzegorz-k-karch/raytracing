@@ -44,6 +44,16 @@ public:
   float m_refIdx;
 };
 
+class Parametric : public Material {
+public:
+  __device__ Parametric(const GenericMaterialDevice* genMatDev) :
+    m_dummy(genMatDev->scalars[0]) {}
+  __device__ virtual bool scatter(const Ray& inRay, const HitRecord& hitRec,
+  				  float3& attenuation, Ray& outRays,
+  				  curandState* localRandState) const;
+  float m_dummy;
+};
+
 __device__ float schlick(float cosine, float refIdx);
 
 #endif//MATERIALS_CUH
