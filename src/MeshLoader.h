@@ -21,12 +21,14 @@ class MeshLoader {
 		std::vector<float3>& vertices,
 		std::vector<float3>& vertexColors,
 		std::vector<float3>& vertexNormals,
-		std::vector<int>& triangleIndices) const;
+		std::vector<int>& triangleIndices,
+		std::vector<float>& scalars) const;
   
 private:
   std::string m_meshFilepath;
   float3 m_worldPos;
   float3 m_scale;
+  float m_smoothness;
 };
 
 #endif//MESH_LOADER_H

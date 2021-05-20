@@ -12,6 +12,8 @@ MeshLoader::MeshLoader(const pt::ptree object)
   m_meshFilepath = object.get<std::string>("source.<xmlattr>.value");
   m_worldPos = string2float3(object.get<std::string>("world_pos.<xmlattr>.value"));
   m_scale = string2float3(object.get<std::string>("scale.<xmlattr>.value"));
+  m_smoothness = object.get<float>("smoothness.<xmlattr>.value", 1.0f);
+
   LOG_TRIVIAL(debug) << "Mesh filepath: " << m_meshFilepath;
 }
 
@@ -19,7 +21,8 @@ void MeshLoader::loadMesh(AABB& bbox,
 			  std::vector<float3>& vertices,
 			  std::vector<float3>& vertexColors,
 			  std::vector<float3>& vertexNormals,
-			  std::vector<int>& triangleIndices) const
+			  std::vector<int>& triangleIndices,
+			  std::vector<float>& scalars) const
 {
   bool fileIsPly = checkIfPlyFile(m_meshFilepath);
   LOG_TRIVIAL(debug) << "File is PLY: " << fileIsPly;
@@ -70,15 +73,16 @@ void MeshLoader::loadMesh(AABB& bbox,
   float3 bmax;
   computeBBox(vertices, bmin, bmax);
 
-  LOG_TRIVIAL(debug) << "BBox: ("
+  LOG_TRIVIAL(trace) << "BBox: ("
 		     << bmin.x << ", " << bmin.y << ", " << bmin.z << ") - ("
 		     << bmax.x << ", " << bmax.y << ", " << bmax.z << ")";
 
   translateAndScale(m_worldPos, m_scale, bmin, bmax, vertices);
 
-  LOG_TRIVIAL(debug) << "BBox after translation and scaling: ("
+  LOG_TRIVIAL(trace) << "BBox after translation and scaling: ("
 		     << bmin.x << ", " << bmin.y << ", " << bmin.z << ") - ("
 		     << bmax.x << ", " << bmax.y << ", " << bmax.z << ")";
 
   bbox = AABB(bmin, bmax);
+  scalars.push_back(m_smoothness);
 }
