@@ -208,11 +208,13 @@ void BVHNode::setChildren(Object* left, Object* right)
 }
 
 
-__device__
-float3 Mesh::normalAtP(float u, float v,
-		       float3 n0, float3 n1, float3 n2) const
+__device__ float3 Mesh::normalAtP(float u, float v,
+				  float3 n0, float3 n1, float3 n2) const
 {
-  float3 n = (1.0f - u - v)*n0 + u*n1 + v*n2;
+  float3 n =
+    powf(1.0f - u - v, m_smoothness)*n0 +
+    powf(u, m_smoothness)*n1 +
+    powf(v, m_smoothness)*n2;
   n = normalize(n);
 
   return n;
@@ -327,12 +329,12 @@ bool Mesh::hit(const Ray& ray, float tMin, float tMax, HitRecord& hitRec) const
     hitRec.t = t;
     hitRec.p = ray.pointAtT(t);
 
-    int v0 = triangleIndices[tidx*3];
-    int v1 = triangleIndices[tidx*3 + 1];
-    int v2 = triangleIndices[tidx*3 + 2];
-    float3 n0 = vertexNormals[v0];
-    float3 n1 = vertexNormals[v1];
-    float3 n2 = vertexNormals[v2];
+    int t0 = triangleIndices[tidx*3];
+    int t1 = triangleIndices[tidx*3 + 1];
+    int t2 = triangleIndices[tidx*3 + 2];
+    float3 n0 = vertexNormals[t0];
+    float3 n1 = vertexNormals[t1];
+    float3 n2 = vertexNormals[t2];
     hitRec.n = normalAtP(u, v, n0, n1, n2);
 
     hitRec.material = m_material;

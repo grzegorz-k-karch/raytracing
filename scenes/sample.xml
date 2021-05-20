@@ -6,7 +6,7 @@
     <!-- <lookAt value="-1.0 1.0 -10.0"/> -->
     <lookAt value="-2.5 1.0 -10.0"/>    
     <up value="0.0 1.0 0.0"/>
-    <fov value="60.0"/>
+    <fov value="30.0"/>
     <aspect value="3.0 2.0"/>
     <aperture value="0.001"/>
     <focus_distance value="-1.0"/>
@@ -21,6 +21,7 @@
     </material>
     <world_pos value="0.0 0.0 -14.0"/>
     <scale value="40.0 40.0 40.0"/>
+    <smoothness value="0.125"/>
   </Mesh>
 
   <Mesh>
@@ -48,6 +49,7 @@
     </material>
     <world_pos value="0.0 -2.0 -10.0"/>
     <scale value="1.0 1.0 1.0"/>
+    <smoothness value="0.0625"/>
   </Mesh>
 
   <Sphere>

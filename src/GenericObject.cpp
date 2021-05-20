@@ -32,7 +32,7 @@ void GenericObject::parseMesh(const pt::ptree object)
 {
   MeshLoader meshLoader = MeshLoader(object);
   meshLoader.loadMesh(m_bbox, m_vertices, m_vertexColors,
-		      m_vertexNormals, m_triangleIndices);
+		      m_vertexNormals, m_triangleIndices, m_scalars);
 }
 
 void GenericObject::parseSphere(const pt::ptree object)

@@ -9,11 +9,9 @@ class Material;
 
 class Object {
 public:
-  __device__ virtual
-  bool hit(const Ray& ray, float tMin,
+  __device__ virtual bool hit(const Ray& ray, float tMin,
 	   float tMax, HitRecord& hitRec) const = 0;
-  __device__ virtual
-  bool getBBox(AABB &bbox) const = 0;
+  __device__ virtual bool getBBox(AABB &bbox) const = 0;
 };
 
 
@@ -32,8 +30,7 @@ public:
 			      float tMax,
 			      HitRecord& hitRec) const;
   __device__ virtual bool getBBox(AABB& outBBox) const;
-  __device__ void setChildren(Object* left,
-			      Object* right);
+  __device__ void setChildren(Object* left, Object* right);
 
 public:
   Object *m_left;
@@ -44,12 +41,9 @@ public:
 };
 
 
-__device__
-Object* createBVH(Object** objects, int numObjects);
+__device__ Object* createBVH(Object** objects, int numObjects);
 
-
-__device__
-bool compareBBoxes(Object* a, Object* b, int axis);
+__device__ bool compareBBoxes(Object* a, Object* b, int axis);
 
 
 class Mesh : public Object {
@@ -65,14 +59,13 @@ public:
       numVertexNormals(genObjDev->numVertexNormals),
       triangleIndices(genObjDev->triangleIndices),
       numTriangleIndices(genObjDev->numTriangleIndices),
-      m_material(mat) {}
+      m_material(mat),
+      m_smoothness(genObjDev->scalars[0]) {}
 
-  __device__ virtual
-  bool hit(const Ray& ray, float tMin,
+  __device__ virtual bool hit(const Ray& ray, float tMin,
 	   float tMax, HitRecord& hitRec) const;
 
-  __device__ virtual
-  bool getBBox(AABB &bbox) const {
+  __device__ virtual bool getBBox(AABB &bbox) const {
     bbox = m_bbox;
     return true;
   }
@@ -88,11 +81,11 @@ public:
   int *triangleIndices;
   int numTriangleIndices;
   const Material *m_material;
+  float m_smoothness;
 
 private:
-  __device__
-  float3 normalAtP(float u, float v,
-		   float3 n0, float3 n1, float3 n2) const;
+  __device__ float3 normalAtP(float u, float v,
+			      float3 n0, float3 n1, float3 n2) const;
 };
 
 
@@ -105,11 +98,9 @@ public:
       m_radius(genObjDev->scalars[0]),
       m_material(mat) {}
 
-  __device__ virtual
-  bool hit(const Ray& ray, float tMin,
-	   float tMax, HitRecord& hitRec) const;
-  __device__ virtual
-  bool getBBox(AABB &bbox) const {
+  __device__ virtual bool hit(const Ray& ray, float tMin,
+			      float tMax, HitRecord& hitRec) const;
+  __device__ virtual bool getBBox(AABB &bbox) const {
     bbox = m_bbox;
     return true;
   }
@@ -120,8 +111,7 @@ public:
   const Material *m_material;
 
 private:
-  __device__
-  float3 normalAtP(float3 point) const;
+  __device__ float3 normalAtP(float3 point) const;
 };
 
 #endif//OBJECTS_CUH

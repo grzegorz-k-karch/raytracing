@@ -15,6 +15,34 @@
   </Camera>
 
   <Mesh>
+    <source value="../models/bunny_small3.ply"/>
+    <material value="Dielectric">
+      <ref_idx value="0.1"/>
+    </material>
+    <world_pos value="0.0 0.0 -14.0"/>
+    <scale value="40.0 40.0 40.0"/>
+    <normal_type="face">
+  </Mesh>
+
+  <Mesh>
+    <source value="../models/bunny_small3.ply"/>
+    <material value="Metal">
+      <albedo value="0.99 0.2 0.01"/>
+      <fuzz value="0.1"/>
+    </material>
+    <world_pos value="6.0 0.0 -14.0"/>
+    <scale value="40.0 40.0 40.0"/>
+  </Mesh>
+
+  <Mesh>
+    <source value="../models/bunny_small3.ply"/>
+    <material value="Parametric">
+    </material>
+    <world_pos value="-6.0 0.0 -14.0"/>
+    <scale value="40.0 40.0 40.0"/>
+  </Mesh>
+
+  <Mesh>
     <source value="../models/box.ply"/>
     <material value="Lambertian">
       <albedo value="0.99 0.99 0.0"/>
@@ -24,10 +52,26 @@
   </Mesh>
 
   <Sphere>
+    <center value="-2.0 -2.0 -10.0"/>
+    <radius value="1.0"/>
+    <material value="Metal">
+      <albedo value="0.3 0.2 0.5"/>
+      <fuzz value="0.1"/>
+    </material>
+  </Sphere>
+
+  <Sphere>
+    <center value="2.0 -2.0 -10.0"/>
+    <radius value="1.0"/>
+    <material value="Parametric">
+    </material>
+  </Sphere>
+
+  <Sphere>
     <center value="0.0 -1003.0 -14.0"/>
     <radius value="1000.0"/>
     <material value="Lambertian">
-      <albedo value="0.2 0.8 0.8"/>
+      <albedo value="0.8 0.8 0.8"/>
     </material>
   </Sphere>
 

@@ -1,10 +1,12 @@
 ------------------------------------------------------------------------------
 TODO:
 ------------------------------------------------------------------------------
- - mesh attribute - whether normal is face normal or normal interpolated from vertices
+ - DONE mesh attribute - whether normal is face normal or normal interpolated from vertices
+   - now there's a <smoothness> parameter that controls how the vertex normals contribute to
+     the interpolated normal: n = pow(w0, smoothness)*n0 + ... + pow(w2, smoothness)*n2
  - material parametric - attribute to control how it's parametrized (normal, color)
  - light sources
- - bvh
+ - DONE bvh
  - textures
  - ray depth
  - memory management
