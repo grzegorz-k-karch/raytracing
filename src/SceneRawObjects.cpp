@@ -42,23 +42,26 @@ bool checkRequiredObjects(const pt::ptree &sceneTree)
 void SceneRawObjects::parseScene(const std::string filepath,
 				 StatusCodes &status) {
   status = StatusCodes::NoError;
+
+  //----------------------------------------------------------------------------
   // read XML file
   pt::ptree fileTree;
-
   try {
     pt::read_xml(filepath, fileTree);
-  } catch (pt::ptree_error &e) {
+  }
+  catch (pt::ptree_error &e) {
     LOG_TRIVIAL(error) << e.what();
     status = StatusCodes::FileError;
     return;
   }
-
-  pt::ptree sceneTree = fileTree.get_child("scene");
+  //----------------------------------------------------------------------------
   // check if required objects are present in the scene:
   // - camera, a renderable object
+  pt::ptree sceneTree = fileTree.get_child("scene");
   bool requiredObjectsPresent = checkRequiredObjects(sceneTree);
-
   if (!requiredObjectsPresent) {
+    LOG_TRIVIAL(error) << "Scene file does not have required objects "
+		       << "(a camera and a renderable object).";    
     status = StatusCodes::SceneError;
     return;
   }
@@ -74,7 +77,7 @@ void SceneRawObjects::parseScene(const std::string filepath,
       setCamera(Camera(it.second));
     } else if (foundAny(objectType, renderableObjects)) {
       // before we store the object, get it's material - one of object's attributes
-      pt::ptree::const_assoc_iterator material_it = it.second.find("material");
+      auto material_it = it.second.find("material");
       bool materialFound = material_it != it.second.not_found();
 
       if (materialFound) {

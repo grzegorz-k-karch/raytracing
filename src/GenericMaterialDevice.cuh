@@ -3,24 +3,16 @@
 
 #include "logging.h"
 
-// #include "cuda_utils.cuh"
-
 enum class MaterialType { None, Lambertian, Metal, Dielectric, Parametric };
 
 struct GenericMaterialDevice {
 
   GenericMaterialDevice() :
+    materialType(MaterialType::None),
     scalars(nullptr), numScalars(0),
     vectors(nullptr), numVectors(0) {}
 
-  ~GenericMaterialDevice() {
-    // if (scalars != nullptr) {
-    //   CCE(cudaFree(scalars));
-    // }
-    // if (vectors != nullptr) {
-    //   CCE(cudaFree(vectors));
-    // }    
-  }
+  ~GenericMaterialDevice() {}
 
   MaterialType materialType;
 

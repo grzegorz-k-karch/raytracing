@@ -373,9 +373,21 @@ bool Sphere::hit(const Ray& ray, float tMin, float tMax, HitRecord& hitRec) cons
       hitRec.t = t;
       hitRec.p = ray.pointAtT(t);
       hitRec.n = normalAtP(hitRec.p);
+      getSphereUV(hitRec.n, hitRec.u, hitRec.v);
       hitRec.material = m_material;
       return true;
     }
   }
   return false;
 }
+
+__device__ void Sphere::getSphereUV(const float3& p,
+				    float& u, float &v)
+{
+  const float pi = 3.14159265f;
+  float theta = acosf(-p.y);
+  float phi = atan2f(-p.z, p.x) + pi;
+  u = phi/(2*pi);
+  v = theta/pi;
+}
+

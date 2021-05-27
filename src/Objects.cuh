@@ -105,6 +105,9 @@ public:
     return true;
   }
 
+  __device__ static void getSphereUV(const float3& p,
+				     float& u, float &v); 
+
   AABB m_bbox;
   float3 m_center;
   float m_radius;

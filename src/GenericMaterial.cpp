@@ -37,6 +37,18 @@ void GenericMaterial::parseLambertian(const pt::ptree material)
 {
   float3 albedo = string2float3(material.get<std::string>("albedo.<xmlattr>.value"));
   m_vectors = {albedo};
+
+  // texture
+  auto texture_it = material.find("texture");
+  bool textureFound = texture_it != material.not_found();
+  if (textureFound) {
+    LOG_TRIVIAL(trace) << "Texture found.";
+    
+    m_textures.push_back(GenericTexture());
+  }
+  else {
+    LOG_TRIVIAL(trace) << "Texture not found.";
+  }
 }
 
 

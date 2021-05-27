@@ -8,7 +8,7 @@ __device__ bool Lambertian::scatter(const Ray& inRay, const HitRecord& hitRec,
 {
   float3 target = hitRec.p + hitRec.n + randomInUnitSphere(localRandState);
   outRays = Ray(hitRec.p, target - hitRec.p, inRay.m_timestamp);
-  attenuation = m_albedo;
+  attenuation = m_albedo; //m_albedoTexture->color(hitRec.u, hitRec.v, hitRec.p);
   return true;
 }
 
