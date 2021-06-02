@@ -1,6 +1,7 @@
 #ifndef TEXTURES_CUH
 #define TEXTURES_CUH
 
+#include "GenericTextureDevice.cuh"
 
 class Texture {
 public:
@@ -11,11 +12,8 @@ public:
 
 class SolidColor : public Texture {
 public:
-  __device__ SolidColor() {}
-  __device__ SolidColor(float3 color) : m_color(color) {}
-
-  __device__ SolidColor(float red, float green, float blue)
-    : SolidColor(make_float3(red,green,blue)) {}
+  __device__ SolidColor(const GenericTextureDevice *genTexDev) :
+    m_color(genTexDev->m_vectors[0]) {}
 
   __device__ virtual float3 color(float u, float v,
 				  const float3& p) const override {
@@ -29,12 +27,34 @@ private:
 
 class ImageTexture : public Texture {
 public:
-  __device__ ImageTexture(cudaTextureObject_t texObj) :
-    m_image(texObj) {}
+  __device__ ImageTexture(const GenericTextureDevice *genTexDev) :
+    m_image(genTexDev->m_textureObject) {}
   __device__ virtual float3 color(float u, float v,
 				  const float3& p) const override;
 private:
   cudaTextureObject_t m_image;
+};
+
+
+class TextureFactory {
+public:
+  __device__
+  static Texture *createTexture(const GenericTextureDevice *genTexDev) {
+
+    Texture *tex = nullptr;
+    switch (genTexDev->m_textureType) {
+    case TextureType::SolidColor:
+      tex = new SolidColor(genTexDev);
+      break;
+    case TextureType::ImageTexture:
+      tex = new ImageTexture(genTexDev);
+      break;
+    default:
+      break;
+    }
+    assert(tex != nullptr);
+    return tex;
+  }
 };
 
 #endif//TEXTURES_CUH

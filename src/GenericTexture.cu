@@ -36,22 +36,24 @@ void GenericTexture::copyToDevice(GenericTextureDevice* genericTextureDevice,
 }
 
 
-GenericTexture::GenericTexture(const std::string& textureType,
-			       const pt::ptree texture,
+GenericTexture::GenericTexture(const pt::ptree& texture,
 			       StatusCodes& status)
 {
+  std::string textureType = texture.get<std::string>("<xmlattr>.value");
   if (textureType == "SolidColor") {
+    LOG_TRIVIAL(trace) << "Solid color texture.";
     m_textureType = TextureType::SolidColor;
     parseSolidColor(texture, status);
   }
   else if (textureType  == "ImageTexture") {
+    LOG_TRIVIAL(trace) << "Image texture.";
     m_textureType = TextureType::ImageTexture;
     parseImageTexture(texture, status);
   }
 }
 
 
-void GenericTexture::parseSolidColor(const pt::ptree texture,
+void GenericTexture::parseSolidColor(const pt::ptree& texture,
 				     StatusCodes& status)
 {
   float3 albedo = string2float3(texture.get<std::string>("albedo.<xmlattr>.value"));
@@ -59,7 +61,7 @@ void GenericTexture::parseSolidColor(const pt::ptree texture,
 }
 
 
-void GenericTexture::parseImageTexture(const pt::ptree texture,
+void GenericTexture::parseImageTexture(const pt::ptree& texture,
 				       StatusCodes& status)
 {
   status = StatusCodes::NoError;

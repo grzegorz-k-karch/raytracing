@@ -35,11 +35,11 @@ void TextureImageLoader::loadImage(int &imageWidth, int &imageHeight,
   for (int pixelIdx = 0; pixelIdx < numImagePixels; pixelIdx++) {
     float pixelBuffer[3];
     for (int channelIdx = 0; channelIdx < desiredNumChannels; channelIdx++) {
-      pixelBuffer[channelIdx] = data[componentIdx];
+      pixelBuffer[channelIdx] = data[componentIdx]/255.0f;
       componentIdx++;
     }
     imageBuffer[pixelIdx] = make_float4(pixelBuffer[0],
 					pixelBuffer[1],
-					pixelBuffer[3], 0.0f);
+					pixelBuffer[2], 0.0f);
   }
 }

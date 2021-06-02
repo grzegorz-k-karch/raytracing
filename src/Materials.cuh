@@ -15,13 +15,13 @@ public:
 
 class Lambertian : public Material {
 public:
-  __device__ Lambertian(const GenericMaterialDevice* genMatDev) :
-    m_albedo(genMatDev->vectors[0]), m_albedoTexture(nullptr) {}
+  __device__ Lambertian(const GenericMaterialDevice *genMatDev);
+  
   __device__ virtual bool scatter(const Ray& inRay, const HitRecord& hitRec,
   				  float3& attenuation, Ray& outRays,
   				  curandState* localRandState) const;
-  Texture *m_albedoTexture;
-  float3 m_albedo;
+  Texture **m_textures;
+  int m_numTextures;
 };
 
 class Metal : public Material {

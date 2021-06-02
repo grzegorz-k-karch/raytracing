@@ -1,6 +1,21 @@
 #include "Materials.cuh"
+#include "Textures.cuh"
 #include "vector_utils.cuh"
 #include "nvidia/helper_math.h"
+
+
+__device__ Lambertian::Lambertian(const GenericMaterialDevice *genMatDev)
+{
+  m_numTextures = genMatDev->numTextures;
+  m_textures = new Texture*[m_numTextures];
+  for (int texIdx = 0; texIdx < m_numTextures; texIdx++) {
+    m_textures[texIdx] = TextureFactory::createTexture(&(genMatDev->textures[texIdx]));
+  }
+#if __CUDA_ARCH__ >= 200
+  printf("numTextures = %d\n", m_numTextures);
+#endif
+}
+
 
 __device__ bool Lambertian::scatter(const Ray& inRay, const HitRecord& hitRec,
 				    float3& attenuation, Ray& outRays,
@@ -8,7 +23,10 @@ __device__ bool Lambertian::scatter(const Ray& inRay, const HitRecord& hitRec,
 {
   float3 target = hitRec.p + hitRec.n + randomInUnitSphere(localRandState);
   outRays = Ray(hitRec.p, target - hitRec.p, inRay.m_timestamp);
-  attenuation = m_albedo; //m_albedoTexture->color(hitRec.u, hitRec.v, hitRec.p);
+  attenuation = make_float3(1.0f, 1.0f, 1.0f);
+  for (int texIdx = 0; texIdx < m_numTextures; texIdx++) {
+    attenuation *= m_textures[texIdx]->color(hitRec.u, hitRec.v, hitRec.p);
+  }
   return true;
 }
 

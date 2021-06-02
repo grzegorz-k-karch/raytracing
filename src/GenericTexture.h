@@ -12,14 +12,16 @@ namespace pt = boost::property_tree;
 
 class GenericTexture {
 public:
-  GenericTexture(const std::string& textureType,
-		 const pt::ptree texture, StatusCodes& status);
+  GenericTexture(const pt::ptree& texture,
+		 StatusCodes& status);
   void copyToDevice(GenericTextureDevice* genericTextureDevice,
 		    StatusCodes& status) const;
 
 private:
-  void parseImageTexture(const pt::ptree texture, StatusCodes& status);
-  void parseSolidColor(const pt::ptree texture, StatusCodes& status);
+  void parseImageTexture(const pt::ptree& texture,
+			 StatusCodes& status);
+  void parseSolidColor(const pt::ptree& texture,
+		       StatusCodes& status);
 
   TextureType m_textureType;
   std::vector<float3> m_vectors;

@@ -21,7 +21,7 @@ bool checkRequiredObjects(const pt::ptree &sceneTree)
   bool cameraPresent = false;
   bool renderableObjectPresent = false;
   std::set<std::string> renderableObjects = {"Sphere", "Mesh"};
-  pt::ptree::const_iterator node = sceneTree.begin();
+  auto node = sceneTree.begin();
 
   while ((!cameraPresent || !renderableObjectPresent) &&
          node != sceneTree.end()) {

@@ -385,7 +385,7 @@ __device__ void Sphere::getSphereUV(const float3& p,
 				    float& u, float &v)
 {
   const float pi = 3.14159265f;
-  float theta = acosf(-p.y);
+  float theta = acosf(p.y);
   float phi = atan2f(-p.z, p.x) + pi;
   u = phi/(2*pi);
   v = theta/pi;
