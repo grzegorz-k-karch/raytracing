@@ -24,11 +24,11 @@ public:
 void mergeVertices(std::vector<int>& indices,
 		   std::vector<float3>& vertices,
 		   std::vector<int>& indicesOfKeptVertices)
-{    
+{
   std::map<float3, int, VertexComparator> visitedVertices;
   std::vector<float3> mergedVertices;
-  std::vector<int> mergedIndices;  
-  
+  std::vector<int> mergedIndices;
+
   int mergedVertexID = 0;
   for (auto vertexIdx : indices) {
 
@@ -68,7 +68,7 @@ void computeNormals(const std::vector<float3>& vertices,
     float3 triangleVertices[3] = {vertices[vertIdx0],
 				  vertices[vertIdx1],
 				  vertices[vertIdx2]};
-    
+
     float3 edge1 = triangleVertices[1] - triangleVertices[0];
     float3 edge2 = triangleVertices[2] - triangleVertices[0];
     float3 n = cross(edge1,edge2);
@@ -80,7 +80,7 @@ void computeNormals(const std::vector<float3>& vertices,
   for (int normIdx = 0; normIdx < normals.size(); normIdx++) {
     float3 n = normals[normIdx];
     normals[normIdx] = normalize(n);
-  }  
+  }
 }
 
 

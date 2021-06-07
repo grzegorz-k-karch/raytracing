@@ -11,18 +11,17 @@ void mergeVertices(std::vector<int>& indices,
 		   std::vector<float3>& vertices,
 		   std::vector<int>& indicesOfKeptVertices);
 
+
 template<class T>
-void mergeVectors(const std::vector<int>& indicesOfKeptVertices,
-		  std::vector<T>& vectors)
+std::vector<T> mergeVectors(const std::vector<int>& indicesOfKeptVertices,
+			    std::vector<T>& vectors)
 {
   std::vector<T> mergedVectors;
-
   for (auto idx : indicesOfKeptVertices) {
     mergedVectors.push_back(vectors[idx]);
   }
-  vectors = mergedVectors;
+  return mergedVectors;
 }
-
 
 
 void computeBBox(const std::vector<float3>& vertices,

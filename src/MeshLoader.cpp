@@ -55,7 +55,7 @@ void MeshLoader::loadMesh(AABB& bbox,
   }
   else {
     // if there are colors - merge them according to the merged vertices
-    mergeVectors(indicesOfKeptVertices, vertexColors);
+    vertexColors = mergeVectors(indicesOfKeptVertices, vertexColors);
   }
   LOG_TRIVIAL(debug) << "After colors cleanup: num colors: " << vertexColors.size();
 
@@ -66,13 +66,13 @@ void MeshLoader::loadMesh(AABB& bbox,
   }
   else {
     // if there are normals - merge them according to the merged vertices
-    mergeVectors(indicesOfKeptVertices, vertexNormals);
+    vertexNormals = mergeVectors(indicesOfKeptVertices, vertexNormals);
   }
   LOG_TRIVIAL(debug) << "After normals cleanup: num normals: " << vertexNormals.size();
 
   //   if vertex coords are present - merge them according to vertex merge
   if (!vertexCoords.empty()) {
-    mergeVectors(indicesOfKeptVertices, vertexCoords);
+    vertexCoords = mergeVectors(indicesOfKeptVertices, vertexCoords);
   }
 
   // compute axis-aligned bounding box
