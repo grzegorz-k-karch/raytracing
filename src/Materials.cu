@@ -11,9 +11,6 @@ __device__ Lambertian::Lambertian(const GenericMaterialDevice *genMatDev)
   for (int texIdx = 0; texIdx < m_numTextures; texIdx++) {
     m_textures[texIdx] = TextureFactory::createTexture(&(genMatDev->textures[texIdx]));
   }
-#if __CUDA_ARCH__ >= 200
-  printf("numTextures = %d\n", m_numTextures);
-#endif
 }
 
 

@@ -56,7 +56,7 @@ void Renderer::initBuffers(StatusCodes &status)
   }
 }
 
-#define GKK_FLOAT_MAX 3.402823e+38
+#define MY_FLOAT_MAX 3.402823e+38
 
 __device__ float3 getBackgroundColor(const Ray& ray)
 {
@@ -74,7 +74,7 @@ __device__ float3 getColor(const Ray& ray, Object* world,
   float3 attenuationTotal = make_float3(1.0f, 1.0f, 1.0f);
 
   for (int i = 0; i < 50; i++) {
-    if (world->hit(inRay, 0.001f, GKK_FLOAT_MAX, hitRec)) {
+    if (world->hit(inRay, 0.001f, MY_FLOAT_MAX, hitRec)) {
       float3 attenuation;
       Ray scattered;
       if (hitRec.material->scatter(inRay, hitRec, attenuation,

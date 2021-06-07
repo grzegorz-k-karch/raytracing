@@ -17,26 +17,7 @@ struct GenericObjectDevice {
     vertexNormals(nullptr), numVertexNormals(0),
     triangleIndices(nullptr), numTriangleIndices(0) {}
 
-  ~GenericObjectDevice() {
-    // if (scalars != nullptr) {
-    //   CCE(cudaFree(scalars));
-    // }
-    // if (vectors != nullptr) {
-    //   CCE(cudaFree(vectors));
-    // }        
-    // if (vertices != nullptr) {
-    //   CCE(cudaFree(vertices));
-    // }        
-    // if (vertexColors != nullptr) {
-    //   CCE(cudaFree(vertexColors));
-    // }        
-    // if (vertexNormals != nullptr) {
-    //   CCE(cudaFree(vertexNormals));
-    // }        
-    // if (triangleIndices != nullptr) {
-    //   CCE(cudaFree(triangleIndices));
-    // }        
-  }
+  ~GenericObjectDevice() {}
 
   ObjectType objectType;
 

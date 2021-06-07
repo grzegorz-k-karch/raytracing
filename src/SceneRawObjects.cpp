@@ -91,7 +91,7 @@ void SceneRawObjects::parseScene(const std::string filepath,
         LOG_TRIVIAL(warning) << "No material found for an object of type " << objectType
                              << ". Skipping the object.";
       }
-    } else {
+    } else if (objectType != "<xmlcomment>") {
       LOG_TRIVIAL(warning) << "Unknown object " << objectType;
     }
   }

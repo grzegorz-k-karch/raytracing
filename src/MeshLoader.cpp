@@ -31,11 +31,11 @@ void MeshLoader::loadMesh(AABB& bbox,
     loadPlyObject(m_meshFilepath.c_str(), vertices,
 		  vertexColors, vertexNormals,
 		  vertexCoords, triangleIndices);
-    LOG_TRIVIAL(debug) << "Num vertices: " << vertices.size()
-		       << " num colors: " << vertexColors.size()
-		       << " num normals: " << vertexNormals.size()
-		       << " num coords: " << vertexCoords.size()
-		       << " num indices: " << triangleIndices.size();
+    LOG_TRIVIAL(debug) << "\nNum vertices: " << vertices.size()
+		       << "\nnum colors: " << vertexColors.size()
+		       << "\nnum normals: " << vertexNormals.size()
+		       << "\nnum coords: " << vertexCoords.size()
+		       << "\nnum indices: " << triangleIndices.size();
   }
 
   // cleanup mesh

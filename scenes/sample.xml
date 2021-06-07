@@ -24,33 +24,33 @@
   <!--   <smoothness value="0.125"/> -->
   <!-- </Mesh> -->
 
-  <Mesh>
-    <source value="../models/bunny.ply"/> <!-- _small3.ply"/> -->
-    <material value="Metal">
-      <albedo value="0.99 0.2 0.41"/>
-      <fuzz value="0.1"/>
-    </material>
-    <world_pos value="6.0 0.0 -14.0"/>
-    <scale value="40.0 40.0 40.0"/>
-  </Mesh>
+  <!-- <Mesh> -->
+  <!--   <source value="../models/bunny.ply"/> <!-\- _small3.ply"/> -\-> -->
+  <!--   <material value="Metal"> -->
+  <!--     <albedo value="0.99 0.2 0.41"/> -->
+  <!--     <fuzz value="0.1"/> -->
+  <!--   </material> -->
+  <!--   <world_pos value="6.0 0.0 -14.0"/> -->
+  <!--   <scale value="40.0 40.0 40.0"/> -->
+  <!-- </Mesh> -->
 
-  <Mesh>
-    <source value="../models/bunny.ply"/>
-    <material value="Parametric">
-    </material>
-    <world_pos value="-6.0 0.0 -14.0"/>
-    <scale value="40.0 40.0 40.0"/>
-  </Mesh>
+  <!-- <Mesh> -->
+  <!--   <source value="../models/bunny.ply"/> -->
+  <!--   <material value="Parametric"> -->
+  <!--   </material> -->
+  <!--   <world_pos value="-6.0 0.0 -14.0"/> -->
+  <!--   <scale value="40.0 40.0 40.0"/> -->
+  <!-- </Mesh> -->
 
-  <Mesh>
-    <source value="../models/teddy3_textured.ply"/>
-    <material value="Metal">
-      <albedo value="0.59 0.12 0.1"/>
-      <fuzz value="0.1"/>
-    </material>
-    <world_pos value="0.0 0.5 -20.0"/>
-    <scale value="2 2 2"/>
-  </Mesh>
+  <!-- <Mesh> -->
+  <!--   <source value="../models/teddy3_textured.ply"/> -->
+  <!--   <material value="Metal"> -->
+  <!--     <albedo value="0.59 0.12 0.1"/> -->
+  <!--     <fuzz value="0.1"/> -->
+  <!--   </material> -->
+  <!--   <world_pos value="0.0 0.5 -20.0"/> -->
+  <!--   <scale value="2 2 2"/> -->
+  <!-- </Mesh> -->
 
   <Mesh>
     <source value="../models/box.ply"/>
@@ -74,12 +74,12 @@
     </material>
   </Sphere>
 
-  <!-- <Sphere> -->
-  <!--   <center value="2.0 -2.0 -10.0"/> -->
-  <!--   <radius value="1.0"/> -->
-  <!--   <material value="Parametric"> -->
-  <!--   </material> -->
-  <!-- </Sphere> -->
+  <Sphere>
+    <center value="2.0 -2.0 -10.0"/>
+    <radius value="1.0"/>
+    <material value="Parametric">
+    </material>
+  </Sphere>
 
   <Sphere>
     <center value="2.5 -2.0 -9.0"/>
