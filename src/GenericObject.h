@@ -46,6 +46,7 @@ private:
   std::vector<float3> m_vertices;
   std::vector<float3> m_vertexColors;
   std::vector<float3> m_vertexNormals;
+  std::vector<float2> m_vertexCoords;
   std::vector<int>    m_triangleIndices;
 };
 

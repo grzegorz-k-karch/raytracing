@@ -52,17 +52,6 @@ void mergeVertices(std::vector<int>& indices,
 }
 
 
-void mergeVectors(const std::vector<int>& indicesOfKeptVertices,
-		  std::vector<float3>& vectors)
-{
-  std::vector<float3> mergedVectors;
-
-  for (auto idx : indicesOfKeptVertices) {
-    mergedVectors.push_back(vectors[idx]);
-  }
-}
-
-
 void computeNormals(const std::vector<float3>& vertices,
 		    const std::vector<int>& indices,
 		    std::vector<float3>& normals)

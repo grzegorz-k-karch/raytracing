@@ -39,7 +39,8 @@ PlyFile* loadPlyFile(const char* filepath)
       LOG_TRIVIAL(debug) << "PLY file " << filepath << " read successfully.";
     }
     else {
-      LOG_TRIVIAL(error) << "Could not read PLY data from " << filepath << ".";
+      LOG_TRIVIAL(error) << "Could not read PLY data from "
+			 << filepath << ".";
     }
   }
   else {
@@ -54,6 +55,11 @@ typedef struct {
 } triangle_t;
 
 typedef struct {
+  unsigned char ncoords;
+  float *coords;
+} texcoords_t;
+
+typedef struct {
   float x;
   float y;
   float z;
@@ -62,7 +68,9 @@ typedef struct {
   unsigned char b;
 } vertex_t;
 
-bool prop_in_list(const char* searched_name, PlyProperty **elem_props, int nprops)
+bool prop_in_list(const char* searched_name,
+		  PlyProperty **elem_props,
+		  int nprops)
 {
   bool prop_found = false;
   for (int prop_idx = 0; prop_idx < nprops; prop_idx++) {
@@ -77,9 +85,10 @@ bool prop_in_list(const char* searched_name, PlyProperty **elem_props, int nprop
 }
 
 
-void get_properties(PlyFile* ply, char* elem_name_cstr, PlyProperty* used_props,
-		    int num_used_props, PlyProperty** elem_props, int nprops,
-		    std::vector<int>& props_present)
+void get_properties(PlyFile* ply, char* elem_name_cstr,
+		    PlyProperty* used_props,
+		    int num_used_props, PlyProperty** elem_props,
+		    int nprops, std::vector<int>& props_present)
 {
   for (int used_prop_idx = 0; used_prop_idx < num_used_props; used_prop_idx++) {
     char *used_prop_name = used_props[used_prop_idx].name;
@@ -92,8 +101,9 @@ void get_properties(PlyFile* ply, char* elem_name_cstr, PlyProperty* used_props,
 
 void loadPlyObject(const char* filepath,
 		   std::vector<float3>& vertices,
-		   std::vector<float3>& vertex_colors,		   
+		   std::vector<float3>& vertex_colors,
 		   std::vector<float3>& vertex_normals,
+		   std::vector<float2>& vertex_coords,
 		   std::vector<int>& triangle_indices)
 {
   PlyFile *ply = loadPlyFile(filepath);
@@ -102,36 +112,40 @@ void loadPlyObject(const char* filepath,
   char **element_name_list = get_element_list_ply(ply, &num_elems);
   LOG_TRIVIAL(debug) << "PLY: num_elems " << num_elems;
 
-  
+
 
   // list of property information for a vertex
-  PlyProperty vert_props[] = {{"x", Float32, Float32, offsetof(vertex_t,x), 0, 0, 0, 0},
-  			      {"y", Float32, Float32, offsetof(vertex_t,y), 0, 0, 0, 0},
-  			      {"z", Float32, Float32, offsetof(vertex_t,z), 0, 0, 0, 0},
-			      {"red", Uint8, Uint8, offsetof(vertex_t,r), 0, 0, 0, 0},
-  			      {"green", Uint8, Uint8, offsetof(vertex_t,g), 0, 0, 0, 0},
-  			      {"blue", Uint8, Uint8, offsetof(vertex_t,b), 0, 0, 0, 0},};
+  PlyProperty vert_props[] =
+    {{"x", Float32, Float32, offsetof(vertex_t,x), 0, 0, 0, 0},
+     {"y", Float32, Float32, offsetof(vertex_t,y), 0, 0, 0, 0},
+     {"z", Float32, Float32, offsetof(vertex_t,z), 0, 0, 0, 0},
+     {"red", Uint8, Uint8, offsetof(vertex_t,r), 0, 0, 0, 0},
+     {"green", Uint8, Uint8, offsetof(vertex_t,g), 0, 0, 0, 0},
+     {"blue", Uint8, Uint8, offsetof(vertex_t,b), 0, 0, 0, 0},};
   int num_vert_props = sizeof(vert_props)/sizeof(PlyProperty);
   std::vector<int> vert_props_present(num_vert_props, 0);
 
-  // list of property information for a vertex
-  PlyProperty face_props[] = {{"vertex_indices", Int32, Int32, offsetof(triangle_t, indices),
-  			       1, Uint8, Uint8, offsetof(triangle_t, nindices)}};
+  // list of property information for a face - triangle
+  PlyProperty face_props[] =
+    {{"vertex_indices", Int32, Int32, offsetof(triangle_t, indices),
+      1, Uint8, Uint8, offsetof(triangle_t, nindices)},
+     {"texcoord", Float32, Float32, offsetof(texcoords_t, coords),
+      1, Uint8, Uint8, offsetof(texcoords_t, ncoords)}};
   int num_face_props = sizeof(face_props)/sizeof(PlyProperty);
-  std::vector<int> face_props_present(num_face_props, 0);  
-  
+  std::vector<int> face_props_present(num_face_props, 0);
+
   for (int elem = 0; elem < num_elems; elem++) {
     std::string elem_name = std::string(element_name_list[elem]);
     char *elem_name_cstr = element_name_list[elem];
     int nelems, nprops;
     PlyProperty **elem_props = get_element_description_ply(ply, elem_name_cstr, &nelems, &nprops);
-  
+
     LOG_TRIVIAL(debug) << "PLY: elem_name " << elem_name
 		       << " nelems: " << nelems
 		       << " nprops " << nprops;
-    
+
     if (elem_name.compare("vertex") == 0) {
-      
+
       get_properties(ply, elem_name_cstr, vert_props,
 		     num_vert_props, elem_props, nprops,
 		     vert_props_present);
@@ -158,6 +172,15 @@ void loadPlyObject(const char* filepath,
 	ply_get_element(ply, (void*)&triangle);
 	for (int v_idx = 0; v_idx < triangle.nindices; v_idx++) {
 	  triangle_indices.push_back(triangle.indices[v_idx]);
+	}
+	bool texcoords_present = face_props_present[1] != 0;
+	if (texcoords_present) {
+	  texcoords_t texcoords;
+	  ply_get_element(ply, (void*)&texcoords);
+	  for (int t_idx = 0; t_idx < texcoords.ncoords/2; t_idx++) {
+	    vertex_coords.push_back(make_float2(texcoords.coords[t_idx*2],
+						texcoords.coords[t_idx*2+1]));
+	  }
 	}
       }
     }

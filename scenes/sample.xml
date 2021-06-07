@@ -43,7 +43,7 @@
   </Mesh>
 
   <Mesh>
-    <source value="../models/teddy3.ply"/>
+    <source value="../models/teddy3_textured.ply"/>
     <material value="Metal">
       <albedo value="0.59 0.12 0.1"/>
       <fuzz value="0.1"/>

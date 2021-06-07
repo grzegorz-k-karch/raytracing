@@ -21,18 +21,20 @@ void MeshLoader::loadMesh(AABB& bbox,
 			  std::vector<float3>& vertices,
 			  std::vector<float3>& vertexColors,
 			  std::vector<float3>& vertexNormals,
+			  std::vector<float2>& vertexCoords,
 			  std::vector<int>& triangleIndices,
 			  std::vector<float>& scalars) const
 {
   bool fileIsPly = checkIfPlyFile(m_meshFilepath);
   LOG_TRIVIAL(debug) << "File is PLY: " << fileIsPly;
   if (fileIsPly) {
-    loadPlyObject(m_meshFilepath.c_str(),
-		  vertices, vertexColors,
-		  vertexNormals, triangleIndices);
+    loadPlyObject(m_meshFilepath.c_str(), vertices,
+		  vertexColors, vertexNormals,
+		  vertexCoords, triangleIndices);
     LOG_TRIVIAL(debug) << "Num vertices: " << vertices.size()
 		       << " num colors: " << vertexColors.size()
 		       << " num normals: " << vertexNormals.size()
+		       << " num coords: " << vertexCoords.size()
 		       << " num indices: " << triangleIndices.size();
   }
 
@@ -67,6 +69,11 @@ void MeshLoader::loadMesh(AABB& bbox,
     mergeVectors(indicesOfKeptVertices, vertexNormals);
   }
   LOG_TRIVIAL(debug) << "After normals cleanup: num normals: " << vertexNormals.size();
+
+  //   if vertex coords are present - merge them according to vertex merge
+  if (!vertexCoords.empty()) {
+    mergeVectors(indicesOfKeptVertices, vertexCoords);
+  }
 
   // compute axis-aligned bounding box
   float3 bmin;
