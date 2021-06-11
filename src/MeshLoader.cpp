@@ -21,19 +21,21 @@ void MeshLoader::loadMesh(AABB& bbox,
 			  std::vector<float3>& vertices,
 			  std::vector<float3>& vertexColors,
 			  std::vector<float3>& vertexNormals,
+			  std::vector<float2>& textureCoords,
 			  std::vector<int>& triangleIndices,
 			  std::vector<float>& scalars) const
 {
   bool fileIsPly = checkIfPlyFile(m_meshFilepath);
   LOG_TRIVIAL(debug) << "File is PLY: " << fileIsPly;
   if (fileIsPly) {
-    loadPlyObject(m_meshFilepath.c_str(),
-		  vertices, vertexColors,
-		  vertexNormals, triangleIndices);
-    LOG_TRIVIAL(debug) << "Num vertices: " << vertices.size()
-		       << " num colors: " << vertexColors.size()
-		       << " num normals: " << vertexNormals.size()
-		       << " num indices: " << triangleIndices.size();
+    loadPlyObject(m_meshFilepath.c_str(), vertices,
+		  vertexColors, vertexNormals,
+		  textureCoords, triangleIndices);
+    LOG_TRIVIAL(debug) << "\nNum vertices: " << vertices.size()
+		       << "\nnum colors: " << vertexColors.size()
+		       << "\nnum normals: " << vertexNormals.size()
+		       << "\nnum coords: " << textureCoords.size()
+		       << "\nnum indices: " << triangleIndices.size();
   }
 
   // cleanup mesh
@@ -53,9 +55,9 @@ void MeshLoader::loadMesh(AABB& bbox,
   }
   else {
     // if there are colors - merge them according to the merged vertices
-    mergeVectors(indicesOfKeptVertices, vertexColors);
+    vertexColors = mergeVectors(indicesOfKeptVertices, vertexColors);
   }
-  LOG_TRIVIAL(debug) << "After colors cleanup: num colors: " << vertexColors.size();
+  LOG_TRIVIAL(debug) << "After colors merge: num colors: " << vertexColors.size();
 
   //   compute normals if not present
   if (vertexNormals.empty()) {
@@ -64,24 +66,16 @@ void MeshLoader::loadMesh(AABB& bbox,
   }
   else {
     // if there are normals - merge them according to the merged vertices
-    mergeVectors(indicesOfKeptVertices, vertexNormals);
+    vertexNormals = mergeVectors(indicesOfKeptVertices, vertexNormals);
   }
-  LOG_TRIVIAL(debug) << "After normals cleanup: num normals: " << vertexNormals.size();
+  LOG_TRIVIAL(debug) << "After normals merge: num normals: " << vertexNormals.size();
 
   // compute axis-aligned bounding box
   float3 bmin;
   float3 bmax;
   computeBBox(vertices, bmin, bmax);
 
-  LOG_TRIVIAL(trace) << "BBox: ("
-		     << bmin.x << ", " << bmin.y << ", " << bmin.z << ") - ("
-		     << bmax.x << ", " << bmax.y << ", " << bmax.z << ")";
-
   translateAndScale(m_worldPos, m_scale, bmin, bmax, vertices);
-
-  LOG_TRIVIAL(trace) << "BBox after translation and scaling: ("
-		     << bmin.x << ", " << bmin.y << ", " << bmin.z << ") - ("
-		     << bmax.x << ", " << bmax.y << ", " << bmax.z << ")";
 
   bbox = AABB(bmin, bmax);
   scalars.push_back(m_smoothness);

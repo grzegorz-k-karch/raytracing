@@ -7,7 +7,9 @@
 class Material;
 
 struct HitRecord {
-  float t; // time
+  float t; // hit param
+  float u; // texture coordinate
+  float v; // texture coordinate
   float3 p; // position
   float3 n; // normal at p
   const Material *material;

@@ -1,18 +1,21 @@
 ------------------------------------------------------------------------------
 TODO:
 ------------------------------------------------------------------------------
+ - IN PROGRESS: textures
  - DONE mesh attribute - whether normal is face normal or normal interpolated from vertices
    - now there's a <smoothness> parameter that controls how the vertex normals contribute to
      the interpolated normal: n = pow(w0, smoothness)*n0 + ... + pow(w2, smoothness)*n2
+ - DONE bvh
  - material parametric - attribute to control how it's parametrized (normal, color)
  - light sources
- - DONE bvh
- - textures
  - ray depth
  - memory management
  - volume rendering
  - member variables - add missing m_
 ------------------------------------------------------------------------------
+ASSUMPTIONS
+------------------------------------------------------------------------------
+ - texture coordinates are defined per triangle vertex index
 
 DONE - resolve object creation before diving into this project
 problem definition:

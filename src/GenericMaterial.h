@@ -7,6 +7,7 @@
 
 #include "StatusCodes.h"
 #include "GenericMaterialDevice.cuh"
+#include "GenericTexture.h"
 
 namespace pt = boost::property_tree;
 
@@ -37,6 +38,7 @@ private:
   MaterialType m_materialType;
   std::vector<float> m_scalars;
   std::vector<float3> m_vectors;
+  std::vector<GenericTexture> m_textures;
 };
 
 #endif//GENERIC_MATERIAL_H

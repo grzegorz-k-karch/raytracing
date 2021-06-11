@@ -16,6 +16,7 @@ void loadPlyObject(const char* filepath,
 		   std::vector<float3>& vertices,
 		   std::vector<float3>& vertex_colors,		   
 		   std::vector<float3>& vertex_normals,
+		   std::vector<float2>& vertex_coords,
 		   std::vector<int>& indices);
 
 #endif // PLY_UTILS_H

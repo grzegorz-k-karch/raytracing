@@ -27,7 +27,8 @@ GenericMaterial::GenericMaterial(const std::string materialType,
 GenericMaterial::GenericMaterial(GenericMaterial&& other) noexcept :
   m_materialType(other.m_materialType),
   m_scalars(other.m_scalars),
-  m_vectors(other.m_vectors)
+  m_vectors(other.m_vectors),
+  m_textures(other.m_textures)
 {
   LOG_TRIVIAL(trace) << "GenericMaterial copy constructor";  
 }
@@ -35,8 +36,19 @@ GenericMaterial::GenericMaterial(GenericMaterial&& other) noexcept :
 
 void GenericMaterial::parseLambertian(const pt::ptree material)
 {
-  float3 albedo = string2float3(material.get<std::string>("albedo.<xmlattr>.value"));
-  m_vectors = {albedo};
+  StatusCodes status = StatusCodes::NoError;
+  //--------------------------------------------------------------------------
+  // texture
+  auto texture_it = material.find("texture");
+  bool textureFound = texture_it != material.not_found();
+  if (textureFound) {
+    LOG_TRIVIAL(trace) << "Texture found.";
+    pt::ptree texture = texture_it->second;
+    m_textures.push_back(GenericTexture(texture, status));
+  }
+  else {
+    LOG_TRIVIAL(trace) << "Texture not found.";
+  }
 }
 
 
@@ -59,4 +71,3 @@ void GenericMaterial::parseParametric(const pt::ptree material)
 {
   m_scalars = {0.0f};
 }
-

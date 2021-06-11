@@ -6,13 +6,14 @@
 #include "SceneRawObjects.h"
 #include "Objects.cuh"
 #include "Materials.cuh"
+#include "Textures.cuh"
 
 class MaterialFactory {
 public:
   __device__
   static Material* createMaterial(const GenericMaterialDevice* genMatDev) {
 
-    Material* mat = nullptr;
+    Material *mat = nullptr;
     switch (genMatDev->materialType) {
     case MaterialType::Lambertian:
       mat = new Lambertian(genMatDev);
@@ -35,7 +36,6 @@ public:
     return mat;
   }
 };
-
 
 class ObjectFactory {
 public:

@@ -4,6 +4,7 @@
 #include <assert.h>
 #include "GenericMaterial.h"
 #include "Ray.cuh"
+#include "Textures.cuh"
 
 class Material {
 public:
@@ -12,15 +13,18 @@ public:
   				  curandState* localRandState) const = 0;
 };
 
+
 class Lambertian : public Material {
 public:
-  __device__ Lambertian(const GenericMaterialDevice* genMatDev)
-    : m_albedo(genMatDev->vectors[0]) {}
+  __device__ Lambertian(const GenericMaterialDevice *genMatDev);
+  
   __device__ virtual bool scatter(const Ray& inRay, const HitRecord& hitRec,
   				  float3& attenuation, Ray& outRays,
   				  curandState* localRandState) const;
-  float3 m_albedo;
+  Texture **m_textures;
+  int m_numTextures;
 };
+
 
 class Metal : public Material {
 public:
@@ -34,6 +38,7 @@ public:
   float m_fuzz;
 };
 
+
 class Dielectric : public Material {
 public:
   __device__ Dielectric(const GenericMaterialDevice* genMatDev)
@@ -43,6 +48,7 @@ public:
   				  curandState* localRandState) const;
   float m_refIdx;
 };
+
 
 class Parametric : public Material {
 public:

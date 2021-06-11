@@ -15,28 +15,10 @@ struct GenericObjectDevice {
     vertices(nullptr), numVertices(0),
     vertexColors(nullptr), numVertexColors(0),
     vertexNormals(nullptr), numVertexNormals(0),
+    textureCoords(nullptr), numTextureCoords(0),
     triangleIndices(nullptr), numTriangleIndices(0) {}
 
-  ~GenericObjectDevice() {
-    // if (scalars != nullptr) {
-    //   CCE(cudaFree(scalars));
-    // }
-    // if (vectors != nullptr) {
-    //   CCE(cudaFree(vectors));
-    // }        
-    // if (vertices != nullptr) {
-    //   CCE(cudaFree(vertices));
-    // }        
-    // if (vertexColors != nullptr) {
-    //   CCE(cudaFree(vertexColors));
-    // }        
-    // if (vertexNormals != nullptr) {
-    //   CCE(cudaFree(vertexNormals));
-    // }        
-    // if (triangleIndices != nullptr) {
-    //   CCE(cudaFree(triangleIndices));
-    // }        
-  }
+  ~GenericObjectDevice() {}
 
   ObjectType objectType;
 
@@ -59,6 +41,9 @@ struct GenericObjectDevice {
 
   float3 *vertexNormals;
   int    numVertexNormals;
+
+  float2 *textureCoords;
+  int    numTextureCoords;
 
   int *triangleIndices;
   int numTriangleIndices;

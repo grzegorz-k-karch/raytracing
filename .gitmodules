@@ -1,3 +1,6 @@
 [submodule "src/external/pngwriter"]
 	path = src/external/pngwriter
 	url = git@github.com:pngwriter/pngwriter.git
+[submodule "src/external/stb"]
+	path = src/external/stb
+	url = git@github.com:nothings/stb.git

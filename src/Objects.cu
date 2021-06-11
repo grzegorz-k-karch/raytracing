@@ -137,7 +137,7 @@ Object* createBVH(Object **objects, int numObjects)
   while (0 < numNodes/2) {
     axis = int(ceilf(curand_uniform(&localRandState)*3.0f) - 1.0f);
     sortNodes(nodes, numNodes, axis);
-    for (int pairIdx = 0; pairIdx < numNodes; pairIdx++) {
+    for (int pairIdx = 0; pairIdx < (numNodes+1)/2; pairIdx++) {
       Object *left = nodes[pairIdx*2];
       int rightIdx = pairIdx*2 + 1;
       Object *right = rightIdx < numNodes ? nodes[rightIdx] : nullptr;
@@ -147,7 +147,6 @@ Object* createBVH(Object **objects, int numObjects)
   }
 
   root = nodes[0];
-
   delete [] nodes;
 
   return root;
@@ -336,11 +335,27 @@ bool Mesh::hit(const Ray& ray, float tMin, float tMax, HitRecord& hitRec) const
     float3 n1 = vertexNormals[t1];
     float3 n2 = vertexNormals[t2];
     hitRec.n = normalAtP(u, v, n0, n1, n2);
-
+    if (numTextureCoords > 0) {
+      getTextureUV(u, v, tidx*3, tidx*3+1, tidx*3+2, hitRec.u, hitRec.v);
+    }
     hitRec.material = m_material;
     return true;
   }
   return false;
+}
+
+
+__device__ void Mesh::getTextureUV(float uTriangle, float vTriangle,
+				   int t0, int t1, int t2,
+				   float& uTexture, float &vTexture) const
+{
+  float2 tc0 = textureCoords[t0];
+  float2 tc1 = textureCoords[t1];
+  float2 tc2 = textureCoords[t2];
+  float2 tc = (1.0f - uTriangle - vTriangle)*tc0 + uTriangle*tc1 + vTriangle*tc2;
+
+  uTexture = tc.x;
+  vTexture = -tc.y;
 }
 
 
@@ -373,9 +388,20 @@ bool Sphere::hit(const Ray& ray, float tMin, float tMax, HitRecord& hitRec) cons
       hitRec.t = t;
       hitRec.p = ray.pointAtT(t);
       hitRec.n = normalAtP(hitRec.p);
+      getSphereUV(hitRec.n, hitRec.u, hitRec.v);
       hitRec.material = m_material;
       return true;
     }
   }
   return false;
+}
+
+__device__ void Sphere::getSphereUV(const float3& p,
+				    float& u, float &v)
+{
+  const float pi = 3.14159265f;
+  float theta = acosf(p.y);
+  float phi = atan2f(-p.z, p.x) + pi;
+  u = phi/(2*pi);
+  v = theta/pi;
 }

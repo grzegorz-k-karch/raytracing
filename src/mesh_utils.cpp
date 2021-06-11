@@ -1,6 +1,8 @@
 #include <map>
 #include <vector_functions.h>
 
+#include "logging.h"
+
 #include "mesh_utils.h"
 #include "nvidia/helper_math.h"
 
@@ -24,11 +26,11 @@ public:
 void mergeVertices(std::vector<int>& indices,
 		   std::vector<float3>& vertices,
 		   std::vector<int>& indicesOfKeptVertices)
-{    
+{
   std::map<float3, int, VertexComparator> visitedVertices;
   std::vector<float3> mergedVertices;
-  std::vector<int> mergedIndices;  
-  
+  std::vector<int> mergedIndices;
+
   int mergedVertexID = 0;
   for (auto vertexIdx : indices) {
 
@@ -52,17 +54,6 @@ void mergeVertices(std::vector<int>& indices,
 }
 
 
-void mergeVectors(const std::vector<int>& indicesOfKeptVertices,
-		  std::vector<float3>& vectors)
-{
-  std::vector<float3> mergedVectors;
-
-  for (auto idx : indicesOfKeptVertices) {
-    mergedVectors.push_back(vectors[idx]);
-  }
-}
-
-
 void computeNormals(const std::vector<float3>& vertices,
 		    const std::vector<int>& indices,
 		    std::vector<float3>& normals)
@@ -79,7 +70,7 @@ void computeNormals(const std::vector<float3>& vertices,
     float3 triangleVertices[3] = {vertices[vertIdx0],
 				  vertices[vertIdx1],
 				  vertices[vertIdx2]};
-    
+
     float3 edge1 = triangleVertices[1] - triangleVertices[0];
     float3 edge2 = triangleVertices[2] - triangleVertices[0];
     float3 n = cross(edge1,edge2);
@@ -91,7 +82,7 @@ void computeNormals(const std::vector<float3>& vertices,
   for (int normIdx = 0; normIdx < normals.size(); normIdx++) {
     float3 n = normals[normIdx];
     normals[normIdx] = normalize(n);
-  }  
+  }
 }
 
 
@@ -120,7 +111,9 @@ void computeBBox(const std::vector<float3>& vertices,
       bmax.z = v.z;
     }
   }
-
+  LOG_TRIVIAL(trace) << "BBox: ("
+		     << bmin.x << ", " << bmin.y << ", " << bmin.z << ") - ("
+		     << bmax.x << ", " << bmax.y << ", " << bmax.z << ")";
 }
 
 void translateAndScale(float3 worldPos, float3 scale,
@@ -135,4 +128,8 @@ void translateAndScale(float3 worldPos, float3 scale,
   }
   bmin = (bmin - center)*scale + worldPos;
   bmax = (bmax - center)*scale + worldPos;
+
+  LOG_TRIVIAL(trace) << "BBox after translation and scaling: ("
+		     << bmin.x << ", " << bmin.y << ", " << bmin.z << ") - ("
+		     << bmax.x << ", " << bmax.y << ", " << bmax.z << ")";
 }
