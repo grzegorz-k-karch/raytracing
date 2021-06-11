@@ -13,6 +13,7 @@ public:
   				  curandState* localRandState) const = 0;
 };
 
+
 class Lambertian : public Material {
 public:
   __device__ Lambertian(const GenericMaterialDevice *genMatDev);
@@ -23,6 +24,7 @@ public:
   Texture **m_textures;
   int m_numTextures;
 };
+
 
 class Metal : public Material {
 public:
@@ -36,6 +38,7 @@ public:
   float m_fuzz;
 };
 
+
 class Dielectric : public Material {
 public:
   __device__ Dielectric(const GenericMaterialDevice* genMatDev)
@@ -45,6 +48,7 @@ public:
   				  curandState* localRandState) const;
   float m_refIdx;
 };
+
 
 class Parametric : public Material {
 public:

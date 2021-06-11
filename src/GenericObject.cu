@@ -17,6 +17,7 @@ void GenericObject::copyToDevice(GenericObjectDevice* genericObjectDevice,
   h_genericObjectDevice.numVertices = m_vertices.size();
   h_genericObjectDevice.numVertexColors = m_vertexColors.size();
   h_genericObjectDevice.numVertexNormals = m_vertexNormals.size();
+  h_genericObjectDevice.numTextureCoords = m_textureCoords.size();
   h_genericObjectDevice.numTriangleIndices = m_triangleIndices.size();
   h_genericObjectDevice.objectType = m_objectType;
 
@@ -75,6 +76,18 @@ void GenericObject::copyToDevice(GenericObjectDevice* genericObjectDevice,
     return;
   }
   status = CCE(cudaMemcpy(h_genericObjectDevice.vertexNormals, m_vertexNormals.data(),
+			  dataSize, cudaMemcpyHostToDevice));
+  if (status != StatusCodes::NoError) {
+    return;
+  }
+
+  // texture coords ----------------------------------------------------------
+  dataSize = m_textureCoords.size()*sizeof(float2);
+  status = CCE(cudaMalloc((void**)&(h_genericObjectDevice.textureCoords), dataSize));
+  if (status != StatusCodes::NoError) {
+    return;
+  }
+  status = CCE(cudaMemcpy(h_genericObjectDevice.textureCoords, m_textureCoords.data(),
 			  dataSize, cudaMemcpyHostToDevice));
   if (status != StatusCodes::NoError) {
     return;

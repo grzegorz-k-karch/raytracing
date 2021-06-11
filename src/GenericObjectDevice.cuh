@@ -15,6 +15,7 @@ struct GenericObjectDevice {
     vertices(nullptr), numVertices(0),
     vertexColors(nullptr), numVertexColors(0),
     vertexNormals(nullptr), numVertexNormals(0),
+    textureCoords(nullptr), numTextureCoords(0),
     triangleIndices(nullptr), numTriangleIndices(0) {}
 
   ~GenericObjectDevice() {}
@@ -40,6 +41,9 @@ struct GenericObjectDevice {
 
   float3 *vertexNormals;
   int    numVertexNormals;
+
+  float2 *textureCoords;
+  int    numTextureCoords;
 
   int *triangleIndices;
   int numTriangleIndices;

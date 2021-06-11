@@ -1,12 +1,12 @@
 <scene version="0.0.1">
 
   <Camera>
-    <lookFrom value="-3.0 2 1.5"/>
-    <lookAt value="-1.5 0.0 -10.0"/>
+    <lookFrom value="-3.0 20 1.5"/>
+    <lookAt value="-1.5 0.0 -12.5"/>
     <!-- <lookFrom value="-6.0 6.0 -2.0"/> -->
     <!-- <lookAt value="-2.5 1.0 -10.0"/>     -->
     <up value="0.0 1.0 0.0"/>
-    <fov value="45.0"/>
+    <fov value="30.0"/>
     <aspect value="3.0 2.0"/>
     <aperture value="0.001"/>
     <focus_distance value="-1.0"/>
@@ -14,43 +14,34 @@
     <time1 value="1.0"/>
   </Camera>
 
-  <!-- <Mesh> -->
-  <!--   <source value="../models/bunny_small3.ply"/> -->
-  <!--   <material value="Dielectric"> -->
-  <!--     <ref_idx value="0.1"/> -->
-  <!--   </material> -->
-  <!--   <world_pos value="0.0 0.0 -14.0"/> -->
-  <!--   <scale value="40.0 40.0 40.0"/> -->
-  <!--   <smoothness value="0.125"/> -->
-  <!-- </Mesh> -->
+  <Mesh>
+    <source value="../models/bunny.ply"/> <!-- _small3.ply"/> -->
+    <material value="Metal">
+      <albedo value="0.99 0.2 0.41"/>
+      <fuzz value="0.1"/>
+    </material>
+    <world_pos value="6.0 0.0 -14.0"/>
+    <scale value="40.0 40.0 40.0"/>
+  </Mesh>
 
-  <!-- <Mesh> -->
-  <!--   <source value="../models/bunny.ply"/> <!-\- _small3.ply"/> -\-> -->
-  <!--   <material value="Metal"> -->
-  <!--     <albedo value="0.99 0.2 0.41"/> -->
-  <!--     <fuzz value="0.1"/> -->
-  <!--   </material> -->
-  <!--   <world_pos value="6.0 0.0 -14.0"/> -->
-  <!--   <scale value="40.0 40.0 40.0"/> -->
-  <!-- </Mesh> -->
+  <Mesh>
+    <source value="../models/bunny.ply"/>
+    <material value="Parametric">
+    </material>
+    <world_pos value="-6.0 0.0 -14.0"/>
+    <scale value="40.0 40.0 40.0"/>
+  </Mesh>
 
-  <!-- <Mesh> -->
-  <!--   <source value="../models/bunny.ply"/> -->
-  <!--   <material value="Parametric"> -->
-  <!--   </material> -->
-  <!--   <world_pos value="-6.0 0.0 -14.0"/> -->
-  <!--   <scale value="40.0 40.0 40.0"/> -->
-  <!-- </Mesh> -->
-
-  <!-- <Mesh> -->
-  <!--   <source value="../models/teddy3_textured.ply"/> -->
-  <!--   <material value="Metal"> -->
-  <!--     <albedo value="0.59 0.12 0.1"/> -->
-  <!--     <fuzz value="0.1"/> -->
-  <!--   </material> -->
-  <!--   <world_pos value="0.0 0.5 -20.0"/> -->
-  <!--   <scale value="2 2 2"/> -->
-  <!-- </Mesh> -->
+  <Mesh>
+    <source value="../models/teddy4_textured.ply"/>
+    <material value="Lambertian">
+      <texture value="ImageTexture">
+      	<source value="../models/10607_teddy_bear_SG_v1_diffuse.jpg"/>
+      </texture>
+    </material>
+    <world_pos value="0.0 0.5 -15.0"/>
+    <scale value="0.2 0.2 0.2"/>
+  </Mesh>
 
   <Mesh>
     <source value="../models/box.ply"/>
@@ -85,7 +76,7 @@
     <center value="2.5 -2.0 -9.0"/>
     <radius value="1.2"/>
     <material value="Dielectric">
-      <ref_idx value="1.5"/>      
+      <ref_idx value="1.5"/>
     </material>
   </Sphere>
 
@@ -108,4 +99,3 @@
   </Sphere>
 
 </scene>
-

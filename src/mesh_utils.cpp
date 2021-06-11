@@ -1,6 +1,8 @@
 #include <map>
 #include <vector_functions.h>
 
+#include "logging.h"
+
 #include "mesh_utils.h"
 #include "nvidia/helper_math.h"
 
@@ -109,7 +111,9 @@ void computeBBox(const std::vector<float3>& vertices,
       bmax.z = v.z;
     }
   }
-
+  LOG_TRIVIAL(trace) << "BBox: ("
+		     << bmin.x << ", " << bmin.y << ", " << bmin.z << ") - ("
+		     << bmax.x << ", " << bmax.y << ", " << bmax.z << ")";
 }
 
 void translateAndScale(float3 worldPos, float3 scale,
@@ -124,4 +128,8 @@ void translateAndScale(float3 worldPos, float3 scale,
   }
   bmin = (bmin - center)*scale + worldPos;
   bmax = (bmax - center)*scale + worldPos;
+
+  LOG_TRIVIAL(trace) << "BBox after translation and scaling: ("
+		     << bmin.x << ", " << bmin.y << ", " << bmin.z << ") - ("
+		     << bmax.x << ", " << bmax.y << ", " << bmax.z << ")";
 }

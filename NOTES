@@ -13,6 +13,9 @@ TODO:
  - volume rendering
  - member variables - add missing m_
 ------------------------------------------------------------------------------
+ASSUMPTIONS
+------------------------------------------------------------------------------
+ - texture coordinates are defined per triangle vertex index
 
 DONE - resolve object creation before diving into this project
 problem definition:

@@ -57,6 +57,8 @@ public:
       numVertexColors(genObjDev->numVertexColors),
       vertexNormals(genObjDev->vertexNormals),
       numVertexNormals(genObjDev->numVertexNormals),
+      textureCoords(genObjDev->textureCoords),
+      numTextureCoords(genObjDev->numTextureCoords),
       triangleIndices(genObjDev->triangleIndices),
       numTriangleIndices(genObjDev->numTriangleIndices),
       m_material(mat),
@@ -70,6 +72,10 @@ public:
     return true;
   }
 
+  __device__ void getTextureUV(float uTriangle, float vTriangle,
+			       int t0, int t1, int t2,
+			       float& uTexture, float &vTexture) const;
+
   AABB m_bbox;
 
   float3 *vertices;
@@ -78,6 +84,8 @@ public:
   int    numVertexColors;
   float3 *vertexNormals;
   int    numVertexNormals;
+  float2 *textureCoords;
+  int    numTextureCoords;
   int *triangleIndices;
   int numTriangleIndices;
   const Material *m_material;
@@ -106,7 +114,7 @@ public:
   }
 
   __device__ static void getSphereUV(const float3& p,
-				     float& u, float &v); 
+				     float& u, float &v);
 
   AABB m_bbox;
   float3 m_center;
