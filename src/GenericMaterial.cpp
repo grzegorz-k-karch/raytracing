@@ -6,7 +6,11 @@
 GenericMaterial::GenericMaterial(const std::string materialType,
 				 const pt::ptree material)
 {
-  if (materialType == "Lambertian") {
+  if (materialType == "DiffuseLight") {
+    m_materialType = MaterialType::DiffuseLight;
+    parseDiffuseLight(material);
+  }
+  else if (materialType == "Lambertian") {
     m_materialType = MaterialType::Lambertian;
     parseLambertian(material);
   }
@@ -31,6 +35,24 @@ GenericMaterial::GenericMaterial(GenericMaterial&& other) noexcept :
   m_textures(other.m_textures)
 {
   LOG_TRIVIAL(trace) << "GenericMaterial copy constructor";  
+}
+
+
+void GenericMaterial::parseDiffuseLight(const pt::ptree material)
+{
+  StatusCodes status = StatusCodes::NoError;
+  //--------------------------------------------------------------------------
+  // texture
+  auto texture_it = material.find("texture");
+  bool textureFound = texture_it != material.not_found();
+  if (textureFound) {
+    LOG_TRIVIAL(trace) << "Texture found.";
+    pt::ptree texture = texture_it->second;
+    m_textures.push_back(GenericTexture(texture, status));
+  }
+  else {
+    LOG_TRIVIAL(trace) << "Texture not found.";
+  }
 }
 
 

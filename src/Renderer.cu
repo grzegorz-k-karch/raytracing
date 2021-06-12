@@ -62,7 +62,7 @@ __device__ float3 getBackgroundColor(const Ray& ray)
 {
   float3 unitDirection = normalize(ray.m_direction);
   float t = 0.5f*(unitDirection.y + 1.0f);
-  return (1.0f - t)*make_float3(1.0f, 1.0f, 1.0f) + t*make_float3(0.5f, 0.7f, 1.0f);
+  return ((1.0f - t)*make_float3(1.0f, 1.0f, 1.0f) + t*make_float3(1.0f, 0.7f, 0.5f))*0.75f;
 }
 
 __device__ float3 getColor(const Ray& ray, Object* world,
@@ -77,10 +77,15 @@ __device__ float3 getColor(const Ray& ray, Object* world,
     if (world->hit(inRay, 0.001f, MY_FLOAT_MAX, hitRec)) {
       float3 attenuation;
       Ray scattered;
+      float3 emitted = hitRec.material->emitted(hitRec.u, hitRec.v, hitRec.p);
       if (hitRec.material->scatter(inRay, hitRec, attenuation,
       				   scattered, localRandState)) {
       	attenuationTotal *= attenuation;
       	inRay = scattered;
+      }
+      else {
+	color = emitted;
+	break;
       }
     }
     else {
