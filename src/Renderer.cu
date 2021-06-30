@@ -60,9 +60,7 @@ void Renderer::initBuffers(StatusCodes &status)
 
 __device__ float3 getBackgroundColor(const Ray& ray)
 {
-  float3 unitDirection = normalize(ray.m_direction);
-  float t = 0.5f*(unitDirection.y + 1.0f);
-  return ((1.0f - t)*make_float3(1.0f, 1.0f, 1.0f) + t*make_float3(1.0f, 0.7f, 0.5f))*0.75f;
+  return make_float3(0.0f, 0.0f, 0.0f);
 }
 
 __device__ float3 getColor(const Ray& ray, Object* world,

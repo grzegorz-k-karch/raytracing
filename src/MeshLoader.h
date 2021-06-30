@@ -30,6 +30,7 @@ private:
   float3 m_worldPos;
   float3 m_scale;
   float m_smoothness;
+  std::string m_frontFace;
 };
 
 #endif//MESH_LOADER_H
