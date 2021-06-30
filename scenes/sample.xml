@@ -20,6 +20,7 @@
     </material>
     <world_pos value="6.0 0.0 -14.0"/>
     <scale value="40.0 40.0 40.0"/>
+    <front_face value="CW"/>
   </Mesh>
 
   <Mesh>
@@ -28,6 +29,7 @@
     </material>
     <world_pos value="-6.0 0.0 -14.0"/>
     <scale value="40.0 40.0 40.0"/>
+    <front_face value="CW"/>
   </Mesh>
 
   <Mesh>
