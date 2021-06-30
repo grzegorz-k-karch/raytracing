@@ -4,7 +4,7 @@
 #include "logging.h"
 #include "GenericTextureDevice.cuh"
 
-enum class MaterialType { None, Lambertian, Metal, Dielectric, Parametric };
+enum class MaterialType { None, DiffuseLight, Lambertian, Metal, Dielectric, Parametric };
 
 struct GenericMaterialDevice {
 

@@ -29,7 +29,8 @@ void computeBBox(const std::vector<float3>& vertices,
 
 void computeNormals(const std::vector<float3>& vertices,
 		    const std::vector<int>& indices,
-		    std::vector<float3>& normals);
+		    std::vector<float3>& normals,
+		    const std::string frontFace);
 
 void translateAndScale(float3 worldPos, float3 scale,
 		       float3& bmin, float3& bmax,

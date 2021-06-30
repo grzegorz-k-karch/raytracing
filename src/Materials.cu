@@ -4,6 +4,12 @@
 #include "nvidia/helper_math.h"
 
 
+__device__ DiffuseLight::DiffuseLight(const GenericMaterialDevice *genMatDev)
+{
+  m_emittingTexture = TextureFactory::createTexture(&(genMatDev->textures[0]));
+}
+
+
 __device__ Lambertian::Lambertian(const GenericMaterialDevice *genMatDev)
 {
   m_numTextures = genMatDev->numTextures;
@@ -63,7 +69,7 @@ __device__ bool Dielectric::scatter(const Ray& inRay, const HitRecord& hitRec,
   else {
     outwardNormal = hitRec.n;
     n1OverN2 = 1.0f/m_refIdx;
-    cosine = -dot(inRay.m_direction, hitRec.n)/length(inRay.m_direction);    
+    cosine = -dot(inRay.m_direction, hitRec.n)/length(inRay.m_direction);
   }
 
   if (refract(inRay.m_direction, outwardNormal, n1OverN2, refracted)) {
@@ -80,8 +86,8 @@ __device__ bool Dielectric::scatter(const Ray& inRay, const HitRecord& hitRec,
   else {
     outRays = Ray(hitRec.p, refracted, inRay.m_timestamp);
   }
-  
-  return true;  
+
+  return true;
 }
 
 __device__ float schlick(float cosine, float refIdx)
@@ -101,4 +107,3 @@ __device__ bool Parametric::scatter(const Ray& inRay, const HitRecord& hitRec,
   attenuation = fabs(hitRec.n);
   return true;
 }
-

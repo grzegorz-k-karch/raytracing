@@ -13,6 +13,7 @@ MeshLoader::MeshLoader(const pt::ptree object)
   m_worldPos = string2float3(object.get<std::string>("world_pos.<xmlattr>.value"));
   m_scale = string2float3(object.get<std::string>("scale.<xmlattr>.value"));
   m_smoothness = object.get<float>("smoothness.<xmlattr>.value", 1.0f);
+  m_frontFace = object.get<std::string>("front_face.<xmlattr>.value", std::string("CCW"));
 
   LOG_TRIVIAL(debug) << "Mesh filepath: " << m_meshFilepath;
 }
@@ -62,7 +63,7 @@ void MeshLoader::loadMesh(AABB& bbox,
   //   compute normals if not present
   if (vertexNormals.empty()) {
     // if no normals - compute them
-    computeNormals(vertices, triangleIndices, vertexNormals);
+    computeNormals(vertices, triangleIndices, vertexNormals, m_frontFace);
   }
   else {
     // if there are normals - merge them according to the merged vertices

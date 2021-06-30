@@ -30,6 +30,7 @@ public:
 		    StatusCodes& status) const;
 
 private:
+  void parseDiffuseLight(const pt::ptree material);
   void parseLambertian(const pt::ptree material);
   void parseMetal(const pt::ptree material);
   void parseDielectric(const pt::ptree material);

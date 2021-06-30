@@ -56,7 +56,8 @@ void mergeVertices(std::vector<int>& indices,
 
 void computeNormals(const std::vector<float3>& vertices,
 		    const std::vector<int>& indices,
-		    std::vector<float3>& normals)
+		    std::vector<float3>& normals,
+		    const std::string frontFace)
 {
   normals.resize(vertices.size(), make_float3(0.0f));
 
@@ -79,9 +80,10 @@ void computeNormals(const std::vector<float3>& vertices,
     normals[vertIdx1] += n;
     normals[vertIdx2] += n;
   }
+  float orientation = frontFace == "CCW" ? 1.0f : -1.0f;
   for (int normIdx = 0; normIdx < normals.size(); normIdx++) {
     float3 n = normals[normIdx];
-    normals[normIdx] = normalize(n);
+    normals[normIdx] = orientation*normalize(n);
   }
 }
 

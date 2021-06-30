@@ -15,6 +15,9 @@ public:
 
     Material *mat = nullptr;
     switch (genMatDev->materialType) {
+    case MaterialType::DiffuseLight:
+      mat = new DiffuseLight(genMatDev);
+      break;
     case MaterialType::Lambertian:
       mat = new Lambertian(genMatDev);
       break;
