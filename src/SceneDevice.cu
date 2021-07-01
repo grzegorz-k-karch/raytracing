@@ -6,9 +6,10 @@
 #include "SceneDevice.cuh"
 
 
-__global__
-void constructScene_kernel(const SceneRawObjectsDevice *sceneRawObjectsDevice,
-			   Camera* camera, Object** world)
+__global__ void constructScene_kernel(
+    const SceneRawObjectsDevice *sceneRawObjectsDevice,
+    Camera* camera,
+    Object** world)
 {
   *camera = *(sceneRawObjectsDevice->camera);
 

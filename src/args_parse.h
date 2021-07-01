@@ -12,6 +12,7 @@ struct ProgramArgs {
   int sampleCount;
   int imageWidth;
   int imageHeight;
+  int rayDepth;
   boost::log::trivial::severity_level logLevel;
 };
 

@@ -8,12 +8,13 @@
 
 class Renderer {
 public:
-  Renderer(int imageWidth, int imageHeight, int sampleCount)
-      : m_imageWidth(imageWidth),
-	m_imageHeight(imageHeight),
-        m_sampleCount(sampleCount),
-	m_framebuffer(nullptr),
-	m_randState(nullptr) {
+  Renderer(int imageWidth, int imageHeight, int sampleCount, int rayDepth) :
+    m_imageWidth(imageWidth),
+    m_imageHeight(imageHeight),
+    m_sampleCount(sampleCount),
+    m_rayDepth(rayDepth),
+    m_framebuffer(nullptr),
+    m_randState(nullptr) {
     LOG_TRIVIAL(trace) << "Renderer::Renderer";
   }
 
@@ -43,6 +44,7 @@ private:
   int m_imageWidth;
   int m_imageHeight;
   int m_sampleCount;
+  int m_rayDepth;
   curandState *m_randState;
   float3 *m_framebuffer;
 };

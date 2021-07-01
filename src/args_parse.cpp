@@ -32,7 +32,10 @@ void add_config_options(po::options_description& config,
      po::value<std::string>(&(args->sceneFilePath))->default_value(""),
      "File with scene description")
     ("num-samples,s",
-     po::value<int>(&(args->sampleCount))->default_value(64),
+     po::value<int>(&(args->sampleCount))->default_value(4),
+     "Number of samples per pixel")
+    ("ray-depth",
+     po::value<int>(&(args->rayDepth))->default_value(32),
      "Number of samples per pixel")
     ("res-x,x",
      po::value<int>(&(args->imageWidth))->default_value(600),

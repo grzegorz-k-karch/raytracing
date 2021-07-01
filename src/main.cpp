@@ -29,7 +29,8 @@ int main(int argc, char** argv)
   sceneDevice.constructScene(sceneRawObjects, status);
   exitIfError(status);
 
-  Renderer renderer{args.imageWidth, args.imageHeight, args.sampleCount};
+  Renderer renderer{args.imageWidth, args.imageHeight,
+		    args.sampleCount, args.rayDepth};
   // initialize random state and image buffer
   renderer.initBuffers(status);
   exitIfError(status);
