@@ -14,50 +14,48 @@ class AABB {
 public:
   __device__ AABB() {}
   __device__ __host__ AABB(float3 a, float3 b) :
-    bmin{a.x, a.y, a.z},
-    bmax{b.x, b.y, b.z} {}
+    m_bmin{a.x, a.y, a.z},
+    m_bmax{b.x, b.y, b.z} {}
   __device__ AABB(const AABB& bbox) :
-    bmin{bbox.bmin[0], bbox.bmin[1], bbox.bmin[2]},
-    bmax{bbox.bmax[0], bbox.bmax[1], bbox.bmax[2]} {}
+    m_bmin{bbox.m_bmin[0], bbox.m_bmin[1], bbox.m_bmin[2]},
+    m_bmax{bbox.m_bmax[0], bbox.m_bmax[1], bbox.m_bmax[2]} {}
   __device__ AABB& operator=(const AABB& other) {
-    bmin[0] = other.min().x;
-    bmin[1] = other.min().y;
-    bmin[2] = other.min().z;
-    bmax[0] = other.max().x;
-    bmax[1] = other.max().y;
-    bmax[2] = other.max().z;
+    m_bmin[0] = other.min().x;
+    m_bmin[1] = other.min().y;
+    m_bmin[2] = other.min().z;
+    m_bmax[0] = other.max().x;
+    m_bmax[1] = other.max().y;
+    m_bmax[2] = other.max().z;
     return *this;
   }
 
-  __device__ __host__ float3 min() const { return make_float3(bmin[0], bmin[1], bmin[2]); }
-  __device__ __host__ float3 max() const { return make_float3(bmax[0], bmax[1], bmax[2]); }
+  __device__ __host__ float3 min() const {
+    return make_float3(m_bmin[0], m_bmin[1], m_bmin[2]);
+  }
+
+  __device__ __host__ float3 max() const {
+    return make_float3(m_bmax[0], m_bmax[1], m_bmax[2]);
+  }
 
   __device__ bool hit(const Ray& ray, float tMin, float tMax) const;
 
-  friend __device__ __inline__
-  AABB surroundingBBox(const AABB& b0, const AABB& b1);
-  
+  friend __device__ __inline__ AABB surroundingBBox(const AABB& b0,
+						    const AABB& b1);
 private:
-  float bmin[3];
-  float bmax[3];
+  float m_bmin[3];
+  float m_bmax[3];
 };
-
-// __device__ inline float ffmin(float a, float b) { return a < b ? a : b; }
-
-// __device__ inline float ffmax(float a, float b) { return a > b ? a : b; }
 
 __device__ __inline__
 AABB surroundingBBox(const AABB& b0, const AABB& b1) {
-  float3 small = make_float3(fminf(b0.bmin[0], b1.bmin[0]),
-			     fminf(b0.bmin[1], b1.bmin[1]),
-			     fminf(b0.bmin[2], b1.bmin[2]));
-  float3 big = make_float3(fmaxf(b0.bmax[0], b1.bmax[0]),
-			   fmaxf(b0.bmax[1], b1.bmax[1]),
-			   fmaxf(b0.bmax[2], b1.bmax[2]));
-  
+  float3 small = make_float3(fminf(b0.m_bmin[0], b1.m_bmin[0]),
+			     fminf(b0.m_bmin[1], b1.m_bmin[1]),
+			     fminf(b0.m_bmin[2], b1.m_bmin[2]));
+  float3 big = make_float3(fmaxf(b0.m_bmax[0], b1.m_bmax[0]),
+			   fmaxf(b0.m_bmax[1], b1.m_bmax[1]),
+			   fmaxf(b0.m_bmax[2], b1.m_bmax[2]));
+
   return AABB(small, big);
 }
-
-
 
 #endif//AABB_CUH

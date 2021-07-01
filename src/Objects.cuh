@@ -50,19 +50,19 @@ class Mesh : public Object {
 public:
   __device__ Mesh(const GenericObjectDevice* genObjDev,
 		  const Material* mat)
-    : m_bbox(AABB(genObjDev->bmin, genObjDev->bmax)),
-      vertices(genObjDev->vertices),
-      numVertices(genObjDev->numVertices),
-      vertexColors(genObjDev->vertexColors),
-      numVertexColors(genObjDev->numVertexColors),
-      vertexNormals(genObjDev->vertexNormals),
-      numVertexNormals(genObjDev->numVertexNormals),
-      textureCoords(genObjDev->textureCoords),
-      numTextureCoords(genObjDev->numTextureCoords),
-      triangleIndices(genObjDev->triangleIndices),
-      numTriangleIndices(genObjDev->numTriangleIndices),
+    : m_bbox(AABB(genObjDev->m_bmin, genObjDev->m_bmax)),
+      vertices(genObjDev->m_vertices),
+      numVertices(genObjDev->m_numVertices),
+      vertexColors(genObjDev->m_vertexColors),
+      numVertexColors(genObjDev->m_numVertexColors),
+      vertexNormals(genObjDev->m_vertexNormals),
+      numVertexNormals(genObjDev->m_numVertexNormals),
+      textureCoords(genObjDev->m_textureCoords),
+      numTextureCoords(genObjDev->m_numTextureCoords),
+      triangleIndices(genObjDev->m_triangleIndices),
+      numTriangleIndices(genObjDev->m_numTriangleIndices),
       m_material(mat),
-      m_smoothness(genObjDev->scalars[0]) {}
+      m_smoothness(genObjDev->m_scalars[0]) {}
 
   __device__ virtual bool hit(const Ray& ray, float tMin,
 	   float tMax, HitRecord& hitRec) const;
@@ -101,9 +101,9 @@ class Sphere : public Object {
 public:
   __device__ Sphere(const GenericObjectDevice* genObjDev,
 		    const Material* mat)
-    : m_bbox(AABB(genObjDev->bmin, genObjDev->bmax)),
-      m_center(genObjDev->vectors[0]),
-      m_radius(genObjDev->scalars[0]),
+    : m_bbox(AABB(genObjDev->m_bmin, genObjDev->m_bmax)),
+      m_center(genObjDev->m_vectors[0]),
+      m_radius(genObjDev->m_scalars[0]),
       m_material(mat) {}
 
   __device__ virtual bool hit(const Ray& ray, float tMin,

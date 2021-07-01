@@ -7,8 +7,8 @@ bool AABB::hit(const Ray& ray, float tMin, float tMax) const
     float direction = ray.direction(a);
     float origin = ray.origin(a);
     float invD = 1.0f/direction;
-    float t0 = (bmin[a] - origin)*invD;
-    float t1 = (bmax[a] - origin)*invD;
+    float t0 = (m_bmin[a] - origin)*invD;
+    float t1 = (m_bmax[a] - origin)*invD;
     if (invD < 0.0f) {
       swap(t0, t1);
     }

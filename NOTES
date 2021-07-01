@@ -1,6 +1,7 @@
 ------------------------------------------------------------------------------
 TODO:
 ------------------------------------------------------------------------------
+ - DONE member variables - add missing m_
  - DONE ray depth
  - DONE light sources
  - DONE textures
@@ -11,7 +12,7 @@ TODO:
  - material parametric - attribute to control how it's parametrized (normal, color)
  - memory management
  - volume rendering
- - member variables - add missing m_
+ - nesting material creation in objects
 ------------------------------------------------------------------------------
 ASSUMPTIONS
 ------------------------------------------------------------------------------

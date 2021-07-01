@@ -50,8 +50,8 @@ public:
 class Metal : public Material {
 public:
   __device__ Metal(const GenericMaterialDevice* genMatDev)
-    : m_albedo(genMatDev->vectors[0]),
-      m_fuzz(genMatDev->scalars[0]) {}
+    : m_albedo(genMatDev->m_vectors[0]),
+      m_fuzz(genMatDev->m_scalars[0]) {}
   __device__ virtual bool scatter(const Ray& inRay, const HitRecord& hitRec,
   				  float3& attenuation, Ray& outRays,
   				  curandState* localRandState) const;
@@ -63,7 +63,7 @@ public:
 class Dielectric : public Material {
 public:
   __device__ Dielectric(const GenericMaterialDevice* genMatDev)
-    : m_refIdx(genMatDev->scalars[0]) {}
+    : m_refIdx(genMatDev->m_scalars[0]) {}
   __device__ virtual bool scatter(const Ray& inRay, const HitRecord& hitRec,
   				  float3& attenuation, Ray& outRays,
   				  curandState* localRandState) const;
@@ -74,7 +74,7 @@ public:
 class Parametric : public Material {
 public:
   __device__ Parametric(const GenericMaterialDevice* genMatDev) :
-    m_dummy(genMatDev->scalars[0]) {}
+    m_dummy(genMatDev->m_scalars[0]) {}
   __device__ virtual bool scatter(const Ray& inRay, const HitRecord& hitRec,
   				  float3& attenuation, Ray& outRays,
   				  curandState* localRandState) const;

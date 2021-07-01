@@ -10,18 +10,18 @@
 struct SceneRawObjectsDevice {
 
   SceneRawObjectsDevice() :
-    camera(nullptr),
-    objects(nullptr),
-    materials(nullptr) {}
+    m_camera(nullptr),
+    m_objects(nullptr), m_numObjects(0),
+    m_materials(nullptr), m_numMaterials(0) {}
 
   ~SceneRawObjectsDevice() {
   }
   
-  Camera* camera;
-  GenericObjectDevice* objects;
-  int numObjects;
-  GenericMaterialDevice* materials;
-  int numMaterials;
+  Camera* m_camera;
+  GenericObjectDevice* m_objects;
+  int m_numObjects;
+  GenericMaterialDevice* m_materials;
+  int m_numMaterials;
 };
 
 #endif//SCENE_RAW_OBJECTS_DEVICE_H

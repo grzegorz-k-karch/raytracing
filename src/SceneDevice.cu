@@ -11,17 +11,17 @@ __global__ void constructScene_kernel(
     Camera* camera,
     Object** world)
 {
-  *camera = *(sceneRawObjectsDevice->camera);
+  *camera = *(sceneRawObjectsDevice->m_camera);
 
-  int numObjects = sceneRawObjectsDevice->numObjects;
+  int numObjects = sceneRawObjectsDevice->m_numObjects;
   Object **objects = new Object*[numObjects];
 
   for (int objIdx = 0; objIdx < numObjects; objIdx++) {
     GenericMaterialDevice *genMatDev =
-      &(sceneRawObjectsDevice->materials[objIdx]);
+      &(sceneRawObjectsDevice->m_materials[objIdx]);
     Material *material = MaterialFactory::createMaterial(genMatDev);
     GenericObjectDevice *genObjDev =
-      &(sceneRawObjectsDevice->objects[objIdx]);
+      &(sceneRawObjectsDevice->m_objects[objIdx]);
     objects[objIdx] = ObjectFactory::createObject(genObjDev, material);
   }
 
