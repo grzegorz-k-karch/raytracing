@@ -10,10 +10,10 @@ void GenericMaterial::copyToDevice(GenericMaterialDevice* genericMaterialDevice,
 
   GenericMaterialDevice h_genericMaterialDevice;
 
-  h_genericMaterialDevice.materialType = m_materialType;
-  h_genericMaterialDevice.numScalars = m_scalars.size();
-  h_genericMaterialDevice.numVectors = m_vectors.size();
-  h_genericMaterialDevice.numTextures = m_textures.size();
+  h_genericMaterialDevice.m_materialType = m_materialType;
+  h_genericMaterialDevice.m_numScalars = m_scalars.size();
+  h_genericMaterialDevice.m_numVectors = m_vectors.size();
+  h_genericMaterialDevice.m_numTextures = m_textures.size();
 
   
   LOG_TRIVIAL(trace) << "GenericMaterial::copyToDevice: m_textures.size() = "
@@ -22,12 +22,12 @@ void GenericMaterial::copyToDevice(GenericMaterialDevice* genericMaterialDevice,
   //--------------------------------------------------------------------------
   // scalars
   int dataSize = m_scalars.size()*sizeof(float);
-  status = CCE(cudaMalloc((void**)&(h_genericMaterialDevice.scalars),
+  status = CCE(cudaMalloc((void**)&(h_genericMaterialDevice.m_scalars),
 			  dataSize));
   if (status != StatusCodes::NoError) {
     return;
   }
-  status = CCE(cudaMemcpy(h_genericMaterialDevice.scalars, m_scalars.data(),
+  status = CCE(cudaMemcpy(h_genericMaterialDevice.m_scalars, m_scalars.data(),
 			  dataSize, cudaMemcpyHostToDevice));
   if (status != StatusCodes::NoError) {
     return;
@@ -35,12 +35,12 @@ void GenericMaterial::copyToDevice(GenericMaterialDevice* genericMaterialDevice,
   //--------------------------------------------------------------------------
   // vectors
   dataSize = m_vectors.size()*sizeof(float3);
-  status = CCE(cudaMalloc((void**)&(h_genericMaterialDevice.vectors),
+  status = CCE(cudaMalloc((void**)&(h_genericMaterialDevice.m_vectors),
 			  dataSize));
   if (status != StatusCodes::NoError) {
     return;
   }
-  status = CCE(cudaMemcpy(h_genericMaterialDevice.vectors, m_vectors.data(),
+  status = CCE(cudaMemcpy(h_genericMaterialDevice.m_vectors, m_vectors.data(),
 			  dataSize, cudaMemcpyHostToDevice));
   if (status != StatusCodes::NoError) {
     return;
@@ -49,11 +49,10 @@ void GenericMaterial::copyToDevice(GenericMaterialDevice* genericMaterialDevice,
   //--------------------------------------------------------------------------
   // textures
   dataSize = m_textures.size()*sizeof(GenericTextureDevice);
-  status = CCE(cudaMalloc((void**)&(h_genericMaterialDevice.textures),
+  status = CCE(cudaMalloc((void**)&(h_genericMaterialDevice.m_textures),
 			  dataSize));
   for (int texIdx = 0; texIdx < m_textures.size(); texIdx++) {
-    
-    m_textures[texIdx].copyToDevice(h_genericMaterialDevice.textures + texIdx,
+    m_textures[texIdx].copyToDevice(h_genericMaterialDevice.m_textures + texIdx,
 				    status);
   }
 

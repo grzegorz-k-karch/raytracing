@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 TODO:
 ------------------------------------------------------------------------------
- - IN PROGRESS: member variables - add missing m_
+ - DONE member variables - add missing m_
  - DONE ray depth
  - DONE light sources
  - DONE textures

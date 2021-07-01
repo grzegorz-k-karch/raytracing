@@ -8,45 +8,38 @@ enum class ObjectType { None, Mesh, Sphere };
 struct GenericObjectDevice {
 
   GenericObjectDevice() :
-    bmin(make_float3(0.0f, 0.0f, 0.0f)),
-    bmax(make_float3(0.0f, 0.0f, 0.0f)),
-    scalars(nullptr), numScalars(0),
-    vectors(nullptr), numVectors(0),
-    vertices(nullptr), numVertices(0),
-    vertexColors(nullptr), numVertexColors(0),
-    vertexNormals(nullptr), numVertexNormals(0),
-    textureCoords(nullptr), numTextureCoords(0),
-    triangleIndices(nullptr), numTriangleIndices(0) {}
+    m_objectType(ObjectType::None),
+    m_bmin(make_float3(0.0f, 0.0f, 0.0f)),
+    m_bmax(make_float3(0.0f, 0.0f, 0.0f)),
+    m_scalars(nullptr), m_numScalars(0),
+    m_vectors(nullptr), m_numVectors(0),
+    m_vertices(nullptr), m_numVertices(0),
+    m_vertexColors(nullptr), m_numVertexColors(0),
+    m_vertexNormals(nullptr), m_numVertexNormals(0),
+    m_textureCoords(nullptr), m_numTextureCoords(0),
+    m_triangleIndices(nullptr), m_numTriangleIndices(0) {}
 
   ~GenericObjectDevice() {}
 
-  ObjectType objectType;
-
-  float3 bmin;
-  float3 bmax;
-
+  ObjectType m_objectType;
+  float3 m_bmin;
+  float3 m_bmax;
   // sphere members
-  float *scalars;
-  int   numScalars;
-
-  float3 *vectors;
-  int    numVectors;
-
+  float *m_scalars;
+  int m_numScalars;
+  float3 *m_vectors;
+  int m_numVectors;
   // mesh members
-  float3 *vertices;
-  int    numVertices;
-
-  float3 *vertexColors;
-  int    numVertexColors;
-
-  float3 *vertexNormals;
-  int    numVertexNormals;
-
-  float2 *textureCoords;
-  int    numTextureCoords;
-
-  int *triangleIndices;
-  int numTriangleIndices;
+  float3 *m_vertices;
+  int m_numVertices;
+  float3 *m_vertexColors;
+  int m_numVertexColors;
+  float3 *m_vertexNormals;
+  int m_numVertexNormals;
+  float2 *m_textureCoords;
+  int m_numTextureCoords;
+  int *m_triangleIndices;
+  int m_numTriangleIndices;
 };
 
 #endif//GENERIC_OBJECT_DEVICE_H

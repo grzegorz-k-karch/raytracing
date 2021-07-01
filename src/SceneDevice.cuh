@@ -14,7 +14,7 @@ public:
   static Material* createMaterial(const GenericMaterialDevice* genMatDev) {
 
     Material *mat = nullptr;
-    switch (genMatDev->materialType) {
+    switch (genMatDev->m_materialType) {
     case MaterialType::DiffuseLight:
       mat = new DiffuseLight(genMatDev);
       break;
@@ -47,7 +47,7 @@ public:
 			      const Material* material) {
 
     Object *obj = nullptr;
-    switch (genObjDev->objectType) {
+    switch (genObjDev->m_objectType) {
     case ObjectType::Mesh:
       obj = new Mesh(genObjDev, material);
       break;

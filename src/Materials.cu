@@ -6,16 +6,16 @@
 
 __device__ DiffuseLight::DiffuseLight(const GenericMaterialDevice *genMatDev)
 {
-  m_emittingTexture = TextureFactory::createTexture(&(genMatDev->textures[0]));
+  m_emittingTexture = TextureFactory::createTexture(&(genMatDev->m_textures[0]));
 }
 
 
 __device__ Lambertian::Lambertian(const GenericMaterialDevice *genMatDev)
 {
-  m_numTextures = genMatDev->numTextures;
+  m_numTextures = genMatDev->m_numTextures;
   m_textures = new Texture*[m_numTextures];
   for (int texIdx = 0; texIdx < m_numTextures; texIdx++) {
-    m_textures[texIdx] = TextureFactory::createTexture(&(genMatDev->textures[texIdx]));
+    m_textures[texIdx] = TextureFactory::createTexture(&(genMatDev->m_textures[texIdx]));
   }
 }
 
