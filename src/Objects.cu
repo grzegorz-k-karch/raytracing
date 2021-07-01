@@ -115,8 +115,7 @@ void sortNodes(BVHNode **nodes, int numNodes, int axis)
 }
 
 
-__device__
-Object* createBVH(Object **objects, int numObjects)
+__device__ Object* createBVH(Object **objects, int numObjects)
 {
   BVHNode *root = nullptr;
   curandState localRandState;
@@ -134,7 +133,7 @@ Object* createBVH(Object **objects, int numObjects)
     nodes[pairIdx] = new BVHNode(left, right);
   }
 
-  while (0 < numNodes/2) {
+  while (1 < numNodes) {
     axis = int(ceilf(curand_uniform(&localRandState)*3.0f) - 1.0f);
     sortNodes(nodes, numNodes, axis);
     for (int pairIdx = 0; pairIdx < (numNodes+1)/2; pairIdx++) {
@@ -143,7 +142,7 @@ Object* createBVH(Object **objects, int numObjects)
       Object *right = rightIdx < numNodes ? nodes[rightIdx] : nullptr;
       nodes[pairIdx] = new BVHNode(left, right);
     }
-    numNodes /= 2;
+    numNodes = (numNodes+1)/2;
   }
 
   root = nodes[0];

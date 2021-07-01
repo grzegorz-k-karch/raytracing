@@ -64,14 +64,15 @@ __device__ float3 getBackgroundColor(const Ray& ray)
 }
 
 __device__ float3 getColor(const Ray& ray, Object* world,
-			   curandState* localRandState)
+			   curandState* localRandState,
+			   int rayDepth)
 {
   HitRecord hitRec;
   float3 color;
   Ray inRay = ray;
   float3 attenuationTotal = make_float3(1.0f, 1.0f, 1.0f);
 
-  for (int i = 0; i < 50; i++) {
+  for (int i = 0; i < rayDepth; i++) {
     if (world->hit(inRay, 0.001f, MY_FLOAT_MAX, hitRec)) {
       float3 attenuation;
       Ray scattered;
@@ -82,8 +83,8 @@ __device__ float3 getColor(const Ray& ray, Object* world,
       	inRay = scattered;
       }
       else {
-	color = emitted;
-	break;
+    	color = emitted;
+    	break;
       }
     }
     else {
@@ -91,7 +92,6 @@ __device__ float3 getColor(const Ray& ray, Object* world,
       break;
     }
   }
-
   color *= attenuationTotal;
 
   return color;
@@ -101,7 +101,7 @@ __global__
 void renderScene_kernel(Camera* camera, Object** world,
 			curandState* randState, int imageWidth,
 			int imageHeight, int sampleCount,
-			float3* framebuffer)
+			int rayDepth, float3* framebuffer)
 {
   int pixelX = threadIdx.x + blockIdx.x*blockDim.x;
   int pixelY = threadIdx.y + blockIdx.y*blockDim.y;
@@ -116,7 +116,7 @@ void renderScene_kernel(Camera* camera, Object** world,
       float u = float(pixelX + curand_uniform(&localRandState))/float(imageWidth);
       float v = float(pixelY + curand_uniform(&localRandState))/float(imageHeight);
       Ray ray = camera->getRay(u, v, &localRandState);
-      color += getColor(ray, *world, &localRandState);
+      color += getColor(ray, *world, &localRandState, rayDepth);
     }
     framebuffer[pixelIdx] = color/float(sampleCount);
   }
@@ -136,7 +136,7 @@ void Renderer::renderScene(const SceneDevice &sceneDevice, StatusCodes &status)
 						sceneDevice.m_world,
 						m_randState, m_imageWidth,
 						m_imageHeight, m_sampleCount,
-						m_framebuffer);
+						m_rayDepth, m_framebuffer);
   status = CCE(cudaDeviceSynchronize());
   if (status != StatusCodes::NoError) {
     return;
