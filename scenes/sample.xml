@@ -8,8 +8,6 @@
     <aspect value="3.0 2.0"/>
     <aperture value="0.001"/>
     <focus_distance value="-1.0"/>
-    <time0 value="0.0"/>
-    <time1 value="1.0"/>
   </Camera>
 
   <Mesh>

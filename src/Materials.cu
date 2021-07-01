@@ -25,7 +25,7 @@ __device__ bool Lambertian::scatter(const Ray& inRay, const HitRecord& hitRec,
 				    curandState* localRandState) const
 {
   float3 target = hitRec.p + hitRec.n + randomInUnitSphere(localRandState);
-  outRays = Ray(hitRec.p, target - hitRec.p, inRay.m_timestamp);
+  outRays = Ray(hitRec.p, target - hitRec.p);
   attenuation = make_float3(1.0f, 1.0f, 1.0f);
   for (int texIdx = 0; texIdx < m_numTextures; texIdx++) {
     attenuation *= m_textures[texIdx]->color(hitRec.u, hitRec.v, hitRec.p);
@@ -42,7 +42,7 @@ __device__ bool Metal::scatter(const Ray& inRay, const HitRecord& hitRec,
     reflected = -1.0f*reflected;
   }
   outRays = Ray(hitRec.p, reflected +
-		m_fuzz*randomInUnitSphere(localRandState), inRay.m_timestamp);
+		m_fuzz*randomInUnitSphere(localRandState));
   attenuation = m_albedo;
   return (dot(outRays.m_direction, hitRec.n) > 0.0f);
 }
@@ -81,10 +81,10 @@ __device__ bool Dielectric::scatter(const Ray& inRay, const HitRecord& hitRec,
 
   if (curand_uniform(localRandState) < reflectProb) {
     float3 reflected = reflect(normalize(inRay.m_direction), hitRec.n);
-    outRays = Ray(hitRec.p, reflected, inRay.m_timestamp);
+    outRays = Ray(hitRec.p, reflected);
   }
   else {
-    outRays = Ray(hitRec.p, refracted, inRay.m_timestamp);
+    outRays = Ray(hitRec.p, refracted);
   }
 
   return true;
@@ -103,7 +103,7 @@ __device__ bool Parametric::scatter(const Ray& inRay, const HitRecord& hitRec,
 				    curandState* localRandState) const
 {
   float3 target = hitRec.p + hitRec.n + randomInUnitSphere(localRandState);
-  outRays = Ray(hitRec.p, target - hitRec.p, inRay.m_timestamp);
+  outRays = Ray(hitRec.p, target - hitRec.p);
   attenuation = fabs(hitRec.n);
   return true;
 }
