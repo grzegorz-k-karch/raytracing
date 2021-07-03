@@ -1,7 +1,7 @@
 #ifndef TEXTURES_CUH
 #define TEXTURES_CUH
 
-#include "GenericTextureDevice.cuh"
+#include "GenericTexture.h"
 
 class Texture {
 public:
