@@ -16,7 +16,7 @@ public:
   // default constructor
   GenericMaterial() = delete;
   // explicit constructor
-  GenericMaterial(const std::string materialType, const pt::ptree material);
+  GenericMaterial(const pt::ptree& material, StatusCodes& status);
   // move constructor
   GenericMaterial(GenericMaterial&& other) noexcept;
   // copy constructor

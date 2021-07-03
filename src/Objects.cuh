@@ -2,9 +2,8 @@
 #define OBJECTS_CUH
 
 #include "Ray.cuh"
-#include "GenericObjectDevice.cuh"
-
-class Material;
+#include "GenericObject.h"
+#include "Materials.cuh"
 
 
 class Object {
@@ -48,9 +47,9 @@ __device__ bool compareBBoxes(Object* a, Object* b, int axis);
 
 class Mesh : public Object {
 public:
-  __device__ Mesh(const GenericObjectDevice* genObjDev,
-		  const Material* mat)
+  __device__ Mesh(const GenericObjectDevice* genObjDev)
     : m_bbox(AABB(genObjDev->m_bmin, genObjDev->m_bmax)),
+      m_material(MaterialFactory::createMaterial(genObjDev->m_material)),
       vertices(genObjDev->m_vertices),
       numVertices(genObjDev->m_numVertices),
       vertexColors(genObjDev->m_vertexColors),
@@ -61,7 +60,6 @@ public:
       numTextureCoords(genObjDev->m_numTextureCoords),
       triangleIndices(genObjDev->m_triangleIndices),
       numTriangleIndices(genObjDev->m_numTriangleIndices),
-      m_material(mat),
       m_smoothness(genObjDev->m_scalars[0]) {}
 
   __device__ virtual bool hit(const Ray& ray, float tMin,
@@ -99,12 +97,11 @@ private:
 
 class Sphere : public Object {
 public:
-  __device__ Sphere(const GenericObjectDevice* genObjDev,
-		    const Material* mat)
+  __device__ Sphere(const GenericObjectDevice* genObjDev)
     : m_bbox(AABB(genObjDev->m_bmin, genObjDev->m_bmax)),
+      m_material(MaterialFactory::createMaterial(genObjDev->m_material)),
       m_center(genObjDev->m_vectors[0]),
-      m_radius(genObjDev->m_scalars[0]),
-      m_material(mat) {}
+      m_radius(genObjDev->m_scalars[0]) {}
 
   __device__ virtual bool hit(const Ray& ray, float tMin,
 			      float tMax, HitRecord& hitRec) const;
@@ -112,9 +109,7 @@ public:
     bbox = m_bbox;
     return true;
   }
-
-  __device__ static void getSphereUV(const float3& p,
-				     float& u, float &v);
+  __device__ static void getSphereUV(const float3& p, float& u, float &v);
 
   AABB m_bbox;
   float3 m_center;

@@ -2,6 +2,7 @@
 #define GENERIC_OBJECT_DEVICE_H
 
 #include "AABB.cuh"
+#include "GenericMaterialDevice.cuh"
 
 enum class ObjectType { None, Mesh, Sphere };
 
@@ -11,6 +12,7 @@ struct GenericObjectDevice {
     m_objectType(ObjectType::None),
     m_bmin(make_float3(0.0f, 0.0f, 0.0f)),
     m_bmax(make_float3(0.0f, 0.0f, 0.0f)),
+    m_material(nullptr),
     m_scalars(nullptr), m_numScalars(0),
     m_vectors(nullptr), m_numVectors(0),
     m_vertices(nullptr), m_numVertices(0),
@@ -24,6 +26,7 @@ struct GenericObjectDevice {
   ObjectType m_objectType;
   float3 m_bmin;
   float3 m_bmax;
+  GenericMaterialDevice *m_material;
   // sphere members
   float *m_scalars;
   int m_numScalars;

@@ -8,51 +8,18 @@
 #include "Materials.cuh"
 #include "Textures.cuh"
 
-class MaterialFactory {
-public:
-  __device__
-  static Material* createMaterial(const GenericMaterialDevice* genMatDev) {
-
-    Material *mat = nullptr;
-    switch (genMatDev->m_materialType) {
-    case MaterialType::DiffuseLight:
-      mat = new DiffuseLight(genMatDev);
-      break;
-    case MaterialType::Lambertian:
-      mat = new Lambertian(genMatDev);
-      break;
-    case MaterialType::Metal:
-      mat = new Metal(genMatDev);
-      break;
-    case MaterialType::Dielectric:
-      mat = new Dielectric(genMatDev);
-      break;
-    case MaterialType::Parametric:
-      mat = new Parametric(genMatDev);
-      break;
-    case MaterialType::None:
-      break;
-    default:
-      break;
-    }
-    assert(mat != nullptr);
-    return mat;
-  }
-};
-
 class ObjectFactory {
 public:
   __device__  
-  static Object* createObject(const GenericObjectDevice* genObjDev,
-			      const Material* material) {
+  static Object* createObject(const GenericObjectDevice* genObjDev) {
 
     Object *obj = nullptr;
     switch (genObjDev->m_objectType) {
     case ObjectType::Mesh:
-      obj = new Mesh(genObjDev, material);
+      obj = new Mesh(genObjDev);
       break;
     case ObjectType::Sphere:
-      obj = new Sphere(genObjDev, material);
+      obj = new Sphere(genObjDev);
       break;
     case ObjectType::None:
       break;

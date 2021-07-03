@@ -22,9 +22,6 @@ public:
   void addObject(GenericObject&& obj) {
     m_objects.push_back(std::move(obj));
   }
-  void addMaterial(GenericMaterial&& mat) {
-    m_materials.push_back(std::move(mat));
-  }
 
   SceneRawObjectsDevice* getObjectsOnDevice(StatusCodes &status) const {
     SceneRawObjectsDevice* sceneRawObjectsDevice = copyToDevice(status);
@@ -36,7 +33,6 @@ private:
 
   Camera m_camera;
   std::vector<GenericObject> m_objects;
-  std::vector<GenericMaterial> m_materials;
 };
 
 #endif//SCENE_RAW_OBJECTS_H

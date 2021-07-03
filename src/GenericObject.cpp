@@ -3,7 +3,8 @@
 #include "MeshLoader.h"
 #include "SphereLoader.h"
 
-GenericObject::GenericObject(const std::string objectType, const pt::ptree object)
+GenericObject::GenericObject(const std::string objectType,
+			     const pt::ptree object)
 {
   if (objectType == "Mesh") {
     m_objectType = ObjectType::Mesh;
@@ -13,11 +14,23 @@ GenericObject::GenericObject(const std::string objectType, const pt::ptree objec
     m_objectType = ObjectType::Sphere;
     parseSphere(object);
   }
+  StatusCodes status = StatusCodes::NoError;
+  auto material_it = object.find("material");
+  bool materialFound = material_it != object.not_found();
+  if (materialFound) {
+    LOG_TRIVIAL(trace) << "Material found.";
+    pt::ptree material = material_it->second;
+    m_material = new GenericMaterial(material, status);
+  }
+  else {
+    LOG_TRIVIAL(trace) << "Material not found.";
+  }
 }
 
 GenericObject::GenericObject(GenericObject&& other) noexcept :
   m_objectType(other.m_objectType),
   m_bbox(other.m_bbox),
+  m_material(other.m_material),
   m_scalars(other.m_scalars),
   m_vectors(other.m_vectors),
   m_vertices(other.m_vertices),

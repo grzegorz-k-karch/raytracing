@@ -3,9 +3,10 @@
 #include "nvidia/helper_math.h"
 #include "vector_utils.cuh"
 
-GenericMaterial::GenericMaterial(const std::string materialType,
-				 const pt::ptree material)
+GenericMaterial::GenericMaterial(const pt::ptree& material,
+				 StatusCodes& status)
 {
+  std::string materialType = material.get<std::string>("<xmlattr>.value");
   if (materialType == "DiffuseLight") {
     m_materialType = MaterialType::DiffuseLight;
     parseDiffuseLight(material);
