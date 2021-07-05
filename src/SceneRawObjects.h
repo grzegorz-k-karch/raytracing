@@ -7,12 +7,27 @@
 #include "GenericMaterial.h"
 #include "Camera.cuh"
 #include "StatusCodes.h"
-#include "SceneRawObjectsDevice.cuh"
+
+struct SceneRawObjectsDevice {
+
+  SceneRawObjectsDevice() :
+    m_camera(nullptr),
+    m_objects(nullptr), m_numObjects(0) {}
+
+  ~SceneRawObjectsDevice() {
+  }
+
+  Camera* m_camera;
+  GenericObjectDevice* m_objects;
+  int m_numObjects;
+};
+
 
 class SceneRawObjects {
 public:
   // default constructor
   SceneRawObjects() {}
+  ~SceneRawObjects();
 
   void parseScene(const std::string filepath, StatusCodes& status);
 
@@ -21,9 +36,6 @@ public:
   }
   void addObject(GenericObject&& obj) {
     m_objects.push_back(std::move(obj));
-  }
-  void addMaterial(GenericMaterial&& mat) {
-    m_materials.push_back(std::move(mat));
   }
 
   SceneRawObjectsDevice* getObjectsOnDevice(StatusCodes &status) const {
@@ -36,7 +48,6 @@ private:
 
   Camera m_camera;
   std::vector<GenericObject> m_objects;
-  std::vector<GenericMaterial> m_materials;
 };
 
 #endif//SCENE_RAW_OBJECTS_H

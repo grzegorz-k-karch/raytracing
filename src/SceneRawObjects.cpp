@@ -35,7 +35,6 @@ bool checkRequiredObjects(const pt::ptree &sceneTree)
     }
     node++;
   }
-
   return cameraPresent && renderableObjectPresent;
 }
 
@@ -61,7 +60,7 @@ void SceneRawObjects::parseScene(const std::string filepath,
   bool requiredObjectsPresent = checkRequiredObjects(sceneTree);
   if (!requiredObjectsPresent) {
     LOG_TRIVIAL(error) << "Scene file does not have required objects "
-		       << "(a camera and a renderable object).";    
+		       << "(a camera and a renderable object).";
     status = StatusCodes::SceneError;
     return;
   }
@@ -72,27 +71,18 @@ void SceneRawObjects::parseScene(const std::string filepath,
 
   for (auto &it : sceneTree) {
     std::string objectType = it.first;
-
     if (objectType == "Camera") {
       setCamera(Camera(it.second));
     } else if (foundAny(objectType, renderableObjects)) {
-      // before we store the object, get it's material - one of object's attributes
-      auto material_it = it.second.find("material");
-      bool materialFound = material_it != it.second.not_found();
-
-      if (materialFound) {
-        // we're good to go - store the object
-        addObject(GenericObject(objectType, it.second));
-        pt::ptree material = material_it->second;
-        std::string materialType = material.get<std::string>("<xmlattr>.value");
-        // store object's material
-        addMaterial(GenericMaterial(materialType, material));
-      } else {
-        LOG_TRIVIAL(warning) << "No material found for an object of type " << objectType
-                             << ". Skipping the object.";
-      }
+      addObject(GenericObject(objectType, it.second));
     } else if (objectType != "<xmlcomment>") {
       LOG_TRIVIAL(warning) << "Unknown object " << objectType;
     }
   }
+}
+
+
+SceneRawObjects::~SceneRawObjects()
+{
+
 }

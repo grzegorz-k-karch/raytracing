@@ -1,6 +1,7 @@
 #include "logging.h"
 #include "cuda_utils.cuh"
 #include "GenericObject.h"
+#include "GenericMaterial.h"
 
 void GenericObject::copyToDevice(GenericObjectDevice* genericObjectDevice,
 				 StatusCodes& status) const
@@ -21,8 +22,21 @@ void GenericObject::copyToDevice(GenericObjectDevice* genericObjectDevice,
   h_genericObjectDevice.m_numTriangleIndices = m_triangleIndices.size();
   h_genericObjectDevice.m_objectType = m_objectType;
 
+  // material ----------------------------------------------------------------
+  // allocate buffer for GenericMaterialDevice struct
+  int dataSize = sizeof(GenericMaterialDevice);
+  status = CCE(cudaMalloc((void**)&(h_genericObjectDevice.m_material),
+			  dataSize));
+  if (status != StatusCodes::NoError) {
+    return;
+  }
+  m_material->copyToDevice(h_genericObjectDevice.m_material, status);
+  if (status != StatusCodes::NoError) {
+    return;
+  }
+
   // scalars -----------------------------------------------------------------
-  int dataSize = m_scalars.size()*sizeof(float);
+  dataSize = m_scalars.size()*sizeof(float);
   status = CCE(cudaMalloc((void**)&(h_genericObjectDevice.m_scalars), dataSize));
   if (status != StatusCodes::NoError) {
     return;

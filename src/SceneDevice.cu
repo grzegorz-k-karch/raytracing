@@ -17,12 +17,9 @@ __global__ void constructScene_kernel(
   Object **objects = new Object*[numObjects];
 
   for (int objIdx = 0; objIdx < numObjects; objIdx++) {
-    GenericMaterialDevice *genMatDev =
-      &(sceneRawObjectsDevice->m_materials[objIdx]);
-    Material *material = MaterialFactory::createMaterial(genMatDev);
     GenericObjectDevice *genObjDev =
       &(sceneRawObjectsDevice->m_objects[objIdx]);
-    objects[objIdx] = ObjectFactory::createObject(genObjDev, material);
+    objects[objIdx] = ObjectFactory::createObject(genObjDev);
   }
 
   *world = createBVH(objects, numObjects);

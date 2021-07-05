@@ -6,6 +6,7 @@
 #include "Ray.cuh"
 #include "Textures.cuh"
 
+
 class Material {
 public:
   __device__ virtual bool scatter(const Ray& inRay, const HitRecord& hitRec,
@@ -38,7 +39,7 @@ public:
 class Lambertian : public Material {
 public:
   __device__ Lambertian(const GenericMaterialDevice *genMatDev);
-  
+
   __device__ virtual bool scatter(const Ray& inRay, const HitRecord& hitRec,
   				  float3& attenuation, Ray& outRays,
   				  curandState* localRandState) const;
@@ -82,5 +83,38 @@ public:
 };
 
 __device__ float schlick(float cosine, float refIdx);
+
+
+class MaterialFactory {
+public:
+  __device__
+  static Material* createMaterial(const GenericMaterialDevice* genMatDev) {
+
+    Material *material = nullptr;
+    switch (genMatDev->m_materialType) {
+    case MaterialType::DiffuseLight:
+      material = new DiffuseLight(genMatDev);
+      break;
+    case MaterialType::Lambertian:
+      material = new Lambertian(genMatDev);
+      break;
+    case MaterialType::Metal:
+      material = new Metal(genMatDev);
+      break;
+    case MaterialType::Dielectric:
+      material = new Dielectric(genMatDev);
+      break;
+    case MaterialType::Parametric:
+      material = new Parametric(genMatDev);
+      break;
+    case MaterialType::None:
+      break;
+    default:
+      break;
+    }
+    assert(material != nullptr);
+    return material;
+  }
+};
 
 #endif//MATERIALS_CUH
