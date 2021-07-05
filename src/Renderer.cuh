@@ -33,9 +33,7 @@ public:
   }
 
   void initBuffers(StatusCodes &status);
-
   void renderScene(const SceneDevice& sceneDevice, StatusCodes& status);
-
   void getImageOnHost(std::vector<float3>& image, StatusCodes& status) const;
 
 private:

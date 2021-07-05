@@ -27,6 +27,7 @@ class SceneRawObjects {
 public:
   // default constructor
   SceneRawObjects() {}
+  ~SceneRawObjects();
 
   void parseScene(const std::string filepath, StatusCodes& status);
 

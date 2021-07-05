@@ -60,7 +60,7 @@ void SceneRawObjects::parseScene(const std::string filepath,
   bool requiredObjectsPresent = checkRequiredObjects(sceneTree);
   if (!requiredObjectsPresent) {
     LOG_TRIVIAL(error) << "Scene file does not have required objects "
-		       << "(a camera and a renderable object).";    
+		       << "(a camera and a renderable object).";
     status = StatusCodes::SceneError;
     return;
   }
@@ -79,4 +79,10 @@ void SceneRawObjects::parseScene(const std::string filepath,
       LOG_TRIVIAL(warning) << "Unknown object " << objectType;
     }
   }
+}
+
+
+SceneRawObjects::~SceneRawObjects()
+{
+
 }
