@@ -1,7 +1,8 @@
 ------------------------------------------------------------------------------
 TODO:
 ------------------------------------------------------------------------------
- - IN PROGRESS nesting material creation in objects
+ - IN PROGRESS memory management
+ - DONE nesting material creation in objects
  - DONE member variables - add missing m_
  - DONE ray depth
  - DONE light sources
@@ -11,7 +12,6 @@ TODO:
      the interpolated normal: n = pow(w0, smoothness)*n0 + ... + pow(w2, smoothness)*n2
  - DONE bvh
  - material parametric - attribute to control how it's parametrized (normal, color)
- - memory management
  - volume rendering
  - use pointers where appropriate (e.g. GenericTexture in GenericMaterial)
 ------------------------------------------------------------------------------
