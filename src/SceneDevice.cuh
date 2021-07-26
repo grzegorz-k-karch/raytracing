@@ -33,7 +33,11 @@ public:
 
 class SceneDevice {
 public:
-  void constructScene(const SceneRawObjects& sceneRawObjects,
+  SceneDevice() :
+    m_camera(nullptr),
+    m_world(nullptr) {}
+  ~SceneDevice();
+  void constructScene(SceneRawObjects& sceneRawObjects,
 		      StatusCodes& status);  
   Camera *m_camera;
   Object** m_world;

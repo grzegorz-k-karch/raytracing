@@ -29,7 +29,8 @@ struct GenericObjectDevice {
     m_textureCoords(nullptr), m_numTextureCoords(0),
     m_triangleIndices(nullptr), m_numTriangleIndices(0) {}
 
-  ~GenericObjectDevice() {}
+  GenericObjectDevice(GenericObjectDevice&& other) noexcept;
+  ~GenericObjectDevice();
 
   ObjectType m_objectType;
   float3 m_bmin;
@@ -68,9 +69,12 @@ class GenericObject {
   GenericObject& operator=(const GenericObject& other) = delete;
   // move assignment operator
   GenericObject& operator=(const GenericObject&& other) = delete;
-  
+
+  ~GenericObject();
+
   void copyToDevice(GenericObjectDevice* genericObjectDevice,
-		    StatusCodes& status) const;
+		    StatusCodes& status);
+  // void freeDeviceMemory(StatusCodes& status);
 
 private:
 
@@ -89,6 +93,8 @@ private:
   std::vector<float3> m_vertexNormals;
   std::vector<float2> m_textureCoords;
   std::vector<int>    m_triangleIndices;
+
+  GenericObjectDevice m_h_genericObjectDevice;
 };
 
 #endif//GENERIC_OBJECT_H

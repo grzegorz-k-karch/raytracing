@@ -18,8 +18,8 @@ void initRandState_kernel(int imageWidth, int imageHeight, curandState* randStat
 
 void Renderer::initRandState(StatusCodes &status)
 {
-  const int tx{8};
-  const int ty{8};
+  const int tx{16};
+  const int ty{16};
 
   dim3 numThreads(tx, ty);
   dim3 numBlocks((m_imageWidth + tx - 1)/tx,

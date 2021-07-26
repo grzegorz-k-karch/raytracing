@@ -8,11 +8,13 @@
 #include "Renderer.cuh"
 #include "ImageSaver.h"
 
+
 int main(int argc, char** argv)
 {
-  size_t freeMemory1;
+  size_t freeMemoryBegin;
   size_t totalMemory;
-  cudaMemGetInfo(&freeMemory1, &totalMemory);
+  cudaMemGetInfo(&freeMemoryBegin, &totalMemory);
+
   {
     StatusCodes status{StatusCodes::NoError};
 
@@ -34,7 +36,7 @@ int main(int argc, char** argv)
     exitIfError(status);
 
     Renderer renderer{args.imageWidth, args.imageHeight,
-		      args.sampleCount, args.rayDepth};
+  		      args.sampleCount, args.rayDepth};
     // initialize random state and image buffer
     renderer.initBuffers(status);
     exitIfError(status);
@@ -46,19 +48,26 @@ int main(int argc, char** argv)
     std::vector<float3> image;
     renderer.getImageOnHost(image, status);
     exitIfError(status);
-  
+
     ImageSaver imageSaver;
     // save the rendered image to file
     imageSaver.saveImage(image, args.imageWidth, args.imageHeight,
-			 args.pictureFilePath, status);
+  			 args.pictureFilePath, status);
     exitIfError(status);
   }
-  size_t freeMemory2;
-  cudaMemGetInfo(&freeMemory2, &totalMemory);
-  LOG_TRIVIAL(info) << "\nfree GPU memory: " << freeMemory2/1024.0/1024.0
-		    << "\ntotal GPU memory: " << totalMemory/1024.0/1024.0
-		    << "\nleaked GPU memory: "
-		    << (freeMemory1 - freeMemory2)/1024.0/1024.0;
+  size_t freeMemoryEnd;
+  cudaMemGetInfo(&freeMemoryEnd, &totalMemory);
+  LOG_TRIVIAL(info) << "\n\tfree GPU memory:\t" << freeMemoryEnd/1024.0/1024.0 << " MB"
+		    << "\n\ttotal GPU memory:\t" << totalMemory/1024.0/1024.0 << " MB"
+		    << "\n\tleaked GPU memory:\t"
+		    << (freeMemoryBegin - freeMemoryEnd)/1024.0/1024.0 << " MB";
 
+  cudaDeviceReset();
   return 0;
 }
+
+/*
+  memory cleanup done for:
+  - Renderer
+  - GenericObject.cpp
+*/

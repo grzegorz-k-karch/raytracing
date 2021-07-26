@@ -20,7 +20,7 @@ struct GenericTextureDevice {
     m_vectors(nullptr),
     m_numVectors(0) {}
 
-  ~GenericTextureDevice() {}
+  ~GenericTextureDevice();
 
   TextureType m_textureType;
   // SolidColor

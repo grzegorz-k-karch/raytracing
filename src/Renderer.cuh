@@ -5,6 +5,7 @@
 #include <curand_kernel.h>
 #include <vector>
 #include "SceneDevice.cuh"
+#include "cuda_utils.cuh"
 
 class Renderer {
 public:
@@ -14,20 +15,18 @@ public:
     m_sampleCount(sampleCount),
     m_rayDepth(rayDepth),
     m_framebuffer(nullptr),
-    m_randState(nullptr) {
-    LOG_TRIVIAL(trace) << "Renderer::Renderer";
-  }
+    m_randState(nullptr) {}
 
   ~Renderer() {
     LOG_TRIVIAL(trace) << "Renderer::~Renderer";
     if (m_framebuffer) {
       LOG_TRIVIAL(trace) << "\treleasing m_framebuffer";
-      cudaFree(m_framebuffer);
+      CCE(cudaFree(m_framebuffer));
       m_framebuffer = nullptr;
     }
     if (m_randState) {
       LOG_TRIVIAL(trace) << "\treleasing m_randState";      
-      cudaFree(m_randState);
+      CCE(cudaFree(m_randState));
       m_randState = nullptr;
     }
   }

@@ -31,23 +31,25 @@ public:
 
   void parseScene(const std::string filepath, StatusCodes& status);
 
-  void setCamera(const Camera& camera) {
+  void setCamera(Camera&& camera) {
     m_camera = std::move(camera);
   }
   void addObject(GenericObject&& obj) {
     m_objects.push_back(std::move(obj));
   }
 
-  SceneRawObjectsDevice* getObjectsOnDevice(StatusCodes &status) const {
+  SceneRawObjectsDevice* getObjectsOnDevice(StatusCodes &status) {
     SceneRawObjectsDevice* sceneRawObjectsDevice = copyToDevice(status);
     return sceneRawObjectsDevice;
   }
 
 private:
-  SceneRawObjectsDevice* copyToDevice(StatusCodes &status) const;
+  SceneRawObjectsDevice* copyToDevice(StatusCodes &status);
 
   Camera m_camera;
   std::vector<GenericObject> m_objects;
+
+  SceneRawObjectsDevice m_h_sceneRawObjectsDevice;
 };
 
 #endif//SCENE_RAW_OBJECTS_H

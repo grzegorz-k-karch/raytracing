@@ -4,6 +4,20 @@
 #include "TextureImageLoader.h"
 #include "GenericTexture.h"
 
+GenericTextureDevice::~GenericTextureDevice()
+{
+  LOG_TRIVIAL(trace) << "~GenericTextureDevice";
+  m_textureType = TextureType::None;
+  if (m_vectors) {
+    CCE(cudaFree(m_vectors));
+    m_vectors = nullptr;
+  }
+  m_numVectors = 0;
+  CCE(cudaDestroyTextureObject(m_textureObject));
+  m_textureObject = 0;
+}
+
+
 void GenericTexture::copyToDevice(GenericTextureDevice* genericTextureDevice,
 				  StatusCodes& status) const
 {
@@ -123,3 +137,4 @@ void GenericTexture::parseImageTexture(const pt::ptree& texture,
     return;
   }
 }
+

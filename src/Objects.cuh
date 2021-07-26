@@ -8,6 +8,7 @@
 
 class Object {
 public:
+  __device__ virtual ~Object() {}
   __device__ virtual bool hit(const Ray& ray, float tMin,
 	   float tMax, HitRecord& hitRec) const = 0;
   __device__ virtual bool getBBox(AABB &bbox) const = 0;
@@ -23,6 +24,20 @@ public:
   }
   __device__ BVHNode() :
     m_left(nullptr), m_right(nullptr), m_bboxComputed(false) {}
+  __device__ ~BVHNode() {
+    if (m_left) {
+#if __CUDA_ARCH__ >= 200
+      printf("delete left\n");
+#endif
+      delete m_left;
+    }
+    if (m_right) {
+#if __CUDA_ARCH__ >= 200
+      printf("delete right\n");
+#endif
+      delete m_right;
+    }
+  }
 
   __device__ virtual bool hit(const Ray& ray,
 			      float tMin,
@@ -41,6 +56,7 @@ public:
 
 
 __device__ Object* createBVH(Object** objects, int numObjects);
+__device__ void destroyBVH(BVHNode** root);
 
 __device__ bool compareBBoxes(Object* a, Object* b, int axis);
 
@@ -61,6 +77,15 @@ public:
       triangleIndices(genObjDev->m_triangleIndices),
       numTriangleIndices(genObjDev->m_numTriangleIndices),
       m_smoothness(genObjDev->m_scalars[0]) {}
+
+  __device__ ~Mesh() {
+#if __CUDA_ARCH__ >= 200
+    printf("~Mesh\n");
+#endif
+    if (m_material) {
+      delete m_material;
+    }
+  }
 
   __device__ virtual bool hit(const Ray& ray, float tMin,
 	   float tMax, HitRecord& hitRec) const;
@@ -102,6 +127,15 @@ public:
       m_material(MaterialFactory::createMaterial(genObjDev->m_material)),
       m_center(genObjDev->m_vectors[0]),
       m_radius(genObjDev->m_scalars[0]) {}
+
+  __device__ ~Sphere() {
+#if __CUDA_ARCH__ >= 200
+    printf("~Sphere\n");
+#endif
+    if (m_material) {
+      delete m_material;
+    }
+  }
 
   __device__ virtual bool hit(const Ray& ray, float tMin,
 			      float tMax, HitRecord& hitRec) const;
