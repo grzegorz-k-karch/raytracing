@@ -180,7 +180,7 @@ GenericObjectDevice::~GenericObjectDevice()
 }
 
 
-GenericObjectDevice::GenericObjectDevice(GenericObjectDevice&& other):
+GenericObjectDevice::GenericObjectDevice(GenericObjectDevice&& other) noexcept:
   m_objectType(other.m_objectType),
   m_bmin(other.m_bmin),
   m_bmax(other.m_bmax),
