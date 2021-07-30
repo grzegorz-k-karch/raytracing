@@ -16,7 +16,7 @@ void initRandState_kernel(int imageWidth, int imageHeight, curandState* randStat
   }
 }
 
-void Renderer::initRandState(StatusCodes &status)
+void Renderer::initRandState(StatusCode &status)
 {
   const int tx{16};
   const int ty{16};
@@ -26,32 +26,32 @@ void Renderer::initRandState(StatusCodes &status)
 		 (m_imageHeight + ty - 1)/ty);
 
   status = CCE(cudaMalloc((void**)&m_randState, m_imageWidth*m_imageHeight*sizeof(curandState)));
-  if (status != StatusCodes::NoError) {
+  if (status != StatusCode::NoError) {
     return;
   }
   initRandState_kernel<<<numBlocks, numThreads>>>(m_imageWidth, m_imageHeight, m_randState);
   status = CCE(cudaGetLastError());
-  if (status != StatusCodes::NoError) {
+  if (status != StatusCode::NoError) {
     return;
   }
   status = CCE(cudaDeviceSynchronize());
-  if (status != StatusCodes::NoError) {
+  if (status != StatusCode::NoError) {
     return;
   }
 }
 
-void Renderer::initBuffers(StatusCodes &status)
+void Renderer::initBuffers(StatusCode &status)
 {
   // initialize random state on device
   initRandState(status);
-  if (status != StatusCodes::NoError) {
+  if (status != StatusCode::NoError) {
     return;
   }
 
   // allocate  buffer for the final image
   int framebufferSize = m_imageWidth*m_imageHeight*sizeof(float3);
   status = CCE(cudaMallocManaged((void**)&m_framebuffer, framebufferSize));
-  if (status != StatusCodes::NoError) {
+  if (status != StatusCode::NoError) {
     return;
   }
 }
@@ -122,7 +122,7 @@ void renderScene_kernel(Camera* camera, Object** world,
   }
 }
 
-void Renderer::renderScene(const SceneDevice &sceneDevice, StatusCodes &status)
+void Renderer::renderScene(const SceneDevice &sceneDevice, StatusCode &status)
 {
   LOG_TRIVIAL(trace) << "Renderer::renderScene";
   const int tx = 8;
@@ -138,12 +138,12 @@ void Renderer::renderScene(const SceneDevice &sceneDevice, StatusCodes &status)
 						m_imageHeight, m_sampleCount,
 						m_rayDepth, m_framebuffer);
   status = CCE(cudaDeviceSynchronize());
-  if (status != StatusCodes::NoError) {
+  if (status != StatusCode::NoError) {
     return;
   }
 }
 
-void Renderer::getImageOnHost(std::vector<float3>& image, StatusCodes& status) const
+void Renderer::getImageOnHost(std::vector<float3>& image, StatusCode& status) const
 {
   int imageSize = m_imageWidth*m_imageHeight;
   image.resize(imageSize);

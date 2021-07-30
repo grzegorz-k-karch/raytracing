@@ -31,12 +31,12 @@ public:
     }
   }
 
-  void initBuffers(StatusCodes &status);
-  void renderScene(const SceneDevice& sceneDevice, StatusCodes& status);
-  void getImageOnHost(std::vector<float3>& image, StatusCodes& status) const;
+  void initBuffers(StatusCode &status);
+  void renderScene(const SceneDevice& sceneDevice, StatusCode& status);
+  void getImageOnHost(std::vector<float3>& image, StatusCode& status) const;
 
 private:
-  void initRandState(StatusCodes &status);
+  void initRandState(StatusCode &status);
 
   int m_imageWidth;
   int m_imageHeight;

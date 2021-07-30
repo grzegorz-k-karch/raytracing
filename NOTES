@@ -14,6 +14,9 @@ TODO:
  - material parametric - attribute to control how it's parametrized (normal, color)
  - volume rendering
  - use pointers where appropriate (e.g. GenericTexture in GenericMaterial)
+ - use typedefs
+ - use CUDA C++ features
+ - use C++11 and C++17 features
 ------------------------------------------------------------------------------
 ASSUMPTIONS
 ------------------------------------------------------------------------------

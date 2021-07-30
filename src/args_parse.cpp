@@ -5,7 +5,7 @@
 #include <boost/program_options.hpp>
 
 #include "args_parse.h"
-#include "StatusCodes.h"
+#include "StatusCode.h"
 
 namespace po = boost::program_options;
 
@@ -50,11 +50,11 @@ void add_config_options(po::options_description& config,
 }
 
 ProgramArgs parseArgsFromCmdLine(int argc, char** argv,
-				 StatusCodes& status)
+				 StatusCode& status)
 {
   ProgramArgs args;
 
-  status = StatusCodes::NoError;
+  status = StatusCode::NoError;
   std::string configFilePath;
   std::string logLevel;
   try {
@@ -71,13 +71,12 @@ ProgramArgs parseArgsFromCmdLine(int argc, char** argv,
     po::options_description configFileOptions;
     configFileOptions.add(config);
 
-
     po::variables_map vm;
     po::store(po::command_line_parser(argc, argv).options(cmdLineOptions).run(), vm);
 
     if (vm.count("help")) {
       BOOST_LOG_TRIVIAL(info) << cmdLineOptions;
-      status = StatusCodes::NoError;
+      status = StatusCode::NoError;
       exit(EXIT_SUCCESS);
     }
 
@@ -97,7 +96,7 @@ ProgramArgs parseArgsFromCmdLine(int argc, char** argv,
       std::ifstream ifs(configFilePath.c_str());
       if (!ifs) {
 	BOOST_LOG_TRIVIAL(error) << "Cannot open config file: " << configFilePath;
-	status = StatusCodes::FileError;
+	status = StatusCode::FileError;
 	return args;
       }
       else {
@@ -108,20 +107,20 @@ ProgramArgs parseArgsFromCmdLine(int argc, char** argv,
   }
   catch(const po::required_option& ex) {
     BOOST_LOG_TRIVIAL(error) << ex.what();
-    status = StatusCodes::CmdLineError;
+    status = StatusCode::CmdLineError;
   }
   catch(const po::unknown_option& ex) {
     BOOST_LOG_TRIVIAL(error) << ex.what();
-    status = StatusCodes::CmdLineError;
+    status = StatusCode::CmdLineError;
   }
   catch(const po::error& ex) {
     BOOST_LOG_TRIVIAL(error) << ex.what();
-    status = StatusCodes::CmdLineError;
+    status = StatusCode::CmdLineError;
   }
   return args;
 }
 
-ProgramArgs parseArgs(int argc, char** argv, StatusCodes& status)
+ProgramArgs parseArgs(int argc, char** argv, StatusCode& status)
 {
   return parseArgsFromCmdLine(argc, argv, status);
 }

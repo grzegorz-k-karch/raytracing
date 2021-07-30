@@ -6,7 +6,7 @@
 #include <texture_types.h>
 #include <boost/property_tree/xml_parser.hpp>
 
-#include "StatusCodes.h"
+#include "StatusCode.h"
 
 namespace pt = boost::property_tree;
 
@@ -34,17 +34,17 @@ struct GenericTextureDevice {
 class GenericTexture {
 public:
   GenericTexture(const pt::ptree& texture,
-		 StatusCodes& status);
+		 StatusCode& status);
   void copyToDevice(GenericTextureDevice* d_genericTextureDevice,
-		    StatusCodes& status);
+		    StatusCode& status);
 
 private:
   void parseImageTexture(const pt::ptree& texture,
-			 StatusCodes& status);
+			 StatusCode& status);
   void parseSolidColor(const pt::ptree& texture,
-		       StatusCodes& status);
+		       StatusCode& status);
   void loadImageToDeviceTexture(cudaTextureObject_t& textureObject,
-				StatusCodes& status);
+				StatusCode& status);
 
   TextureType m_textureType;
   int m_imageWidth;

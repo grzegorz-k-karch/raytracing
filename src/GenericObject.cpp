@@ -14,7 +14,7 @@ GenericObject::GenericObject(const std::string objectType,
     m_objectType = ObjectType::Sphere;
     parseSphere(object);
   }
-  StatusCodes status = StatusCodes::NoError;
+  StatusCode status = StatusCode::NoError;
   auto material_it = object.find("material");
   bool materialFound = material_it != object.not_found();
   if (materialFound) {

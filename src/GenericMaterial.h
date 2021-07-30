@@ -5,7 +5,7 @@
 #include <vector_types.h>
 #include <boost/property_tree/xml_parser.hpp>
 
-#include "StatusCodes.h"
+#include "StatusCode.h"
 #include "GenericTexture.h"
 
 namespace pt = boost::property_tree;
@@ -38,7 +38,7 @@ public:
   // default constructor
   GenericMaterial() = delete;
   // explicit constructor
-  GenericMaterial(const pt::ptree& material, StatusCodes& status);
+  GenericMaterial(const pt::ptree& material, StatusCode& status);
   // move constructor
   GenericMaterial(GenericMaterial&& other) noexcept;
   // copy constructor
@@ -49,7 +49,7 @@ public:
   GenericMaterial& operator=(const GenericMaterial&& other) = delete;
 
   void copyToDevice(GenericMaterialDevice* genericMaterialDevice,
-		    StatusCodes& status);
+		    StatusCode& status);
 
 private:
   void parseDiffuseLight(const pt::ptree material);

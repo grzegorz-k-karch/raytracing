@@ -38,7 +38,7 @@ public:
     m_world(nullptr) {}
   ~SceneDevice();
   void constructScene(SceneRawObjects& sceneRawObjects,
-		      StatusCodes& status);  
+		      StatusCode& status);  
   Camera *m_camera;
   Object** m_world;
 };

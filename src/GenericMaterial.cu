@@ -3,12 +3,12 @@
 #include "GenericMaterial.h"
 #include "GenericTexture.h"
 
-void GenericMaterial::copyToDevice(GenericMaterialDevice* d_genericMaterialDevice,
-				   StatusCodes& status)
+void GenericMaterial::copyToDevice(GenericMaterialDevice* d_genericMaterial,
+				   StatusCode& status)
 {
   LOG_TRIVIAL(trace) << "GenericMaterial::copyToDevice";
   
-  status = StatusCodes::NoError;
+  status = StatusCode::NoError;
 
   m_h_genericMaterialDevice.m_materialType = m_materialType;
   m_h_genericMaterialDevice.m_numScalars = m_scalars.size();
@@ -20,12 +20,12 @@ void GenericMaterial::copyToDevice(GenericMaterialDevice* d_genericMaterialDevic
   int dataSize = m_scalars.size()*sizeof(float);
   status = CCE(cudaMalloc((void**)&(m_h_genericMaterialDevice.m_scalars),
 			  dataSize));
-  if (status != StatusCodes::NoError) {
+  if (status != StatusCode::NoError) {
     return;
   }
   status = CCE(cudaMemcpy(m_h_genericMaterialDevice.m_scalars, m_scalars.data(),
 			  dataSize, cudaMemcpyHostToDevice));
-  if (status != StatusCodes::NoError) {
+  if (status != StatusCode::NoError) {
     return;
   }
   //--------------------------------------------------------------------------
@@ -33,12 +33,12 @@ void GenericMaterial::copyToDevice(GenericMaterialDevice* d_genericMaterialDevic
   dataSize = m_vectors.size()*sizeof(float3);
   status = CCE(cudaMalloc((void**)&(m_h_genericMaterialDevice.m_vectors),
 			  dataSize));
-  if (status != StatusCodes::NoError) {
+  if (status != StatusCode::NoError) {
     return;
   }
   status = CCE(cudaMemcpy(m_h_genericMaterialDevice.m_vectors, m_vectors.data(),
 			  dataSize, cudaMemcpyHostToDevice));
-  if (status != StatusCodes::NoError) {
+  if (status != StatusCode::NoError) {
     return;
   }
 
@@ -54,10 +54,10 @@ void GenericMaterial::copyToDevice(GenericMaterialDevice* d_genericMaterialDevic
 
   //--------------------------------------------------------------------------
   // whole material
-  status = CCE(cudaMemcpy(d_genericMaterialDevice, &m_h_genericMaterialDevice,
+  status = CCE(cudaMemcpy(d_genericMaterial, &m_h_genericMaterialDevice,
 			  sizeof(GenericMaterialDevice),
 			  cudaMemcpyHostToDevice));
-  if (status != StatusCodes::NoError) {
+  if (status != StatusCode::NoError) {
     return;
   }
 }

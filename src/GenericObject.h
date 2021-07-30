@@ -6,7 +6,7 @@
 #include <boost/property_tree/xml_parser.hpp>
 
 #include "logging.h"
-#include "StatusCodes.h"
+#include "StatusCode.h"
 #include "AABB.cuh"
 #include "GenericMaterial.h"
 
@@ -72,9 +72,8 @@ class GenericObject {
 
   ~GenericObject();
 
-  void copyToDevice(GenericObjectDevice* genericObjectDevice,
-		    StatusCodes& status);
-  // void freeDeviceMemory(StatusCodes& status);
+  void copyToDevice(GenericObjectDevice* d_genericObject,
+		    StatusCode& status);
 
 private:
 

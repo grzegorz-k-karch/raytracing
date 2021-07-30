@@ -27,7 +27,7 @@ GenericTextureDevice::~GenericTextureDevice()
 
 
 void GenericTexture::loadImageToDeviceTexture(cudaTextureObject_t& textureObject,
-					      StatusCodes& status)
+					      StatusCode& status)
 {
   // create cuda texture
   // Allocate CUDA array in device memory
@@ -38,7 +38,7 @@ void GenericTexture::loadImageToDeviceTexture(cudaTextureObject_t& textureObject
 		     << " m_imageHeight = " << m_imageHeight;  
   status = CCE(cudaMallocArray(&cuArray, &channelDesc,
 			       m_imageWidth, m_imageHeight));
-  if (status != StatusCodes::NoError) {
+  if (status != StatusCode::NoError) {
     return;
   }
 
@@ -49,7 +49,7 @@ void GenericTexture::loadImageToDeviceTexture(cudaTextureObject_t& textureObject
   status = CCE(cudaMemcpy2DToArray(cuArray, 0, 0, m_imageBuffer.data(), spitch,
 				   m_imageWidth*sizeof(float4), m_imageHeight,
 				   cudaMemcpyHostToDevice));
-  if (status != StatusCodes::NoError) {
+  if (status != StatusCode::NoError) {
     return;
   }
 
@@ -72,28 +72,28 @@ void GenericTexture::loadImageToDeviceTexture(cudaTextureObject_t& textureObject
   textureObject = 0;
   status = CCE(cudaCreateTextureObject(&(textureObject), &resDesc,
 				       &texDesc, NULL));
-  if (status != StatusCodes::NoError) {
+  if (status != StatusCode::NoError) {
     return;
   }
   if (textureObject == 0) {
     LOG_TRIVIAL(error) << "Could not create texture object.";
-    status = StatusCodes::CudaError;
+    status = StatusCode::CudaError;
     return;
   }
 }
 
 
 void GenericTexture::copyToDevice(GenericTextureDevice* d_genericTextureDevice,
-				  StatusCodes& status)
+				  StatusCode& status)
 {
-  status = StatusCodes::NoError;
+  status = StatusCode::NoError;
 
   m_h_genericTextureDevice.m_textureType = m_textureType;
   m_h_genericTextureDevice.m_numVectors = m_vectors.size();
 
   if (m_textureType == TextureType::ImageTexture) {
     loadImageToDeviceTexture(m_h_genericTextureDevice.m_textureObject, status);
-    if (status != StatusCodes::NoError) {
+    if (status != StatusCode::NoError) {
       return;
     }
   }
@@ -101,12 +101,12 @@ void GenericTexture::copyToDevice(GenericTextureDevice* d_genericTextureDevice,
     // vectors
     int dataSize = m_vectors.size()*sizeof(float3);
     status = CCE(cudaMalloc((void**)&(m_h_genericTextureDevice.m_vectors), dataSize));
-    if (status != StatusCodes::NoError) {
+    if (status != StatusCode::NoError) {
       return;
     }
     status = CCE(cudaMemcpy(m_h_genericTextureDevice.m_vectors, m_vectors.data(),
 			    dataSize, cudaMemcpyHostToDevice));
-    if (status != StatusCodes::NoError) {
+    if (status != StatusCode::NoError) {
       return;
     }
   }
@@ -114,14 +114,14 @@ void GenericTexture::copyToDevice(GenericTextureDevice* d_genericTextureDevice,
   // whole texture
   status = CCE(cudaMemcpy(d_genericTextureDevice, &m_h_genericTextureDevice,
 			  sizeof(GenericTextureDevice), cudaMemcpyHostToDevice));
-  if (status != StatusCodes::NoError) {
+  if (status != StatusCode::NoError) {
     return;
   }
 }
 
 
 GenericTexture::GenericTexture(const pt::ptree& texture,
-			       StatusCodes& status)
+			       StatusCode& status)
 {
   std::string textureType = texture.get<std::string>("<xmlattr>.value");
   if (textureType == "SolidColor") {
@@ -138,7 +138,7 @@ GenericTexture::GenericTexture(const pt::ptree& texture,
 
 
 void GenericTexture::parseSolidColor(const pt::ptree& texture,
-				     StatusCodes& status)
+				     StatusCode& status)
 {
   float3 albedo = string2float3(texture.get<std::string>("albedo.<xmlattr>.value"));
   m_vectors = {albedo};
@@ -146,9 +146,9 @@ void GenericTexture::parseSolidColor(const pt::ptree& texture,
 
 
 void GenericTexture::parseImageTexture(const pt::ptree& texture,
-				       StatusCodes& status)
+				       StatusCode& status)
 {
-  status = StatusCodes::NoError;
+  status = StatusCode::NoError;
   TextureImageLoader textureImageLoader(texture);
   textureImageLoader.loadImage(m_imageWidth, m_imageHeight, m_numChannels,
   			       m_imageBuffer, status);
