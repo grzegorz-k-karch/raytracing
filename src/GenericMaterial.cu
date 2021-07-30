@@ -3,7 +3,7 @@
 #include "GenericMaterial.h"
 #include "GenericTexture.h"
 
-void GenericMaterial::copyToDevice(GenericMaterialDevice* genericMaterialDevice,
+void GenericMaterial::copyToDevice(GenericMaterialDevice* d_genericMaterialDevice,
 				   StatusCodes& status)
 {
   LOG_TRIVIAL(trace) << "GenericMaterial::copyToDevice";
@@ -54,7 +54,7 @@ void GenericMaterial::copyToDevice(GenericMaterialDevice* genericMaterialDevice,
 
   //--------------------------------------------------------------------------
   // whole material
-  status = CCE(cudaMemcpy(genericMaterialDevice, &m_h_genericMaterialDevice,
+  status = CCE(cudaMemcpy(d_genericMaterialDevice, &m_h_genericMaterialDevice,
 			  sizeof(GenericMaterialDevice),
 			  cudaMemcpyHostToDevice));
   if (status != StatusCodes::NoError) {

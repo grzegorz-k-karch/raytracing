@@ -42,7 +42,6 @@ __global__ void constructScene_kernel(
     GenericObjectDevice *genObjDev =
       &(sceneRawObjectsDevice->m_objects[objIdx]);
     objects[objIdx] = ObjectFactory::createObject(genObjDev);
-    // genObjDev->releaseData();
   }
 
   *world = createBVH(objects, numObjects);

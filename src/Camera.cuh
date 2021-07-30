@@ -22,7 +22,7 @@ public:
 	    float fov, float2 aspect,
             float aperture, float focusDist);
 
-  void copyToDevice(Camera *cameraDevice, StatusCodes &status) const;
+  void copyToDevice(Camera *d_camera, StatusCodes &status) const;
 
   __device__
   Ray getRay(float s, float t, curandState* localRandState) const {

@@ -35,18 +35,25 @@ class GenericTexture {
 public:
   GenericTexture(const pt::ptree& texture,
 		 StatusCodes& status);
-  void copyToDevice(GenericTextureDevice* genericTextureDevice,
-		    StatusCodes& status) const;
+  void copyToDevice(GenericTextureDevice* d_genericTextureDevice,
+		    StatusCodes& status);
 
 private:
   void parseImageTexture(const pt::ptree& texture,
 			 StatusCodes& status);
   void parseSolidColor(const pt::ptree& texture,
 		       StatusCodes& status);
+  void loadImageToDeviceTexture(cudaTextureObject_t& textureObject,
+				StatusCodes& status);
 
   TextureType m_textureType;
+  int m_imageWidth;
+  int m_imageHeight;
+  int m_numChannels;
+  std::vector<float4> m_imageBuffer;
   std::vector<float3> m_vectors;
-  cudaTextureObject_t m_textureObject;  
+
+  GenericTextureDevice m_h_genericTextureDevice;
 };
 
 #endif//GENERIC_TEXTURE_H
