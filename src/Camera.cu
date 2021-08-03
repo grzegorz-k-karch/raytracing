@@ -6,11 +6,11 @@
 #include "cuda_utils.cuh"
 #include "vector_utils.cuh"
 
-void Camera::copyToDevice(Camera* cameraDevice, StatusCodes& status) const
+void Camera::copyToDevice(Camera* d_camera, StatusCode& status) const
 {
-  status = StatusCodes::NoError;
+  status = StatusCode::NoError;
 
-  status = CCE(cudaMemcpy(cameraDevice, this,
+  status = CCE(cudaMemcpy(d_camera, this,
 			  sizeof(Camera), cudaMemcpyHostToDevice));
 }
 

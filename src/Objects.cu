@@ -152,6 +152,13 @@ __device__ Object* createBVH(Object **objects, int numObjects)
 }
 
 
+__device__ void destroyBVH(BVHNode** root)
+{
+  // BVHNode *currentNode = root;
+
+}
+
+
 __device__
 bool BVHNode::hit(const Ray& ray, float tMin, float tMax, HitRecord& hitRec) const
 {

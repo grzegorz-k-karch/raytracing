@@ -4,7 +4,7 @@
 #include <string>
 #include <boost/log/trivial.hpp>
 
-#include "StatusCodes.h"
+#include "StatusCode.h"
 
 struct ProgramArgs {
   std::string sceneFilePath;
@@ -16,6 +16,6 @@ struct ProgramArgs {
   boost::log::trivial::severity_level logLevel;
 };
 
-ProgramArgs parseArgs(int argc, char** argv, StatusCodes& status);
+ProgramArgs parseArgs(int argc, char** argv, StatusCode& status);
 
 #endif//ARGS_PARSE_H

@@ -4,7 +4,7 @@
 #include "vector_utils.cuh"
 
 GenericMaterial::GenericMaterial(const pt::ptree& material,
-				 StatusCodes& status)
+				 StatusCode& status)
 {
   std::string materialType = material.get<std::string>("<xmlattr>.value");
   if (materialType == "DiffuseLight") {
@@ -41,7 +41,7 @@ GenericMaterial::GenericMaterial(GenericMaterial&& other) noexcept :
 
 void GenericMaterial::parseDiffuseLight(const pt::ptree material)
 {
-  StatusCodes status = StatusCodes::NoError;
+  StatusCode status = StatusCode::NoError;
   //--------------------------------------------------------------------------
   // texture
   auto texture_it = material.find("texture");
@@ -59,7 +59,7 @@ void GenericMaterial::parseDiffuseLight(const pt::ptree material)
 
 void GenericMaterial::parseLambertian(const pt::ptree material)
 {
-  StatusCodes status = StatusCodes::NoError;
+  StatusCode status = StatusCode::NoError;
   //--------------------------------------------------------------------------
   // texture
   auto texture_it = material.find("texture");

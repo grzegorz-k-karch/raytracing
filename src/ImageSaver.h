@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 #include "nvidia/helper_math.h"
-#include "StatusCodes.h"
+#include "StatusCode.h"
 
 enum class ImageType { None, PNG, PPM };
 
@@ -15,16 +15,16 @@ public:
   void saveImage(const std::vector<float3>& image,
 		 int imageWidth, int imageHeight,
 		 std::string pictureFilePath,
-		 StatusCodes& status);
+		 StatusCode& status);
 private:
   void savePPM(const std::vector<float3>& image,
 	       int imageWidth, int imageHeight,
 	       std::string pictureFilePath,
-	       StatusCodes& status) const;  
+	       StatusCode& status) const;  
   void savePNG(const std::vector<float3>& image,
 	       int imageWidth, int imageHeight,
 	       std::string pictureFilePath,
-	       StatusCodes& status) const;
+	       StatusCode& status) const;
 
   ImageType m_imageType;
 };

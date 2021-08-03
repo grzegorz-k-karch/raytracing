@@ -7,7 +7,7 @@
 #include "vector_utils.cuh"
 
 #include "Ray.cuh"
-#include "StatusCodes.h"
+#include "StatusCode.h"
 
 namespace pt = boost::property_tree;
 
@@ -22,7 +22,7 @@ public:
 	    float fov, float2 aspect,
             float aperture, float focusDist);
 
-  void copyToDevice(Camera *cameraDevice, StatusCodes &status) const;
+  void copyToDevice(Camera *d_camera, StatusCode &status) const;
 
   __device__
   Ray getRay(float s, float t, curandState* localRandState) const {

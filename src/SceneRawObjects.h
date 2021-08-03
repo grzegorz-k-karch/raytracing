@@ -6,7 +6,7 @@
 #include "GenericObject.h"
 #include "GenericMaterial.h"
 #include "Camera.cuh"
-#include "StatusCodes.h"
+#include "StatusCode.h"
 
 struct SceneRawObjectsDevice {
 
@@ -29,25 +29,30 @@ public:
   SceneRawObjects() {}
   ~SceneRawObjects();
 
-  void parseScene(const std::string filepath, StatusCodes& status);
+  void parseScene(const std::string filepath, StatusCode& status);
 
-  void setCamera(const Camera& camera) {
+  void setCamera(Camera&& camera) {
     m_camera = std::move(camera);
   }
   void addObject(GenericObject&& obj) {
     m_objects.push_back(std::move(obj));
   }
 
-  SceneRawObjectsDevice* getObjectsOnDevice(StatusCodes &status) const {
-    SceneRawObjectsDevice* sceneRawObjectsDevice = copyToDevice(status);
-    return sceneRawObjectsDevice;
-  }
+  // SceneRawObjectsDevice* getObjectsOnDevice(StatusCode &status) {
+  //   SceneRawObjectsDevice* sceneRawObjectsDevice = copyToDevice(status);
+  //   return sceneRawObjectsDevice;
+  // }
+
+  void copyToDevice(SceneRawObjectsDevice* d_sceneRawObjects,
+		    StatusCode &status);
 
 private:
-  SceneRawObjectsDevice* copyToDevice(StatusCodes &status) const;
+  // SceneRawObjectsDevice* copyToDevice(StatusCode &status);
 
   Camera m_camera;
   std::vector<GenericObject> m_objects;
+
+  SceneRawObjectsDevice m_h_sceneRawObjectsDevice;
 };
 
 #endif//SCENE_RAW_OBJECTS_H

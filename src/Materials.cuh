@@ -38,7 +38,9 @@ public:
 
 class Lambertian : public Material {
 public:
+  __device__ Lambertian() = delete;
   __device__ Lambertian(const GenericMaterialDevice *genMatDev);
+  __device__ ~Lambertian();  
 
   __device__ virtual bool scatter(const Ray& inRay, const HitRecord& hitRec,
   				  float3& attenuation, Ray& outRays,

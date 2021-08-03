@@ -6,7 +6,7 @@
 #include <boost/property_tree/xml_parser.hpp>
 
 #include "logging.h"
-#include "StatusCodes.h"
+#include "StatusCode.h"
 #include "AABB.cuh"
 #include "GenericMaterial.h"
 
@@ -29,7 +29,8 @@ struct GenericObjectDevice {
     m_textureCoords(nullptr), m_numTextureCoords(0),
     m_triangleIndices(nullptr), m_numTriangleIndices(0) {}
 
-  ~GenericObjectDevice() {}
+  GenericObjectDevice(GenericObjectDevice&& other) noexcept;
+  ~GenericObjectDevice();
 
   ObjectType m_objectType;
   float3 m_bmin;
@@ -68,9 +69,11 @@ class GenericObject {
   GenericObject& operator=(const GenericObject& other) = delete;
   // move assignment operator
   GenericObject& operator=(const GenericObject&& other) = delete;
-  
-  void copyToDevice(GenericObjectDevice* genericObjectDevice,
-		    StatusCodes& status) const;
+
+  ~GenericObject();
+
+  void copyToDevice(GenericObjectDevice* d_genericObject,
+		    StatusCode& status);
 
 private:
 
@@ -89,6 +92,8 @@ private:
   std::vector<float3> m_vertexNormals;
   std::vector<float2> m_textureCoords;
   std::vector<int>    m_triangleIndices;
+
+  GenericObjectDevice m_h_genericObjectDevice;
 };
 
 #endif//GENERIC_OBJECT_H

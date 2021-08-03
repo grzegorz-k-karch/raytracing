@@ -17,9 +17,9 @@ TextureImageLoader::TextureImageLoader(const pt::ptree& texture)
 void TextureImageLoader::loadImage(int &imageWidth, int &imageHeight,
 				   int &numChannels,
 				   std::vector<float4> &imageBuffer,
-				   StatusCodes& status)
+				   StatusCode& status)
 {
-  status = StatusCodes::NoError;
+  status = StatusCode::NoError;
   const int desiredNumChannels = 3;
   unsigned char *data = stbi_load(m_textureFilepath.c_str(), &imageWidth, &imageHeight,
 				  &numChannels, desiredNumChannels);

@@ -39,8 +39,8 @@ bool checkRequiredObjects(const pt::ptree &sceneTree)
 }
 
 void SceneRawObjects::parseScene(const std::string filepath,
-				 StatusCodes &status) {
-  status = StatusCodes::NoError;
+				 StatusCode &status) {
+  status = StatusCode::NoError;
 
   //----------------------------------------------------------------------------
   // read XML file
@@ -50,7 +50,7 @@ void SceneRawObjects::parseScene(const std::string filepath,
   }
   catch (pt::ptree_error &e) {
     LOG_TRIVIAL(error) << e.what();
-    status = StatusCodes::FileError;
+    status = StatusCode::FileError;
     return;
   }
   //----------------------------------------------------------------------------
@@ -61,7 +61,7 @@ void SceneRawObjects::parseScene(const std::string filepath,
   if (!requiredObjectsPresent) {
     LOG_TRIVIAL(error) << "Scene file does not have required objects "
 		       << "(a camera and a renderable object).";
-    status = StatusCodes::SceneError;
+    status = StatusCode::SceneError;
     return;
   }
 
@@ -84,5 +84,5 @@ void SceneRawObjects::parseScene(const std::string filepath,
 
 SceneRawObjects::~SceneRawObjects()
 {
-
+  LOG_TRIVIAL(trace) << "SceneRawObjects destructor";  
 }

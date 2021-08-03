@@ -12,7 +12,7 @@
 
 
 void ImageSaver::savePPM(const std::vector<float3>& image, int imageWidth, int imageHeight,
-			 std::string pictureFilePath, StatusCodes& status) const
+			 std::string pictureFilePath, StatusCode& status) const
 {
   std::fstream fs(pictureFilePath, std::fstream::out);
 
@@ -42,7 +42,7 @@ void ImageSaver::savePPM(const std::vector<float3>& image, int imageWidth, int i
 }
 
 void ImageSaver::savePNG(const std::vector<float3>& image, int imageWidth, int imageHeight,
-			 std::string pictureFilePath, StatusCodes& status) const
+			 std::string pictureFilePath, StatusCode& status) const
 {
   pngwriter pngFile(imageWidth,imageHeight,0,pictureFilePath.c_str());
   for (int j = imageHeight - 1; j >= 0; j--) {
@@ -62,7 +62,7 @@ void ImageSaver::savePNG(const std::vector<float3>& image, int imageWidth, int i
 }
 
 void ImageSaver::saveImage(const std::vector<float3>& image, int imageWidth, int imageHeight,
-			   std::string pictureFilePath, StatusCodes& status)
+			   std::string pictureFilePath, StatusCode& status)
 {
   if (m_imageType == ImageType::None) {
     std::smatch match_png;
@@ -91,7 +91,7 @@ void ImageSaver::saveImage(const std::vector<float3>& image, int imageWidth, int
   }
   else {
     LOG_TRIVIAL(error) << "Image file type unknown. Saving \"" << pictureFilePath << "\" aborted.";
-    status = StatusCodes::FileError;
+    status = StatusCode::FileError;
     return;
   }
   LOG_TRIVIAL(info) << "Image saved as " << pictureFilePath << ".";

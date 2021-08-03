@@ -7,7 +7,7 @@
 
 #include <vector_types.h>
 
-#include "StatusCodes.h"
+#include "StatusCode.h"
 
 namespace pt = boost::property_tree;
 
@@ -16,7 +16,7 @@ class TextureImageLoader {
   TextureImageLoader(const pt::ptree& texture);
   void loadImage(int& imageWidth, int& imageHeight,
 		 int& numChannels, std::vector<float4>& imageBuffer,
-		 StatusCodes& status);
+		 StatusCode& status);
  private:
   std::string m_textureFilepath;
 };

@@ -20,6 +20,22 @@ __device__ Lambertian::Lambertian(const GenericMaterialDevice *genMatDev)
 }
 
 
+__device__ Lambertian::~Lambertian()
+{
+#if __CUDA_ARCH__ > 200
+  printf("Lambertian::~Lambertian\n");
+#endif
+  for (int texIdx = 0; texIdx < m_numTextures; texIdx++) {
+    if (m_textures[texIdx]) {
+      delete m_textures[texIdx];
+    }
+  }
+  if (m_textures) {
+    delete [] m_textures;
+  }
+}
+
+
 __device__ bool Lambertian::scatter(const Ray& inRay, const HitRecord& hitRec,
 				    float3& attenuation, Ray& outRays,
 				    curandState* localRandState) const

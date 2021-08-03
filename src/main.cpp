@@ -2,15 +2,16 @@
 
 #include "logging.h"
 #include "args_parse.h"
-#include "StatusCodes.h"
+#include "StatusCode.h"
 #include "SceneRawObjects.h"
 #include "SceneDevice.cuh"
 #include "Renderer.cuh"
 #include "ImageSaver.h"
 
+
 int main(int argc, char** argv)
 {
-  StatusCodes status{StatusCodes::NoError};
+  StatusCode status{StatusCode::NoError};
 
   // parse command line arguments
   ProgramArgs args = parseArgs(argc, argv, status);
@@ -42,11 +43,11 @@ int main(int argc, char** argv)
   std::vector<float3> image;
   renderer.getImageOnHost(image, status);
   exitIfError(status);
-  
+
   ImageSaver imageSaver;
   // save the rendered image to file
   imageSaver.saveImage(image, args.imageWidth, args.imageHeight,
-  		       args.pictureFilePath, status);
+		       args.pictureFilePath, status);
   exitIfError(status);
 
   return 0;
