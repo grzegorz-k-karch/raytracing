@@ -135,3 +135,18 @@ void translateAndScale(float3 worldPos, float3 scale,
 		     << bmin.x << ", " << bmin.y << ", " << bmin.z << ") - ("
 		     << bmax.x << ", " << bmax.y << ", " << bmax.z << ")";
 }
+
+
+void scaleRotateTranslate(float3 scale, float3 rotate, float3 worldPos,
+			  float3& bmin, float3& bmax,
+			  std::vector<float3>& vertices,
+			  std::vector<float3>& normals)
+{
+  float3 center = make_float3((bmin.x + bmax.x)/2.0f,
+			      (bmin.y + bmax.y)/2.0f,
+			      (bmin.z + bmax.z)/2.0f);
+  // bring object to the origin
+  for (auto &v : vertices) {
+    v = (v - center);
+  }  
+}
