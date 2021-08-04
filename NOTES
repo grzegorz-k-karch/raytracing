@@ -1,6 +1,7 @@
 ------------------------------------------------------------------------------
 TODO:
 ------------------------------------------------------------------------------
+ - DONE object rotation
  - DONE memory management
  - DONE nesting material creation in objects
  - DONE member variables - add missing m_
@@ -17,9 +18,9 @@ TODO:
  - use typedefs
  - use CUDA C++ features
  - use C++11 and C++17 features
- - object rotation
  - profile code
  - revisit memory management
+ - use Cornell box
 ------------------------------------------------------------------------------
 ASSUMPTIONS
 ------------------------------------------------------------------------------
