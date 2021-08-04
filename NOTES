@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------------
 TODO:
 ------------------------------------------------------------------------------
- - IN PROGRESS object rotation
+ - DONE object rotation
  - DONE memory management
  - DONE nesting material creation in objects
  - DONE member variables - add missing m_
