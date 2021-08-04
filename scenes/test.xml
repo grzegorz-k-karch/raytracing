@@ -19,6 +19,7 @@
     </material>
     <world_pos value="0.0 -2.0 -10.0"/>
     <scale value="1.0 1.0 1.0"/>
+    <rotation value="0.0 45.0 0.0"/>
     <smoothness value="0.0625"/>
   </Mesh>
 

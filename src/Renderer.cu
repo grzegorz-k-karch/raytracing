@@ -56,12 +56,15 @@ void Renderer::initBuffers(StatusCode &status)
   }
 }
 
+
 #define MY_FLOAT_MAX 3.402823e+38
+
 
 __device__ float3 getBackgroundColor(const Ray& ray)
 {
-  return make_float3(0.0f, 0.0f, 0.0f);
+  return make_float3(0.1f, 0.1f, 0.1f);
 }
+
 
 __device__ float3 getColor(const Ray& ray, Object* world,
 			   curandState* localRandState,

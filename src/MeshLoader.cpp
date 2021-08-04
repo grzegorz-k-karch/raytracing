@@ -12,6 +12,7 @@ MeshLoader::MeshLoader(const pt::ptree object)
   m_meshFilepath = object.get<std::string>("source.<xmlattr>.value");
   m_worldPos = string2float3(object.get<std::string>("world_pos.<xmlattr>.value"));
   m_scale = string2float3(object.get<std::string>("scale.<xmlattr>.value"));
+  m_rotation = string2float3(object.get<std::string>("rotation.<xmlattr>.value"));
   m_smoothness = object.get<float>("smoothness.<xmlattr>.value", 1.0f);
   m_frontFace = object.get<std::string>("front_face.<xmlattr>.value", std::string("CCW"));
 
@@ -76,7 +77,12 @@ void MeshLoader::loadMesh(AABB& bbox,
   float3 bmax;
   computeBBox(vertices, bmin, bmax);
 
-  translateAndScale(m_worldPos, m_scale, bmin, bmax, vertices);
+  LOG_TRIVIAL(debug) << "transforming geometry ...";
+  scaleRotateTranslate(m_scale, m_rotation, m_worldPos,
+		       bmin, bmax, vertices, vertexNormals);
+  LOG_TRIVIAL(debug) << "transforming geometry done";
+
+  computeBBox(vertices, bmin, bmax);
 
   bbox = AABB(bmin, bmax);
   scalars.push_back(m_smoothness);

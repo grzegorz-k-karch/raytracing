@@ -24,11 +24,12 @@ class MeshLoader {
 		std::vector<float2>& vertexCoords,
 		std::vector<int>& triangleIndices,
 		std::vector<float>& scalars) const;
-  
+
 private:
   std::string m_meshFilepath;
   float3 m_worldPos;
   float3 m_scale;
+  float3 m_rotation;
   float m_smoothness;
   std::string m_frontFace;
 };

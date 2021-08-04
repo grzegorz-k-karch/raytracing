@@ -32,8 +32,9 @@ void computeNormals(const std::vector<float3>& vertices,
 		    std::vector<float3>& normals,
 		    const std::string frontFace);
 
-void translateAndScale(float3 worldPos, float3 scale,
-		       float3& bmin, float3& bmax,
-		       std::vector<float3>& vertices);
+void scaleRotateTranslate(float3 scale, float3 rotation, float3 worldPos,
+			  float3& bmin, float3& bmax,
+			  std::vector<float3>& vertices,
+			  std::vector<float3>& normals);
 
 #endif//MESH_UTILS_H
