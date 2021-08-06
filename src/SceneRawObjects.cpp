@@ -74,7 +74,14 @@ void SceneRawObjects::parseScene(const std::string filepath,
     if (objectType == "Camera") {
       setCamera(Camera(it.second));
     } else if (foundAny(objectType, renderableObjects)) {
-      addObject(GenericObject(objectType, it.second));
+      GenericObject genObj = GenericObject(objectType, it.second, status);
+      if (status == StatusCode::NoError) {
+	addObject(std::move(genObj));
+      }
+      else {
+	LOG_TRIVIAL(error) << "Could not add an object of type "
+			   << objectType << ".";
+      }
     } else if (objectType != "<xmlcomment>") {
       LOG_TRIVIAL(warning) << "Unknown object " << objectType;
     }

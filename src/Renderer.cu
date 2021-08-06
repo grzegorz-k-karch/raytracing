@@ -62,7 +62,7 @@ void Renderer::initBuffers(StatusCode &status)
 
 __device__ float3 getBackgroundColor(const Ray& ray)
 {
-  return make_float3(0.1f, 0.1f, 0.1f);
+  return make_float3(0.0f, 0.0f, 0.0f);
 }
 
 

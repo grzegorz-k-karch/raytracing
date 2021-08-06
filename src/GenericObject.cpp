@@ -4,17 +4,22 @@
 #include "SphereLoader.h"
 
 GenericObject::GenericObject(const std::string objectType,
-			     const pt::ptree object)
+			     const pt::ptree object,
+			     StatusCode& status)
 {
   if (objectType == "Mesh") {
     m_objectType = ObjectType::Mesh;
-    parseMesh(object);
+    parseMesh(object, status);
   }
   else if (objectType  == "Sphere") {
     m_objectType = ObjectType::Sphere;
-    parseSphere(object);
+    parseSphere(object, status);
   }
-  StatusCode status = StatusCode::NoError;
+  if (status != StatusCode::NoError) {
+    LOG_TRIVIAL(error) << "Could not parse "
+		       << objectType << " object.";
+    return;
+  }
   auto material_it = object.find("material");
   bool materialFound = material_it != object.not_found();
   if (materialFound) {
@@ -56,16 +61,20 @@ GenericObject::~GenericObject()
 }
 
 
-void GenericObject::parseMesh(const pt::ptree object)
+void GenericObject::parseMesh(const pt::ptree object,
+			      StatusCode& status)
 {
   MeshLoader meshLoader = MeshLoader(object);
   meshLoader.loadMesh(m_bbox, m_vertices, m_vertexColors,
 		      m_vertexNormals, m_textureCoords,
-		      m_triangleIndices, m_scalars);
+		      m_triangleIndices, m_scalars,
+		      status);
 }
 
-void GenericObject::parseSphere(const pt::ptree object)
+void GenericObject::parseSphere(const pt::ptree object,
+				StatusCode& status)
 {
   SphereLoader sphereLoader = SphereLoader(object);
-  sphereLoader.loadSphere(m_bbox, m_vectors, m_scalars);
+  sphereLoader.loadSphere(m_bbox, m_vectors, m_scalars,
+			  status);
 }

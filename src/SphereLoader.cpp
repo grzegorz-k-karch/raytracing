@@ -19,7 +19,8 @@ SphereLoader::SphereLoader(const pt::ptree object)
 
 void SphereLoader::loadSphere(AABB &bbox,
 			      std::vector<float3> &vectors,
-			      std::vector<float> &scalars) const {
+			      std::vector<float> &scalars,
+			      StatusCode& status) const {
   vectors = {m_center};
   scalars = {m_radius};
   bbox = AABB(m_center - make_float3(m_radius),

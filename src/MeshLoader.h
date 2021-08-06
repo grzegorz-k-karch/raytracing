@@ -6,6 +6,7 @@
 #include <boost/property_tree/xml_parser.hpp>
 #include <vector_types.h>
 
+#include "StatusCode.h"
 #include "AABB.cuh"
 
 namespace pt = boost::property_tree;
@@ -23,11 +24,12 @@ class MeshLoader {
 		std::vector<float3>& vertexNormals,
 		std::vector<float2>& vertexCoords,
 		std::vector<int>& triangleIndices,
-		std::vector<float>& scalars) const;
+		std::vector<float>& scalars,
+		StatusCode& status) const;
 
 private:
   std::string m_meshFilepath;
-  float3 m_worldPos;
+  float3 m_translation;
   float3 m_scale;
   float3 m_rotation;
   float m_smoothness;

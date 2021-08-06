@@ -246,31 +246,35 @@ void computeBBox(const std::vector<float3>& vertices,
       bmax.z = v.z;
     }
   }
+  const float eps = 0.001f;
+  if (std::abs(bmax.x - bmin.x) < eps) {
+    bmax.x += eps;
+    bmin.x -= eps;
+  }
+  if (std::abs(bmax.y - bmin.y) < eps) {
+    bmax.y += eps;
+    bmin.y -= eps;
+  }
+  if (std::abs(bmax.z - bmin.z) < eps) {
+    bmax.z += eps;
+    bmin.z -= eps;
+  }
   LOG_TRIVIAL(trace) << "BBox: ("
 		     << bmin.x << ", " << bmin.y << ", " << bmin.z << ") - ("
 		     << bmax.x << ", " << bmax.y << ", " << bmax.z << ")";
 }
 
 
-void scaleRotateTranslate(float3 scale, float3 rotation, float3 worldPos,
+void scaleRotateTranslate(float3 scale, float3 rotation, float3 translation,
 			  float3& bmin, float3& bmax,
 			  std::vector<float3>& vertices,
 			  std::vector<float3>& normals)
 {
-  float3 center = make_float3((bmin.x + bmax.x)/2.0f,
-			      (bmin.y + bmax.y)/2.0f,
-			      (bmin.z + bmax.z)/2.0f);
-  // bring object to the origin
-  for (auto &v : vertices) {
-    v = (v - center);
-  }
-
   mat4x4 scaleMat = scaleMat4x4(scale);
   mat4x4 rotationMat = rotationMat4x4(rotation);
-  mat4x4 translationMat = translationMat4x4(worldPos);
+  mat4x4 translationMat = translationMat4x4(translation);
 
   mat4x4 transformVertices = translationMat*rotationMat*scaleMat;
-
   for (auto &v : vertices) {
     float4 t = transformVertices*make_float4(v.x, v.y, v.z, 1.0f);
     v = make_float3(t.x, t.y, t.z);

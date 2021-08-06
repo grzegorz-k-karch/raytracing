@@ -5,6 +5,8 @@
 #include <vector_types.h>
 #include <string>
 
+#include "StatusCode.h"
+
 typedef struct {
   unsigned char nindices;
   int *indices;
@@ -14,9 +16,10 @@ bool checkIfPlyFile(const std::string& filepath);
 
 void loadPlyObject(const char* filepath,
 		   std::vector<float3>& vertices,
-		   std::vector<float3>& vertex_colors,		   
-		   std::vector<float3>& vertex_normals,
-		   std::vector<float2>& vertex_coords,
-		   std::vector<int>& indices);
+		   std::vector<float3>& vertexColors,
+		   std::vector<float3>& vertexNormals,
+		   std::vector<float2>& textureCoords,
+		   std::vector<int>& triangleIndices,
+		   StatusCode& status);
 
 #endif // PLY_UTILS_H
