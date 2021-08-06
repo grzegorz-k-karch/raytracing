@@ -1,9 +1,9 @@
 ------------------------------------------------------------------------------
 TODO:
 ------------------------------------------------------------------------------
- - IN PROGRESS use Cornell box
-   - DONE inform about non-existing mesh file
-   - DONE default values for no transform
+ - DONE use Cornell box
+ - DONE inform about non-existing mesh file
+ - DONE default values for no transform
  - DONE object rotation
  - DONE memory management
  - DONE nesting material creation in objects
@@ -26,6 +26,8 @@ TODO:
  - BRDF
  - OptiX
  - add option to merge vertices
+ - Monte Carlo path tracing
+ - Acceleration structure for large meshes
 ------------------------------------------------------------------------------
 ASSUMPTIONS
 ------------------------------------------------------------------------------
