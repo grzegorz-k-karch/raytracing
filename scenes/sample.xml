@@ -16,7 +16,7 @@
       <albedo value="0.99 0.2 0.41"/>
       <fuzz value="0.1"/>
     </material>
-    <world_pos value="6.0 0.0 -14.0"/>
+    <translation value="6.0 0.0 -14.0"/>
     <scale value="40.0 40.0 40.0"/>
     <front_face value="CW"/>
   </Mesh>
@@ -25,7 +25,7 @@
     <source value="../models/bunny.ply"/>
     <material value="Parametric">
     </material>
-    <world_pos value="-6.0 0.0 -14.0"/>
+    <translation value="-6.0 0.0 -14.0"/>
     <scale value="40.0 40.0 40.0"/>
     <front_face value="CW"/>
   </Mesh>
@@ -37,7 +37,7 @@
       	<source value="../models/10607_teddy_bear_SG_v1_diffuse.jpg"/>
       </texture>
     </material>
-    <world_pos value="0.0 0.5 -15.0"/>
+    <translation value="0.0 0.5 -15.0"/>
     <scale value="0.2 0.2 0.2"/>
   </Mesh>
 
@@ -48,7 +48,7 @@
       	<albedo value="4.0 4.0 4.0"/>
       </texture>
     </material>
-    <world_pos value="0.0 -2.0 -10.0"/>
+    <translation value="0.0 -2.0 -10.0"/>
     <scale value="1.0 1.0 1.0"/>
     <smoothness value="0.0625"/>
   </Mesh>

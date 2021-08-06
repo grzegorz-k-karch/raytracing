@@ -24,6 +24,7 @@ bool checkIfPlyFile(const std::string& filepath)
   	}
       }
     }
+    file.close();
   }
   return headerIsPly;
 }
@@ -101,9 +102,14 @@ void loadPlyObject(const char* filepath,
 		   std::vector<float3>& vertexColors,
 		   std::vector<float3>& vertexNormals,
 		   std::vector<float2>& textureCoords,
-		   std::vector<int>& triangleIndices)
+		   std::vector<int>& triangleIndices,
+		   StatusCode& status)
 {
   PlyFile *ply = loadPlyFile(filepath);
+  if (ply == NULL) {
+    status = StatusCode::FileError;
+    return;
+  }
 
   int numElems;
   char **elementNameList = get_element_list_ply(ply, &numElems);

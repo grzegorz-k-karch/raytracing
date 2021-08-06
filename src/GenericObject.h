@@ -56,11 +56,12 @@ struct GenericObjectDevice {
 
 
 class GenericObject {
- public:
+public:
   // default constructor
   GenericObject() = delete;
   // explicit constructor
-  GenericObject(const std::string objectType, const pt::ptree object);
+  GenericObject(const std::string objectType, const pt::ptree object,
+		StatusCode& status);
   // move constructor
   GenericObject(GenericObject&& other) noexcept;
   // copy constructor
@@ -77,8 +78,10 @@ class GenericObject {
 
 private:
 
-  void parseMesh(const pt::ptree object);
-  void parseSphere(const pt::ptree object);
+  void parseMesh(const pt::ptree object,
+		 StatusCode& status);
+  void parseSphere(const pt::ptree object,
+		   StatusCode& status);
 
   ObjectType m_objectType;
   AABB m_bbox;

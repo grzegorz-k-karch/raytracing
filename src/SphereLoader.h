@@ -5,6 +5,7 @@
 #include <boost/property_tree/xml_parser.hpp>
 #include <vector_types.h>
 
+#include "StatusCode.h"
 #include "AABB.cuh"
 
 namespace pt = boost::property_tree;
@@ -14,7 +15,8 @@ public:
   SphereLoader(const pt::ptree object);
   void loadSphere(AABB &m_bbox,
 		  std::vector<float3> &m_vectors,
-                  std::vector<float> &m_scalars) const;
+                  std::vector<float> &m_scalars,
+		  StatusCode& status) const;
 private:
   float3 m_center;
   float m_radius;

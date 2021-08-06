@@ -1,0 +1,121 @@
+<scene version="0.0.1">
+
+  <Camera>
+    <lookFrom value="0 0 7.5"/>
+    <lookAt value="0 0 0"/>
+    <up value="0 1 0"/>
+    <fov value="30"/>
+    <aspect value="1.0 1.0"/>
+    <aperture value="0.001"/>
+    <focus_distance value="-1.0"/>
+  </Camera>
+
+  <Mesh>
+    <source value="../pv-data/cornell-box2/light-source.ply"/>
+    <material value="DiffuseLight">
+      <texture value="SolidColor">
+      	<albedo value="8.0 8.0 8.0"/>
+      </texture>
+    </material>
+    <rotation value="0.0 0.0 0.0"/>
+    <smoothness value="0.0625"/>
+  </Mesh>
+
+  <Mesh>
+    <source value="../pv-data/cornell-box2/small-box.ply"/>
+    <material value="Lambertian">
+      <texture value="SolidColor">
+      	<albedo value="1.0 1.0 1.0"/>
+      </texture>
+    </material>
+    <translation value="0.5 -1.0 0.5"/>
+    <rotation value="0.0 -15.0 0.0"/>
+    <smoothness value="0.0"/>
+    <front_face value="CW"/>
+  </Mesh>
+
+  <Mesh>
+    <source value="../pv-data/cornell-box2/big-box.ply"/>
+    <material value="Lambertian">
+      <texture value="SolidColor">
+      	<albedo value="1.0 1.0 1.0"/>
+      </texture>
+    </material>
+    <translation value="-0.5 -0.5 -0.5"/>
+    <rotation value="0.0 15.0 0.0"/>
+    <smoothness value="0.0"/>
+    <front_face value="CW"/>
+  </Mesh>
+
+  <Sphere>
+    <center value="-0.6 -1.1 0.6"/>
+    <radius value="0.4"/>
+    <material value="Dielectric">
+      <ref_idx value="1.5"/>
+    </material>
+  </Sphere>
+
+  <Sphere>
+    <center value="-0.6 -1.1 0.6"/>
+    <radius value="-0.35"/>
+    <material value="Dielectric">
+      <ref_idx value="1.5"/>
+    </material>
+  </Sphere>  
+
+  <Mesh>
+    <source value="../pv-data/cornell-box2/left-wall.ply"/>
+    <material value="Lambertian">
+      <texture value="SolidColor">
+      	<albedo value="1 0 0"/>
+      </texture>
+    </material>
+    <smoothness value="0.0"/>
+    <front_face value="CW"/>
+  </Mesh>
+
+  <Mesh>
+    <source value="../pv-data/cornell-box2/right-wall.ply"/>
+    <material value="Lambertian">
+      <texture value="SolidColor">
+      	<albedo value="0 1 0"/>
+      </texture>
+    </material>
+    <smoothness value="0.0"/>
+    <front_face value="CW"/>
+  </Mesh>
+
+  <Mesh>
+    <source value="../pv-data/cornell-box2/back-wall.ply"/>
+    <material value="Lambertian">
+      <texture value="SolidColor">
+      	<albedo value="1 1 1"/>
+      </texture>
+    </material>
+    <smoothness value="0.0"/>
+    <front_face value="CW"/>
+  </Mesh>
+  
+  <Mesh>
+    <source value="../pv-data/cornell-box2/floor.ply"/>
+    <material value="Lambertian">
+      <texture value="SolidColor">
+      	<albedo value="1 1 1"/>
+      </texture>
+    </material>
+    <smoothness value="0.0"/>
+    <front_face value="CW"/>
+  </Mesh>
+  
+  <Mesh>
+    <source value="../pv-data/cornell-box2/ceiling.ply"/>
+    <material value="Lambertian">
+      <texture value="SolidColor">
+      	<albedo value="1 1 1"/>
+      </texture>
+    </material>
+    <smoothness value="0.0"/>
+    <front_face value="CW"/>
+  </Mesh>
+  
+</scene>
