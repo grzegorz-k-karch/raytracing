@@ -18,7 +18,7 @@ void GenericMaterial::copyToDevice(GenericMaterialDevice* d_genericMaterial,
   //--------------------------------------------------------------------------
   // scalars
   int dataSize = m_scalars.size()*sizeof(float);
-  status = CCE(cudaMalloc((void**)&(m_h_genericMaterialDevice.m_scalars),
+  status = CCE(cudaMalloc(reinterpret_cast<void**>(&m_h_genericMaterialDevice.m_scalars),
 			  dataSize));
   if (status != StatusCode::NoError) {
     return;
@@ -31,7 +31,7 @@ void GenericMaterial::copyToDevice(GenericMaterialDevice* d_genericMaterial,
   //--------------------------------------------------------------------------
   // vectors
   dataSize = m_vectors.size()*sizeof(float3);
-  status = CCE(cudaMalloc((void**)&(m_h_genericMaterialDevice.m_vectors),
+  status = CCE(cudaMalloc(reinterpret_cast<void**>(&m_h_genericMaterialDevice.m_vectors),
 			  dataSize));
   if (status != StatusCode::NoError) {
     return;
@@ -45,7 +45,7 @@ void GenericMaterial::copyToDevice(GenericMaterialDevice* d_genericMaterial,
   //--------------------------------------------------------------------------
   // textures
   dataSize = m_textures.size()*sizeof(GenericTextureDevice);
-  status = CCE(cudaMalloc((void**)&(m_h_genericMaterialDevice.m_textures),
+  status = CCE(cudaMalloc(reinterpret_cast<void**>(&m_h_genericMaterialDevice.m_textures),
 			  dataSize));
   for (int texIdx = 0; texIdx < m_textures.size(); texIdx++) {
     m_textures[texIdx].copyToDevice(m_h_genericMaterialDevice.m_textures + texIdx,

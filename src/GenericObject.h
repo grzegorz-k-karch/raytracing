@@ -5,6 +5,10 @@
 #include <vector_types.h>
 #include <boost/property_tree/xml_parser.hpp>
 
+#include <optix.h>
+// #include <optix_function_table_definition.h>
+#include <optix_stubs.h>
+
 #include "logging.h"
 #include "StatusCode.h"
 #include "AABB.cuh"
@@ -75,6 +79,8 @@ public:
 
   void copyToDevice(GenericObjectDevice* d_genericObject,
 		    StatusCode& status);
+
+  void buildOptixAccelStruct(OptixDeviceContext context);
 
 private:
 

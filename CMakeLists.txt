@@ -16,6 +16,7 @@ set_target_properties(raytracing-cuda PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 target_compile_features(raytracing-cuda PUBLIC cxx_std_17)
 
 target_include_directories(raytracing-cuda PRIVATE "/usr/local/cuda/include")
+target_include_directories(raytracing-cuda PRIVATE "/home/gkk/NVIDIA-OptiX-SDK-7.3.0-linux64-x86_64/include")
 
 # nvidia sdk, stb_image
 target_include_directories(raytracing-cuda PRIVATE ${CMAKE_SOURCE_DIR}/src/external/)

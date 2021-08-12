@@ -1,7 +1,80 @@
+#include <optix.h>
+// #include <optix_function_table_definition.h>
+#include <optix_stubs.h>
+
 #include "logging.h"
 #include "cuda_utils.cuh"
 #include "GenericObject.h"
 #include "GenericMaterial.h"
+
+void GenericObject::buildOptixAccelStruct(OptixDeviceContext context)
+{
+  // OptixTraversableHandle gasHandle;
+  // CUdeviceptr            d_gasOutputBuffer;
+  // {
+  //   // Use default options for simplicity.  In a real use case we would want to
+  //   // enable compaction, etc
+  //   OptixAccelBuildOptions accelOptions = {};
+  //   accelOptions.buildFlags = OPTIX_BUILD_FLAG_NONE;
+  //   accelOptions.operation  = OPTIX_BUILD_OPERATION_BUILD;
+
+
+  //   const size_t verticesSize = sizeof(float3)*m_vertices.size();
+  //   CUdeviceptr d_vertices=0;
+  //   CCE(cudaMalloc(reinterpret_cast<void**>(&d_vertices), verticesSize));
+  //   CCE(cudaMemcpy(reinterpret_cast<void*>(d_vertices), m_vertices.data(),
+  // 		   verticesSize, cudaMemcpyHostToDevice));
+
+  //   // Our build input is a simple list of non-indexed triangle vertices
+  //   const uint32_t triangleInputFlags[1] = { OPTIX_GEOMETRY_FLAG_NONE };
+  //   OptixBuildInput triangleInput = {};
+  //   triangleInput.type                        = OPTIX_BUILD_INPUT_TYPE_TRIANGLES;
+  //   triangleInput.triangleArray.vertexFormat  = OPTIX_VERTEX_FORMAT_FLOAT3;
+  //   triangleInput.triangleArray.numVertices   = static_cast<uint32_t>(m_vertices.size());
+  //   triangleInput.triangleArray.vertexBuffers = &d_vertices;
+  //   triangleInput.triangleArray.indexBuffer   = &d_triangleIndices;
+  //   triangleInput.triangleArray.numIndexTriplets = static_cast<uint32_t>(m_triangleIndices.size()/3);
+  //   triangleInput.triangleArray.indexFormat   = OPTIX_INDICES_FORMAT_UNSIGNED_INT3; 
+  //   triangleInput.triangleArray.flags         = triangleInputFlags;
+  //   triangleInput.triangleArray.numSbtRecords = 1;
+    
+
+  //   OptixAccelBufferSizes gas_buffer_sizes;
+  //   // TODO: optix check
+  //   optixAccelComputeMemoryUsage(
+  // 				 context,
+  // 				 &accelOptions,
+  // 				 &triangleInput,
+  // 				 1, // Number of build inputs
+  // 				 &gas_buffer_sizes
+  // 				 );
+  //   CUdeviceptr d_temp_buffer_gas;
+  //   CCE(cudaMalloc(reinterpret_cast<void**>(&d_temp_buffer_gas),
+  // 		   gas_buffer_sizes.tempSizeInBytes));
+  //   CCE(cudaMalloc(reinterpret_cast<void**>(&d_gasOutputBuffer),
+  // 		   gas_buffer_sizes.outputSizeInBytes));
+
+  //   // TODO: optix check
+  //   optixAccelBuild(
+  // 		    context,
+  // 		    0,                  // CUDA stream
+  // 		    &accelOptions,
+  // 		    &triangleInput,
+  // 		    1,                  // num build inputs
+  // 		    d_temp_buffer_gas,
+  // 		    gas_buffer_sizes.tempSizeInBytes,
+  // 		    d_gasOutputBuffer,
+  // 		    gas_buffer_sizes.outputSizeInBytes,
+  // 		    &gasHandle,
+  // 		    nullptr,            // emitted property list
+  // 		    0                   // num emitted properties
+  // 		    );
+
+  //   CCE(cudaFree(reinterpret_cast<void*>(d_temp_buffer_gas)));
+  //   CCE(cudaFree(reinterpret_cast<void*>(d_vertices)));
+  // }
+  
+}
 
 void GenericObject::copyToDevice(GenericObjectDevice* d_genericObject,
 				 StatusCode& status)
@@ -23,7 +96,7 @@ void GenericObject::copyToDevice(GenericObjectDevice* d_genericObject,
   // material ----------------------------------------------------------------
   // allocate buffer for GenericMaterialDevice struct
   int dataSize = sizeof(GenericMaterialDevice);
-  status = CCE(cudaMalloc((void**)&(m_h_genericObjectDevice.m_material),
+  status = CCE(cudaMalloc(reinterpret_cast<void**>(&m_h_genericObjectDevice.m_material),
 			  dataSize));
   if (status != StatusCode::NoError) {
     return;
@@ -35,7 +108,7 @@ void GenericObject::copyToDevice(GenericObjectDevice* d_genericObject,
 
   // scalars -----------------------------------------------------------------
   dataSize = m_scalars.size()*sizeof(float);
-  status = CCE(cudaMalloc((void**)&(m_h_genericObjectDevice.m_scalars), dataSize));
+  status = CCE(cudaMalloc(reinterpret_cast<void**>(&m_h_genericObjectDevice.m_scalars), dataSize));
   if (status != StatusCode::NoError) {
     return;
   }
@@ -47,7 +120,7 @@ void GenericObject::copyToDevice(GenericObjectDevice* d_genericObject,
 
   // vectors -----------------------------------------------------------------
   dataSize = m_vectors.size()*sizeof(float3);
-  status = CCE(cudaMalloc((void**)&(m_h_genericObjectDevice.m_vectors), dataSize));
+  status = CCE(cudaMalloc(reinterpret_cast<void**>(&m_h_genericObjectDevice.m_vectors), dataSize));
   if (status != StatusCode::NoError) {
     return;
   }
@@ -59,7 +132,7 @@ void GenericObject::copyToDevice(GenericObjectDevice* d_genericObject,
 
   // vertices ----------------------------------------------------------------
   dataSize = m_vertices.size()*sizeof(float3);
-  status = CCE(cudaMalloc((void**)&(m_h_genericObjectDevice.m_vertices),
+  status = CCE(cudaMalloc(reinterpret_cast<void**>(&m_h_genericObjectDevice.m_vertices),
 			  dataSize));
   if (status != StatusCode::NoError) {
     return;
@@ -72,7 +145,7 @@ void GenericObject::copyToDevice(GenericObjectDevice* d_genericObject,
 
   // vertex colors -----------------------------------------------------------
   dataSize = m_vertexColors.size()*sizeof(float3);
-  status = CCE(cudaMalloc((void**)&(m_h_genericObjectDevice.m_vertexColors),
+  status = CCE(cudaMalloc(reinterpret_cast<void**>(&m_h_genericObjectDevice.m_vertexColors),
 			  dataSize));
   if (status != StatusCode::NoError) {
     return;
@@ -86,7 +159,7 @@ void GenericObject::copyToDevice(GenericObjectDevice* d_genericObject,
 
   // vertex normals ----------------------------------------------------------
   dataSize = m_vertexNormals.size()*sizeof(float3);
-  status = CCE(cudaMalloc((void**)&(m_h_genericObjectDevice.m_vertexNormals),
+  status = CCE(cudaMalloc(reinterpret_cast<void**>(&m_h_genericObjectDevice.m_vertexNormals),
 			  dataSize));
   if (status != StatusCode::NoError) {
     return;
@@ -100,7 +173,7 @@ void GenericObject::copyToDevice(GenericObjectDevice* d_genericObject,
 
   // texture coords ----------------------------------------------------------
   dataSize = m_textureCoords.size()*sizeof(float2);
-  status = CCE(cudaMalloc((void**)&(m_h_genericObjectDevice.m_textureCoords),
+  status = CCE(cudaMalloc(reinterpret_cast<void**>(&m_h_genericObjectDevice.m_textureCoords),
 			  dataSize));
   if (status != StatusCode::NoError) {
     return;
@@ -114,7 +187,7 @@ void GenericObject::copyToDevice(GenericObjectDevice* d_genericObject,
 
   // triangle indices --------------------------------------------------------
   dataSize = m_triangleIndices.size()*sizeof(int);
-  status = CCE(cudaMalloc((void**)&(m_h_genericObjectDevice.m_triangleIndices),
+  status = CCE(cudaMalloc(reinterpret_cast<void**>(&m_h_genericObjectDevice.m_triangleIndices),
 			  dataSize));
   if (status != StatusCode::NoError) {
     return;

@@ -100,7 +100,7 @@ void GenericTexture::copyToDevice(GenericTextureDevice* d_genericTextureDevice,
   else if (m_textureType == TextureType::SolidColor) {
     // vectors
     int dataSize = m_vectors.size()*sizeof(float3);
-    status = CCE(cudaMalloc((void**)&(m_h_genericTextureDevice.m_vectors), dataSize));
+    status = CCE(cudaMalloc(reinterpret_cast<void**>(&m_h_genericTextureDevice.m_vectors), dataSize));
     if (status != StatusCode::NoError) {
       return;
     }

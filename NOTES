@@ -28,6 +28,8 @@ TODO:
  - add option to merge vertices
  - Monte Carlo path tracing
  - Acceleration structure for large meshes
+ - use instancing when common mesh
+   - use a class holding those meshes and shared pointer in Mesh class
 ------------------------------------------------------------------------------
 ASSUMPTIONS
 ------------------------------------------------------------------------------
