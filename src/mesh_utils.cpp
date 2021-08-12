@@ -188,30 +188,26 @@ void mergeVertices(std::vector<int>& indices,
 
 
 void computeNormals(const std::vector<float3>& vertices,
-		    const std::vector<int>& indices,
+		    const std::vector<uint3>& indices,
 		    std::vector<float3>& normals,
 		    const std::string frontFace)
 {
   normals.resize(vertices.size(), make_float3(0.0f));
 
   int numTriangles = indices.size()/3;
-  for (int triaIdx = 0; triaIdx < numTriangles; triaIdx++) {
+  for (auto triplet : indices) {
 
-    int vertIdx0 = indices[triaIdx*3];
-    int vertIdx1 = indices[triaIdx*3+1];
-    int vertIdx2 = indices[triaIdx*3+2];
-
-    float3 triangleVertices[3] = {vertices[vertIdx0],
-				  vertices[vertIdx1],
-				  vertices[vertIdx2]};
+    float3 triangleVertices[3] = {vertices[triplet.x],
+				  vertices[triplet.y],
+				  vertices[triplet.z]};
 
     float3 edge1 = triangleVertices[1] - triangleVertices[0];
     float3 edge2 = triangleVertices[2] - triangleVertices[0];
     float3 n = cross(edge1,edge2);
 
-    normals[vertIdx0] += n;
-    normals[vertIdx1] += n;
-    normals[vertIdx2] += n;
+    normals[triplet.x] += n;
+    normals[triplet.y] += n;
+    normals[triplet.z] += n;
   }
   float orientation = frontFace == "CCW" ? 1.0f : -1.0f;
   for (int normIdx = 0; normIdx < normals.size(); normIdx++) {

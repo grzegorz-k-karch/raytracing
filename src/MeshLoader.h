@@ -23,7 +23,7 @@ class MeshLoader {
 		std::vector<float3>& vertexColors,
 		std::vector<float3>& vertexNormals,
 		std::vector<float2>& vertexCoords,
-		std::vector<int>& triangleIndices,
+		std::vector<uint3>& indexTriplets,
 		std::vector<float>& scalars,
 		StatusCode& status) const;
 

@@ -102,7 +102,7 @@ void loadPlyObject(const char* filepath,
 		   std::vector<float3>& vertexColors,
 		   std::vector<float3>& vertexNormals,
 		   std::vector<float2>& textureCoords,
-		   std::vector<int>& triangleIndices,
+		   std::vector<uint3>& indexTriplets,
 		   StatusCode& status)
 {
   PlyFile *ply = loadPlyFile(filepath);
@@ -185,9 +185,11 @@ void loadPlyObject(const char* filepath,
 	triangle_t triangle;
 	ply_get_element(ply, (void*)&triangle);
 	assert(triangle.nIndices == 3);
-	for (int vIdx = 0; vIdx < triangle.nIndices; vIdx++) {
-	  triangleIndices.push_back(triangle.indices[vIdx]);
-	}
+	uint3 triplet = make_uint3(triangle.indices[0],
+				   triangle.indices[1],
+				   triangle.indices[2]);
+	indexTriplets.push_back(triplet);
+
 	if (texcoordsPresent) {
 	  assert(triangle.nTexCoords == 6);
 	  for (int tIdx = 0; tIdx < triangle.nTexCoords/2; tIdx++) {

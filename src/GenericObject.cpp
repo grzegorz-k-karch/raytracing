@@ -43,7 +43,7 @@ GenericObject::GenericObject(GenericObject&& other) noexcept :
   m_vertexColors(other.m_vertexColors),
   m_vertexNormals(other.m_vertexNormals),
   m_textureCoords(other.m_textureCoords),
-  m_triangleIndices(other.m_triangleIndices),
+  m_indexTriplets(other.m_indexTriplets),
   m_h_genericObjectDevice(std::move(other.m_h_genericObjectDevice))
 {
   LOG_TRIVIAL(trace) << "GenericObject move constructor";
@@ -67,7 +67,7 @@ void GenericObject::parseMesh(const pt::ptree object,
   MeshLoader meshLoader = MeshLoader(object);
   meshLoader.loadMesh(m_bbox, m_vertices, m_vertexColors,
 		      m_vertexNormals, m_textureCoords,
-		      m_triangleIndices, m_scalars,
+		      m_indexTriplets, m_scalars,
 		      status);
 }
 

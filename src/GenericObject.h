@@ -31,7 +31,7 @@ struct GenericObjectDevice {
     m_vertexColors(nullptr), m_numVertexColors(0),
     m_vertexNormals(nullptr), m_numVertexNormals(0),
     m_textureCoords(nullptr), m_numTextureCoords(0),
-    m_triangleIndices(nullptr), m_numTriangleIndices(0) {}
+    m_indexTriplets(nullptr), m_numIndexTriplets(0) {}
 
   GenericObjectDevice(GenericObjectDevice&& other) noexcept;
   ~GenericObjectDevice();
@@ -54,8 +54,8 @@ struct GenericObjectDevice {
   int m_numVertexNormals;
   float2 *m_textureCoords;
   int m_numTextureCoords;
-  int *m_triangleIndices;
-  int m_numTriangleIndices;
+  uint3 *m_indexTriplets;
+  int m_numIndexTriplets;
 };
 
 
@@ -100,7 +100,7 @@ private:
   std::vector<float3> m_vertexColors;
   std::vector<float3> m_vertexNormals;
   std::vector<float2> m_textureCoords;
-  std::vector<int>    m_triangleIndices;
+  std::vector<uint3>  m_indexTriplets;
 
   GenericObjectDevice m_h_genericObjectDevice;
 };

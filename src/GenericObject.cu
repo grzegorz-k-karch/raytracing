@@ -32,8 +32,8 @@ void GenericObject::buildOptixAccelStruct(OptixDeviceContext context)
   //   triangleInput.triangleArray.vertexFormat  = OPTIX_VERTEX_FORMAT_FLOAT3;
   //   triangleInput.triangleArray.numVertices   = static_cast<uint32_t>(m_vertices.size());
   //   triangleInput.triangleArray.vertexBuffers = &d_vertices;
-  //   triangleInput.triangleArray.indexBuffer   = &d_triangleIndices;
-  //   triangleInput.triangleArray.numIndexTriplets = static_cast<uint32_t>(m_triangleIndices.size()/3);
+  //   triangleInput.triangleArray.indexBuffer   = &d_indexTriplets;
+  //   triangleInput.triangleArray.numIndexTriplets = static_cast<uint32_t>(m_indexTriplets.size()/3);
   //   triangleInput.triangleArray.indexFormat   = OPTIX_INDICES_FORMAT_UNSIGNED_INT3; 
   //   triangleInput.triangleArray.flags         = triangleInputFlags;
   //   triangleInput.triangleArray.numSbtRecords = 1;
@@ -90,7 +90,7 @@ void GenericObject::copyToDevice(GenericObjectDevice* d_genericObject,
   m_h_genericObjectDevice.m_numVertexColors = m_vertexColors.size();
   m_h_genericObjectDevice.m_numVertexNormals = m_vertexNormals.size();
   m_h_genericObjectDevice.m_numTextureCoords = m_textureCoords.size();
-  m_h_genericObjectDevice.m_numTriangleIndices = m_triangleIndices.size();
+  m_h_genericObjectDevice.m_numIndexTriplets = m_indexTriplets.size();
   m_h_genericObjectDevice.m_objectType = m_objectType;
 
   // material ----------------------------------------------------------------
@@ -186,14 +186,14 @@ void GenericObject::copyToDevice(GenericObjectDevice* d_genericObject,
   }
 
   // triangle indices --------------------------------------------------------
-  dataSize = m_triangleIndices.size()*sizeof(int);
-  status = CCE(cudaMalloc(reinterpret_cast<void**>(&m_h_genericObjectDevice.m_triangleIndices),
+  dataSize = m_indexTriplets.size()*sizeof(uint3);
+  status = CCE(cudaMalloc(reinterpret_cast<void**>(&m_h_genericObjectDevice.m_indexTriplets),
 			  dataSize));
   if (status != StatusCode::NoError) {
     return;
   }
-  status = CCE(cudaMemcpy(m_h_genericObjectDevice.m_triangleIndices,
-			  m_triangleIndices.data(), dataSize,
+  status = CCE(cudaMemcpy(m_h_genericObjectDevice.m_indexTriplets,
+			  m_indexTriplets.data(), dataSize,
 			  cudaMemcpyHostToDevice));
   if (status != StatusCode::NoError) {
     return;
@@ -245,11 +245,11 @@ GenericObjectDevice::~GenericObjectDevice()
     m_textureCoords = nullptr;
   }
   m_numTextureCoords = 0;
-  if (m_triangleIndices) {
-    CCE(cudaFree(m_triangleIndices));
-    m_triangleIndices = nullptr;
+  if (m_indexTriplets) {
+    CCE(cudaFree(m_indexTriplets));
+    m_indexTriplets = nullptr;
   }
-  m_numTriangleIndices = 0;
+  m_numIndexTriplets = 0;
 }
 
 
@@ -270,8 +270,8 @@ GenericObjectDevice::GenericObjectDevice(GenericObjectDevice&& other) noexcept:
   m_numVertexNormals(other.m_numVertexNormals),
   m_textureCoords(other.m_textureCoords),
   m_numTextureCoords(other.m_numTextureCoords),
-  m_triangleIndices(other.m_triangleIndices),
-  m_numTriangleIndices(other.m_numTriangleIndices)
+  m_indexTriplets(other.m_indexTriplets),
+  m_numIndexTriplets(other.m_numIndexTriplets)
 {
   other.m_material = nullptr;
   other.m_scalars = nullptr;
@@ -286,6 +286,6 @@ GenericObjectDevice::GenericObjectDevice(GenericObjectDevice&& other) noexcept:
   other.m_numVertexNormals = 0;
   other.m_textureCoords = nullptr;
   other.m_numTextureCoords = 0;
-  other.m_triangleIndices = nullptr;
-  other.m_numTriangleIndices = 0;
+  other.m_indexTriplets = nullptr;
+  other.m_numIndexTriplets = 0;
 }

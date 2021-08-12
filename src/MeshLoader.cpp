@@ -37,7 +37,7 @@ void MeshLoader::loadMesh(AABB& bbox,
 			  std::vector<float3>& vertexColors,
 			  std::vector<float3>& vertexNormals,
 			  std::vector<float2>& textureCoords,
-			  std::vector<int>& triangleIndices,
+			  std::vector<uint3>& indexTriplets,
 			  std::vector<float>& scalars,
 			  StatusCode& status) const
 {
@@ -52,7 +52,7 @@ void MeshLoader::loadMesh(AABB& bbox,
   if (fileIsPly) {
     loadPlyObject(m_meshFilepath.c_str(), vertices,
 		  vertexColors, vertexNormals,
-		  textureCoords, triangleIndices, status);
+		  textureCoords, indexTriplets, status);
     if (status != StatusCode::NoError) {
       return;
     }
@@ -60,7 +60,7 @@ void MeshLoader::loadMesh(AABB& bbox,
 		       << "\nnum colors: " << vertexColors.size()
 		       << "\nnum normals: " << vertexNormals.size()
 		       << "\nnum coords: " << textureCoords.size()
-		       << "\nnum indices: " << triangleIndices.size();
+		       << "\nnum index triplets: " << indexTriplets.size();
   }
   else {
     LOG_TRIVIAL(error) << "Only PLY files are currently supported";
@@ -71,10 +71,10 @@ void MeshLoader::loadMesh(AABB& bbox,
   // cleanup mesh
   //   merge vertices
   // std::vector<int> indicesOfKeptVertices;
-  // mergeVertices(triangleIndices, vertices, indicesOfKeptVertices);
+  // mergeVertices(indexTriplets, vertices, indicesOfKeptVertices);
   LOG_TRIVIAL(debug) << "After merging vertices:"
 		     << " num vertices: " << vertices.size()
-    		     << " num indices: " << triangleIndices.size();
+    		     << " num index triplets: " << indexTriplets.size();
 
   //   set vertex colors if not present
   if (vertexColors.empty()) {
@@ -92,7 +92,7 @@ void MeshLoader::loadMesh(AABB& bbox,
   //   compute normals if not present
   if (vertexNormals.empty()) {
     // if no normals - compute them
-    computeNormals(vertices, triangleIndices, vertexNormals, m_frontFace);
+    computeNormals(vertices, indexTriplets, vertexNormals, m_frontFace);
   }
   else {
     // if there are normals - merge them according to the merged vertices

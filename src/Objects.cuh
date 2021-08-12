@@ -74,8 +74,8 @@ public:
       numVertexNormals(genObjDev->m_numVertexNormals),
       textureCoords(genObjDev->m_textureCoords),
       numTextureCoords(genObjDev->m_numTextureCoords),
-      triangleIndices(genObjDev->m_triangleIndices),
-      numTriangleIndices(genObjDev->m_numTriangleIndices),
+      indexTriplets(genObjDev->m_indexTriplets),
+      numIndexTriplets(genObjDev->m_numIndexTriplets),
       m_smoothness(genObjDev->m_scalars[0]) {}
 
   __device__ ~Mesh() {
@@ -109,8 +109,8 @@ public:
   int    numVertexNormals;
   float2 *textureCoords;
   int    numTextureCoords;
-  int *triangleIndices;
-  int numTriangleIndices;
+  uint3 *indexTriplets;
+  int numIndexTriplets;
   const Material *m_material;
   float m_smoothness;
 

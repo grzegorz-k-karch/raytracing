@@ -28,7 +28,7 @@ void computeBBox(const std::vector<float3>& vertices,
 		 float3& bmin, float3& bmax);
 
 void computeNormals(const std::vector<float3>& vertices,
-		    const std::vector<int>& indices,
+		    const std::vector<uint3>& indices,
 		    std::vector<float3>& normals,
 		    const std::string frontFace);
 

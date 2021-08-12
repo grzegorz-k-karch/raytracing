@@ -302,19 +302,15 @@ bool Mesh::hit(const Ray& ray, float tMin, float tMax, HitRecord& hitRec) const
   // int isect = 0;
   int tidx;
 
-  int numTriangles = numTriangleIndices/3;
-  // ensure numTriangleIndices is divisible by 3
-  assert(numTriangles*3 == numTriangleIndices);
+  int numTriangles = numIndexTriplets;
 
   for (int triangleIdx = 0; triangleIdx < numTriangles; triangleIdx++) {
 
-    int v0 = triangleIndices[triangleIdx*3];
-    int v1 = triangleIndices[triangleIdx*3 + 1];
-    int v2 = triangleIndices[triangleIdx*3 + 2];
+    uint3 triaIdx = indexTriplets[triangleIdx];
 
-    float3 vert0 = vertices[v0];
-    float3 vert1 = vertices[v1];
-    float3 vert2 = vertices[v2];
+    float3 vert0 = vertices[triaIdx.x];
+    float3 vert1 = vertices[triaIdx.y];
+    float3 vert2 = vertices[triaIdx.z];
 
     float t_tmp, u_tmp, v_tmp;
     int isect = intersectTriangle(ray.m_origin, ray.m_direction,
@@ -334,12 +330,10 @@ bool Mesh::hit(const Ray& ray, float tMin, float tMax, HitRecord& hitRec) const
     hitRec.t = t;
     hitRec.p = ray.pointAtT(t);
 
-    int t0 = triangleIndices[tidx*3];
-    int t1 = triangleIndices[tidx*3 + 1];
-    int t2 = triangleIndices[tidx*3 + 2];
-    float3 n0 = vertexNormals[t0];
-    float3 n1 = vertexNormals[t1];
-    float3 n2 = vertexNormals[t2];
+    uint3 triaIdx = indexTriplets[tidx];
+    float3 n0 = vertexNormals[triaIdx.x];
+    float3 n1 = vertexNormals[triaIdx.y];
+    float3 n2 = vertexNormals[triaIdx.z];
     hitRec.n = normalAtP(u, v, n0, n1, n2);
     if (numTextureCoords > 0) {
       getTextureUV(u, v, tidx*3, tidx*3+1, tidx*3+2, hitRec.u, hitRec.v);
