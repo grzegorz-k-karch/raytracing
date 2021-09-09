@@ -80,7 +80,9 @@ public:
   void copyToDevice(GenericObjectDevice* d_genericObject,
 		    StatusCode& status);
 
-  void buildOptixAccelStruct(OptixDeviceContext context);
+  void buildOptixAccelStruct(OptixDeviceContext context,
+			     OptixTraversableHandle& gasHandle,
+			     CUdeviceptr& d_gasOutputBuffer);
 
 private:
 

@@ -2,7 +2,7 @@
 #define STATUS_CODES_H
 
 enum class StatusCode {
-  NoError, FileError, CmdLineError, SceneError, UnknownError, CudaError
+  NoError, FileError, CmdLineError, SceneError, UnknownError, CudaError, OptixError
     };
 
 // used in main

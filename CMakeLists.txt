@@ -7,10 +7,12 @@ find_package(PNGwriter 0.7.0)
 
 file(GLOB_RECURSE CU_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cu)
 file(GLOB CPP_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp)
+# OptixRenderer.cu will be compiled to ptx separately
+list(REMOVE_ITEM CU_FILES ${CMAKE_CURRENT_SOURCE_DIR}/src/OptixRenderer.cu)
 
 add_executable(raytracing-cuda ${CU_FILES} ${CPP_FILES})
 
-set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -gencode arch=compute_70,code=sm_70")
+set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -gencode arch=compute_70,code=sm_70 -rdc=true")
 set(CMAKE_CUDA_FLAGS_DEBUG "${CMAKE_CUDA_FLAGS_DEBUG} -G")
 set_target_properties(raytracing-cuda PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 target_compile_features(raytracing-cuda PUBLIC cxx_std_17)
@@ -31,6 +33,11 @@ target_link_libraries(raytracing-cuda
   PNGwriter::PNGwriter
 )
 
-# if(PNGwriter_FOUND)
-#   target_link_libraries(raytracing-cuda PRIVATE PNGwriter::PNGwriter)
-# endif(PNGwriter_FOUND)
+# rules for creating PTX file
+
+add_library(OptixRendererPTX OBJECT ${CMAKE_CURRENT_SOURCE_DIR}/src/OptixRenderer.cu)
+set_property(TARGET OptixRendererPTX PROPERTY CUDA_PTX_COMPILATION ON)
+target_include_directories(OptixRendererPTX PRIVATE ${CMAKE_SOURCE_DIR}/src/external/)
+target_include_directories(OptixRendererPTX PRIVATE $ENV{HOME}/NVIDIA-OptiX-SDK-7.3.0-linux64-x86_64/include/)
+install(TARGETS OptixRendererPTX OBJECTS DESTINATION ${CMAKE_BINARY_DIR})
+
