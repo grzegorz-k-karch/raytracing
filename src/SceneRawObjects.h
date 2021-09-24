@@ -46,6 +46,8 @@ public:
   void copyToDevice(SceneRawObjectsDevice* d_sceneRawObjects,
 		    StatusCode &status);
 
+  void generateTraversableHandles(std::vector<OptixTraversableHandle>& traversableHandles);
+
 private:
   // SceneRawObjectsDevice* copyToDevice(StatusCode &status);
 

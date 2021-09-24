@@ -20,8 +20,8 @@
 template <typename T>
 struct SbtRecord
 {
-    __align__( OPTIX_SBT_RECORD_ALIGNMENT ) char header[OPTIX_SBT_RECORD_HEADER_SIZE];
-    T data;
+  __align__( OPTIX_SBT_RECORD_ALIGNMENT ) char header[OPTIX_SBT_RECORD_HEADER_SIZE];
+  T data;
 };
 
 typedef SbtRecord<RayGenData>     RayGenSbtRecord;
@@ -97,9 +97,9 @@ void OptixRenderer::createModule(OptixPipelineCompileOptions& pipelineCompileOpt
 
   std::string ptxInput;
   status = loadPTXFile("objects-Release/OptixRendererPTX/src/OptixRenderer.ptx", ptxInput);
-
-  // const char* input = loadCUFile("OptixRenderer.cu", fileSize);
-  // size_t sizeofLog = sizeof(log);
+  if (status != StatusCode::NoError) {
+    LOG_TRIVIAL(error) << "Error\n";
+  }
 
   status = OCE(optixModuleCreateFromPTX(
 					m_context,
@@ -111,6 +111,9 @@ void OptixRenderer::createModule(OptixPipelineCompileOptions& pipelineCompileOpt
 					&sizeofLog,
 					&m_module
 					));
+  if (status != StatusCode::NoError) {
+    LOG_TRIVIAL(error) << "Error\n";
+  }  
 }
 
 
@@ -124,44 +127,53 @@ void OptixRenderer::createProgramGroups(StatusCode& status)
   OptixProgramGroupDesc raygenProgGroupDesc    = {};
   raygenProgGroupDesc.kind                     = OPTIX_PROGRAM_GROUP_KIND_RAYGEN;
   raygenProgGroupDesc.raygen.module            = m_module;
-  raygenProgGroupDesc.raygen.entryFunctionName = "__raygen__renderScene";
-  OCE(optixProgramGroupCreate(
-			      m_context,
-			      &raygenProgGroupDesc,
-			      1,   // num program groups
-			      &programGroupOptions,
-			      log,
-			      &sizeofLog,
-			      &m_raygenProgramGroup
-			      ));
+  raygenProgGroupDesc.raygen.entryFunctionName = "__raygen__rg";
+  status = OCE(optixProgramGroupCreate(
+				       m_context,
+				       &raygenProgGroupDesc,
+				       1,   // num program groups
+				       &programGroupOptions,
+				       log,
+				       &sizeofLog,
+				       &m_raygenProgramGroup
+				       ));
+  if (status != StatusCode::NoError) {
+    LOG_TRIVIAL(error) << "Error\n";
+  }
 
   OptixProgramGroupDesc missProgGroupDesc  = {};
   missProgGroupDesc.kind                   = OPTIX_PROGRAM_GROUP_KIND_MISS;
   missProgGroupDesc.miss.module            = m_module;
   missProgGroupDesc.miss.entryFunctionName = "__miss__ms";
-  OCE(optixProgramGroupCreate(
-			      m_context,
-			      &missProgGroupDesc,
-			      1,   // num program groups
-			      &programGroupOptions,
-			      log,
-			      &sizeofLog,
-			      &m_missProgramGroup
-			      ));
+  status = OCE(optixProgramGroupCreate(
+				       m_context,
+				       &missProgGroupDesc,
+				       1,   // num program groups
+				       &programGroupOptions,
+				       log,
+				       &sizeofLog,
+				       &m_missProgramGroup
+				       ));
+  if (status != StatusCode::NoError) {
+    LOG_TRIVIAL(error) << "Error\n";
+  }
 
   OptixProgramGroupDesc hitgroupProgGroupDesc = {};
   hitgroupProgGroupDesc.kind                         = OPTIX_PROGRAM_GROUP_KIND_HITGROUP;
   hitgroupProgGroupDesc.hitgroup.moduleCH            = m_module;
   hitgroupProgGroupDesc.hitgroup.entryFunctionNameCH = "__closesthit__ch";
-  OCE(optixProgramGroupCreate(
-			      m_context,
-			      &hitgroupProgGroupDesc,
-			      1,   // num program groups
-			      &programGroupOptions,
-			      log,
-			      &sizeofLog,
-			      &m_hitgroupProgramGroup
-			      ));
+  status = OCE(optixProgramGroupCreate(
+				       m_context,
+				       &hitgroupProgGroupDesc,
+				       1,   // num program groups
+				       &programGroupOptions,
+				       log,
+				       &sizeofLog,
+				       &m_hitgroupProgramGroup
+				       ));
+  if (status != StatusCode::NoError) {
+    LOG_TRIVIAL(error) << "Error\n";
+  }
 }
 
 
@@ -182,34 +194,46 @@ void OptixRenderer::createPipeline(OptixPipelineCompileOptions& pipelineCompileO
   OptixPipelineLinkOptions pipelineLinkOptions = {};
   pipelineLinkOptions.maxTraceDepth = maxTraceDepth;
   pipelineLinkOptions.debugLevel    = OPTIX_COMPILE_DEBUG_LEVEL_FULL;
-  OCE(optixPipelineCreate(
-			  m_context,
-			  &pipelineCompileOptions,
-			  &pipelineLinkOptions,
-			  programGroups,
-			  sizeof(programGroups) / sizeof(programGroups[0]),
-			  log,
-			  &sizeofLog,
-			  &m_pipeline
-			  ));
+  status = OCE(optixPipelineCreate(
+				   m_context,
+				   &pipelineCompileOptions,
+				   &pipelineLinkOptions,
+				   programGroups,
+				   sizeof(programGroups) / sizeof(programGroups[0]),
+				   log,
+				   &sizeofLog,
+				   &m_pipeline
+				   ));
+  if (status != StatusCode::NoError) {
+    LOG_TRIVIAL(error) << "Error\n";
+  }
 
   OptixStackSizes stackSizes = {};
   for(auto& progGroup : programGroups) {
-    OCE(optixUtilAccumulateStackSizes(progGroup, &stackSizes));
+    status = OCE(optixUtilAccumulateStackSizes(progGroup, &stackSizes));
+    if (status != StatusCode::NoError) {
+      LOG_TRIVIAL(error) << "Error\n";
+    }
   }
 
   uint32_t directCallableStackSizeFromTraversal;
   uint32_t directCallableStackSizeFromState;
   uint32_t continuationStackSize;
-  OCE(optixUtilComputeStackSizes(&stackSizes, maxTraceDepth,
-				 0,  // maxCCDepth
-				 0,  // maxDCDEpth
-				 &directCallableStackSizeFromTraversal,
-				 &directCallableStackSizeFromState, &continuationStackSize));
-  OCE(optixPipelineSetStackSize(m_pipeline, directCallableStackSizeFromTraversal,
-				directCallableStackSizeFromState, continuationStackSize,
-				1  // maxTraversableDepth
-				));
+  status = OCE(optixUtilComputeStackSizes(&stackSizes, maxTraceDepth,
+					  0,  // maxCCDepth
+					  0,  // maxDCDEpth
+					  &directCallableStackSizeFromTraversal,
+					  &directCallableStackSizeFromState, &continuationStackSize));
+  if (status != StatusCode::NoError) {
+    LOG_TRIVIAL(error) << "Error\n";
+  }
+  status = OCE(optixPipelineSetStackSize(m_pipeline, directCallableStackSizeFromTraversal,
+					 directCallableStackSizeFromState, continuationStackSize,
+					 1  // maxTraversableDepth
+					 ));
+  if (status != StatusCode::NoError) {
+    LOG_TRIVIAL(error) << "Error\n";
+  }
 }
 
 
@@ -217,41 +241,70 @@ void OptixRenderer::setupShaderBindingTable(StatusCode& status)
 {
   CUdeviceptr  raygenRecord;
   const size_t raygenRecordSize = sizeof(RayGenSbtRecord);
-  CCE(cudaMalloc(reinterpret_cast<void**>(&raygenRecord), raygenRecordSize));
+  status = CCE(cudaMalloc(reinterpret_cast<void**>(&raygenRecord), raygenRecordSize));
+  if (status != StatusCode::NoError) {
+    LOG_TRIVIAL(error) << "Error\n";
+  }
   RayGenSbtRecord rg_sbt;
-  OCE(optixSbtRecordPackHeader(m_raygenProgramGroup, &rg_sbt));
-  CCE(cudaMemcpy(
-		 reinterpret_cast<void*>(raygenRecord),
-		 &rg_sbt,
-		 raygenRecordSize,
-		 cudaMemcpyHostToDevice
-		 ));
+  status = OCE(optixSbtRecordPackHeader(m_raygenProgramGroup, &rg_sbt));
+  if (status != StatusCode::NoError) {
+    LOG_TRIVIAL(error) << "Error\n";
+  }
+  status = CCE(cudaMemcpy(
+			  reinterpret_cast<void*>(raygenRecord),
+			  &rg_sbt,
+			  raygenRecordSize,
+			  cudaMemcpyHostToDevice
+			  ));
+  if (status != StatusCode::NoError) {
+    LOG_TRIVIAL(error) << "Error\n";
+  }
 
   CUdeviceptr missRecord;
   size_t      missRecordSize = sizeof(MissSbtRecord);
-  CCE(cudaMalloc(reinterpret_cast<void**>(&missRecord), missRecordSize));
+  status = CCE(cudaMalloc(reinterpret_cast<void**>(&missRecord), missRecordSize));
+  if (status != StatusCode::NoError) {
+    LOG_TRIVIAL(error) << "Error\n";
+  }
   MissSbtRecord ms_sbt;
-  ms_sbt.data = { 0.3f, 0.1f, 0.2f };
-  OCE(optixSbtRecordPackHeader(m_missProgramGroup, &ms_sbt));
-  CCE(cudaMemcpy(
-		 reinterpret_cast<void*>(missRecord),
-		 &ms_sbt,
-		 missRecordSize,
-		 cudaMemcpyHostToDevice
-		 ));
+  ms_sbt.data = { 0.9f, 0.1f, 0.2f };
+  status = OCE(optixSbtRecordPackHeader(m_missProgramGroup, &ms_sbt));
+  if (status != StatusCode::NoError) {
+    LOG_TRIVIAL(error) << "Error\n";
+  }
+  status = CCE(cudaMemcpy(
+			  reinterpret_cast<void*>(missRecord),
+			  &ms_sbt,
+			  missRecordSize,
+			  cudaMemcpyHostToDevice
+			  ));
+  if (status != StatusCode::NoError) {
+    LOG_TRIVIAL(error) << "Error\n";
+  }
 
   CUdeviceptr hitgroupRecord;
   size_t      hitgroupRecordSize = sizeof(HitGroupSbtRecord);
-  CCE(cudaMalloc(reinterpret_cast<void**>(&hitgroupRecord), hitgroupRecordSize));
+  status = CCE(cudaMalloc(reinterpret_cast<void**>(&hitgroupRecord), hitgroupRecordSize));
+  if (status != StatusCode::NoError) {
+    LOG_TRIVIAL(error) << "Error\n";
+  }
   HitGroupSbtRecord hg_sbt;
-  OCE(optixSbtRecordPackHeader(m_hitgroupProgramGroup, &hg_sbt));
-  CCE(cudaMemcpy(
-		 reinterpret_cast<void*>(hitgroupRecord),
-		 &hg_sbt,
-		 hitgroupRecordSize,
-		 cudaMemcpyHostToDevice
-		 ));
+  status = OCE(optixSbtRecordPackHeader(m_hitgroupProgramGroup, &hg_sbt));
+  if (status != StatusCode::NoError) {
+    LOG_TRIVIAL(error) << "Error\n";
+  }
+  status = CCE(cudaMemcpy(
+			  reinterpret_cast<void*>(hitgroupRecord),
+			  &hg_sbt,
+			  hitgroupRecordSize,
+			  cudaMemcpyHostToDevice
+			  ));
+  if (status != StatusCode::NoError) {
+    LOG_TRIVIAL(error) << "Error\n";
+  }
 
+  m_shaderBindingTable = {};
+  memset(&m_shaderBindingTable, 0, sizeof(OptixShaderBindingTable));  
   m_shaderBindingTable.raygenRecord                = raygenRecord;
   m_shaderBindingTable.missRecordBase              = missRecord;
   m_shaderBindingTable.missRecordStrideInBytes     = sizeof(MissSbtRecord);
@@ -301,17 +354,20 @@ OptixRenderer::OptixRenderer(StatusCode& status) :
 }
 
 
-void OptixRenderer::launch(OptixTraversableHandle gasHandle,
+void OptixRenderer::launch(uchar4* outputBuffer,
 			   StatusCode& status)
 {
   unsigned int imageWidth = 1200;
   unsigned int imageHeight = 800;
 
   uchar4* d_outputBuffer;
-  cudaMalloc(reinterpret_cast<void**>(d_outputBuffer), imageWidth*imageHeight*sizeof(uchar4));
+  cudaMalloc(reinterpret_cast<void**>(&d_outputBuffer), imageWidth*imageHeight*sizeof(uchar4));
 
   CUstream stream;
-  CCE(cudaStreamCreate(&stream));
+  status = CCE(cudaStreamCreate(&stream));
+  if (status != StatusCode::NoError) {
+    LOG_TRIVIAL(error) << "Error\n";
+  }
 
   // sutil::Camera cam;
   // configureCamera(cam, width, height);
@@ -320,30 +376,62 @@ void OptixRenderer::launch(OptixTraversableHandle gasHandle,
   params.image        = d_outputBuffer;
   params.image_width  = imageWidth;
   params.image_height = imageHeight;
-  params.handle       = gasHandle;
+  params.handle       = m_iasHandle;
   params.cam_eye      = make_float3(0.0f, 0.0f, 2.0f);
   params.cam_u        = make_float3(1.0f, 0.0f, 0.0f);
   params.cam_v        = make_float3(0.0f, 1.0f, 0.0f);
   params.cam_w        = make_float3(0.0f, 0.0f, 1.0f);
 
   CUdeviceptr d_param;
-  CCE(cudaMalloc(reinterpret_cast<void**>(&d_param), sizeof(Params)));
-  CCE(cudaMemcpy(
-		 reinterpret_cast<void*>(d_param),
-		 &params, sizeof(params),
-		 cudaMemcpyHostToDevice
-		 ));
+  status = CCE(cudaMalloc(reinterpret_cast<void**>(&d_param), sizeof(Params)));
+  if (status != StatusCode::NoError) {
+    LOG_TRIVIAL(error) << "Error\n";
+  }
+  
+  status = CCE(cudaMemcpy(
+			  reinterpret_cast<void*>(d_param),
+			  &params, sizeof(params),
+			  cudaMemcpyHostToDevice
+			  ));
+  if (status != StatusCode::NoError) {
+    LOG_TRIVIAL(error) << "Error\n";
+  }
 
-  OCE(optixLaunch(
-		  m_pipeline,
-		  stream,
-		  d_param,
-		  sizeof(Params),
-		  &m_shaderBindingTable,
-		  imageWidth,
-		  imageHeight,
-		  /*depth=*/1));
+  status = OCE(optixLaunch(
+			   m_pipeline,
+			   stream,
+			   d_param,
+			   sizeof(Params),
+			   &m_shaderBindingTable,
+			   imageWidth,
+			   imageHeight,
+			   /*depth=*/1
+			   )
+	       );
+  if (status != StatusCode::NoError) {
+    LOG_TRIVIAL(error) << "Error in optixLaunch.\n";
+  }
   cudaDeviceSynchronize();
+  cudaStreamSynchronize(stream);
+
+  Params params2;  
+  status = CCE(cudaMemcpy(
+  			  reinterpret_cast<void*>(&params2),
+  			  reinterpret_cast<void*>(d_param), sizeof(params2),
+  			  cudaMemcpyDeviceToHost
+  			  ));
+  if (status != StatusCode::NoError) {
+    LOG_TRIVIAL(error) << "Error\n";
+  }
+
+  status = CCE(cudaMemcpy(
+  			  reinterpret_cast<void*>(outputBuffer),
+  			  params2.image, imageWidth*imageHeight*sizeof(uchar4),
+  			  cudaMemcpyDeviceToHost
+  			  ));
+  if (status != StatusCode::NoError) {
+    LOG_TRIVIAL(error) << "Error\n";
+  }
 }
 
 
@@ -386,4 +474,189 @@ OptixRenderer::~OptixRenderer()
       LOG_TRIVIAL(error) << "Error occurred during Optix context destruction.";
     }
   }
+}
+
+
+void OptixRenderer::buildRootAccelStruct(std::vector<OptixTraversableHandle>& traversableHandles,
+					 StatusCode& status)
+{
+  // Use default options for simplicity.  In a real use case we would want to
+  // enable compaction, etc
+  OptixAccelBuildOptions accel_options = {};
+  accel_options.buildFlags = OPTIX_BUILD_FLAG_NONE;
+  accel_options.operation  = OPTIX_BUILD_OPERATION_BUILD;
+
+  // Triangle build input: simple list of three vertices
+  const std::array<float3, 3> vertices =
+    { {
+       { -0.5f, -0.5f, 0.0f },
+       {  0.5f, -0.5f, 0.0f },
+       {  0.0f,  0.5f, 0.0f }
+       } };
+
+  const size_t vertices_size = sizeof( float3 )*vertices.size();
+  CUdeviceptr d_vertices=0;
+  status = CCE( cudaMalloc( reinterpret_cast<void**>( &d_vertices ), vertices_size ) );
+  if (status != StatusCode::NoError) {
+    LOG_TRIVIAL(error) << "Error\n";
+  }  
+  status = CCE( cudaMemcpy(
+			 reinterpret_cast<void*>( d_vertices ),
+			 vertices.data(),
+			 vertices_size,
+			 cudaMemcpyHostToDevice
+			 ) );
+  if (status != StatusCode::NoError) {
+    LOG_TRIVIAL(error) << "Error\n";
+  }  
+
+  // Our build input is a simple list of non-indexed triangle vertices
+  const uint32_t triangle_input_flags[1] = { OPTIX_GEOMETRY_FLAG_NONE };
+  OptixBuildInput triangle_input = {};
+  triangle_input.type                        = OPTIX_BUILD_INPUT_TYPE_TRIANGLES;
+  triangle_input.triangleArray.vertexFormat  = OPTIX_VERTEX_FORMAT_FLOAT3;
+  triangle_input.triangleArray.numVertices   = static_cast<uint32_t>( vertices.size() );
+  triangle_input.triangleArray.vertexBuffers = &d_vertices;
+  triangle_input.triangleArray.flags         = triangle_input_flags;
+  triangle_input.triangleArray.numSbtRecords = 1;
+
+  OptixAccelBufferSizes gas_buffer_sizes;
+  status = OCE( optixAccelComputeMemoryUsage(
+					    m_context,
+					    &accel_options,
+					    &triangle_input,
+					    1, // Number of build inputs
+					    &gas_buffer_sizes
+					    ) );
+  if (status != StatusCode::NoError) {
+    LOG_TRIVIAL(error) << "Error\n";
+  }
+  CUdeviceptr d_temp_buffer_gas;
+  status = CCE( cudaMalloc(
+			 reinterpret_cast<void**>( &d_temp_buffer_gas ),
+			 gas_buffer_sizes.tempSizeInBytes
+			 ) );
+  if (status != StatusCode::NoError) {
+    LOG_TRIVIAL(error) << "Error\n";
+  }
+  status = CCE(cudaMalloc(reinterpret_cast<void**>(&m_d_iasOutputBuffer), gas_buffer_sizes.outputSizeInBytes));
+  if (status != StatusCode::NoError) {
+    LOG_TRIVIAL(error) << "Error\n";
+  }
+
+  status = OCE( optixAccelBuild(
+			       m_context,
+			       0,                  // CUDA stream
+			       &accel_options,
+			       &triangle_input,
+			       1,                  // num build inputs
+			       d_temp_buffer_gas,
+			       gas_buffer_sizes.tempSizeInBytes,
+			       m_d_iasOutputBuffer,
+			       gas_buffer_sizes.outputSizeInBytes,
+			       &m_iasHandle,
+			       nullptr,            // emitted property list
+			       0                   // num emitted properties
+			       ) );
+  if (status != StatusCode::NoError) {
+    LOG_TRIVIAL(error) << "Error\n";
+  }
+
+  // We can now free the scratch space buffer used during build and the vertex
+  // inputs, since they are not needed by our trivial shading method
+  status = CCE( cudaFree( reinterpret_cast<void*>( d_temp_buffer_gas ) ) );
+  if (status != StatusCode::NoError) {
+    LOG_TRIVIAL(error) << "Error\n";
+  }
+  status = CCE( cudaFree( reinterpret_cast<void*>( d_vertices        ) ) );
+  if (status != StatusCode::NoError) {
+    LOG_TRIVIAL(error) << "Error\n";
+  }
+
+  
+  // int numInstances = traversableHandles.size();
+  // CUdeviceptr d_instances;
+  // size_t instanceSizeInBytes = sizeof(OptixInstance)*numInstances;
+  // status = CCE(cudaMalloc(reinterpret_cast<void**>(&d_instances), instanceSizeInBytes));
+  // if (status != StatusCode::NoError) {
+  //   LOG_TRIVIAL(error) << "Error\n";
+  // }
+
+  // OptixBuildInput instanceInput = {};
+  // instanceInput.type                       = OPTIX_BUILD_INPUT_TYPE_INSTANCES;
+  // instanceInput.instanceArray.instances    = d_instances;
+  // instanceInput.instanceArray.numInstances = numInstances;
+
+  // OptixAccelBuildOptions accelOptions = {};
+  // accelOptions.buildFlags             = OPTIX_BUILD_FLAG_NONE;
+  // accelOptions.operation              = OPTIX_BUILD_OPERATION_BUILD;
+
+  // OptixAccelBufferSizes iasBufferSizes;
+  // status = OCE(optixAccelComputeMemoryUsage(m_context, &accelOptions, &instanceInput,
+  // 					    1,  // num build inputs
+  // 					    &iasBufferSizes));
+  // if (status != StatusCode::NoError) {
+  //   LOG_TRIVIAL(error) << "Error\n";
+  // }
+
+  // CUdeviceptr d_tempBuffer;
+  // status = CCE(cudaMalloc(reinterpret_cast<void**>(&d_tempBuffer), iasBufferSizes.tempSizeInBytes));
+  // if (status != StatusCode::NoError) {
+  //   LOG_TRIVIAL(error) << "Error\n";
+  // }
+  // status = CCE(cudaMalloc(reinterpret_cast<void**>(&m_d_iasOutputBuffer), iasBufferSizes.outputSizeInBytes));
+  // if (status != StatusCode::NoError) {
+  //   LOG_TRIVIAL(error) << "Error\n";
+  // }
+
+  // // Use the identity matrix for the instance transform
+  // float transform[12] = {1,0,0,0,
+  // 			 0,1,0,0,
+  // 			 0,0,1,0};
+  // std::vector<OptixInstance> instances;
+  // instances.resize(numInstances);
+  // memset(instances.data(), 0, instanceSizeInBytes);
+
+  // int instanceId = 0;
+  // for (auto &instance : instances) {
+  //   instance.traversableHandle = traversableHandles[instanceId];
+  //   instance.flags             = OPTIX_INSTANCE_FLAG_NONE;
+  //   instance.instanceId        = instanceId;
+  //   instance.sbtOffset         = instanceId; // TODO
+  //   instance.visibilityMask    = 1;
+  //   memcpy(instance.transform, transform, sizeof(float)*12);
+  //   instanceId++;
+  // }
+
+  // status = CCE(cudaMemcpy(reinterpret_cast<void*>(d_instances), &instances,
+  // 			  instanceSizeInBytes, cudaMemcpyHostToDevice));
+  // if (status != StatusCode::NoError) {
+  //   LOG_TRIVIAL(error) << "Error\n";
+  // }
+
+  // status = OCE(optixAccelBuild(m_context,
+  // 			       0,  // CUDA stream
+  // 			       &accelOptions,
+  // 			       &instanceInput,
+  // 			       1,  // num build inputs
+  // 			       d_tempBuffer,
+  // 			       iasBufferSizes.tempSizeInBytes,
+  // 			       m_d_iasOutputBuffer,
+  // 			       iasBufferSizes.outputSizeInBytes,
+  // 			       &m_iasHandle,
+  // 			       nullptr,  // emitted property list
+  // 			       0         // num emitted properties
+  // 			       ));
+  // if (status != StatusCode::NoError) {
+  //   LOG_TRIVIAL(error) << "Could not build Optix acceleration structure.\n";
+  // }
+
+  // status = CCE(cudaFree(reinterpret_cast<void*>(d_tempBuffer)));
+  // if (status != StatusCode::NoError) {
+  //   LOG_TRIVIAL(error) << "Error\n";
+  // }
+  // status = CCE(cudaFree(reinterpret_cast<void*>(d_instances)));
+  // if (status != StatusCode::NoError) {
+  //   LOG_TRIVIAL(error) << "Error\n";
+  // }
 }

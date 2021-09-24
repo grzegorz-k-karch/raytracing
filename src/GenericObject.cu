@@ -7,78 +7,53 @@
 #include "GenericObject.h"
 #include "GenericMaterial.h"
 
-void GenericObject::buildOptixAccelStruct(OptixDeviceContext context,
-					  OptixTraversableHandle& gasHandle,
-					  CUdeviceptr& d_gasOutputBuffer)
+void GenericObject::generateOptixBuildInput(OptixBuildInput& buildInput)
 {
-  // Use default options for simplicity.  In a real use case we would want to
-  // enable compaction, etc
-  OptixAccelBuildOptions accelOptions = {};
-  memset(&accelOptions, 0, sizeof(OptixAccelBuildOptions));
-  accelOptions.buildFlags = OPTIX_BUILD_FLAG_NONE;
-  accelOptions.operation  = OPTIX_BUILD_OPERATION_BUILD;
-  accelOptions.motionOptions.numKeys = 0;
+  const uint32_t inputFlags[1] = { OPTIX_GEOMETRY_FLAG_NONE };
+
+  memset(&buildInput, 0, sizeof(OptixBuildInput));
   
-  const size_t verticesSize = sizeof(float3)*m_vertices.size();
-  CUdeviceptr d_vertices = 0;
-  CCE(cudaMalloc(reinterpret_cast<void**>(&d_vertices), verticesSize));
-  CCE(cudaMemcpy(reinterpret_cast<void*>(d_vertices), m_vertices.data(),
-		 verticesSize, cudaMemcpyHostToDevice));
+  LOG_TRIVIAL(trace) << "Generating Optix Build Input: ";
+  if (m_objectType == ObjectType::Mesh) {
+    LOG_TRIVIAL(trace) << "Mesh\n";
+    const size_t verticesSize = sizeof(float3)*m_vertices.size();
+    CUdeviceptr d_vertices = 0;
+    CCE(cudaMalloc(reinterpret_cast<void**>(&d_vertices), verticesSize));
+    CCE(cudaMemcpy(reinterpret_cast<void*>(d_vertices), m_vertices.data(),
+		   verticesSize, cudaMemcpyHostToDevice));
 
-  const size_t indexTripletsSize = sizeof(uint3)*m_indexTriplets.size();
-  CUdeviceptr d_indexTriplets = 0;
-  CCE(cudaMalloc(reinterpret_cast<void**>(&d_indexTriplets), indexTripletsSize));
-  CCE(cudaMemcpy(reinterpret_cast<void*>(d_indexTriplets), m_indexTriplets.data(),
-		 indexTripletsSize, cudaMemcpyHostToDevice));
+    const size_t indexTripletsSize = sizeof(uint3)*m_indexTriplets.size();
+    CUdeviceptr d_indexTriplets = 0;
+    CCE(cudaMalloc(reinterpret_cast<void**>(&d_indexTriplets), indexTripletsSize));
+    CCE(cudaMemcpy(reinterpret_cast<void*>(d_indexTriplets), m_indexTriplets.data(),
+		   indexTripletsSize, cudaMemcpyHostToDevice));
 
-  // Our build input is a simple list of non-indexed triangle vertices
-  const uint32_t triangleInputFlags[1] = { OPTIX_GEOMETRY_FLAG_NONE };
-  OptixBuildInput triangleInput = {};
-  memset(&triangleInput, 0, sizeof(OptixBuildInput));
-  triangleInput.type                           = OPTIX_BUILD_INPUT_TYPE_TRIANGLES;
-  triangleInput.triangleArray.vertexFormat     = OPTIX_VERTEX_FORMAT_FLOAT3;
-  triangleInput.triangleArray.numVertices      = static_cast<uint32_t>(m_vertices.size());
-  triangleInput.triangleArray.vertexBuffers    = &d_vertices;
-  triangleInput.triangleArray.indexBuffer      = d_indexTriplets;
-  triangleInput.triangleArray.numIndexTriplets = static_cast<uint32_t>(m_indexTriplets.size());
-  triangleInput.triangleArray.indexFormat      = OPTIX_INDICES_FORMAT_UNSIGNED_INT3;
-  triangleInput.triangleArray.flags            = triangleInputFlags;
-  triangleInput.triangleArray.numSbtRecords    = 1;
+    buildInput.type                           = OPTIX_BUILD_INPUT_TYPE_TRIANGLES;
+    buildInput.triangleArray.vertexFormat     = OPTIX_VERTEX_FORMAT_FLOAT3;
+    buildInput.triangleArray.numVertices      = static_cast<uint32_t>(m_vertices.size());
+    buildInput.triangleArray.vertexBuffers    = &d_vertices;
+    buildInput.triangleArray.indexBuffer      = d_indexTriplets;
+    buildInput.triangleArray.numIndexTriplets = static_cast<uint32_t>(m_indexTriplets.size());
+    buildInput.triangleArray.indexFormat      = OPTIX_INDICES_FORMAT_UNSIGNED_INT3;
+    buildInput.triangleArray.flags            = inputFlags;
+    buildInput.triangleArray.numSbtRecords    = 1;
+  }
+  else if (m_objectType == ObjectType::Sphere) {
+    LOG_TRIVIAL(trace) << "Sphere\n";    
+    // AABB build input
+    OptixAabb aabb  = {m_bbox.min().x, m_bbox.min().y, m_bbox.min().z,
+		       m_bbox.max().x, m_bbox.max().y, m_bbox.max().z};
 
-
-  OptixAccelBufferSizes gasBufferSizes;
-  // TODO: optix check
-  optixAccelComputeMemoryUsage(
-			       context,
-			       &accelOptions,
-			       &triangleInput,
-			       1, // Number of build inputs
-			       &gasBufferSizes
-			       );
-  CUdeviceptr d_tempBufferGas;
-  CCE(cudaMalloc(reinterpret_cast<void**>(&d_tempBufferGas),
-		 gasBufferSizes.tempSizeInBytes));
-  CCE(cudaMalloc(reinterpret_cast<void**>(&d_gasOutputBuffer),
-		 gasBufferSizes.outputSizeInBytes));
-
-  // TODO: optix check
-  optixAccelBuild(
-		  context,
-		  0,                  // CUDA stream
-		  &accelOptions,
-		  &triangleInput,
-		  1,                  // num build inputs
-		  d_tempBufferGas,
-		  gasBufferSizes.tempSizeInBytes,
-		  d_gasOutputBuffer,
-		  gasBufferSizes.outputSizeInBytes,
-		  &gasHandle,
-		  nullptr,            // emitted property list
-		  0                   // num emitted properties
-		  );
-
-  CCE(cudaFree(reinterpret_cast<void*>(d_tempBufferGas)));
-  CCE(cudaFree(reinterpret_cast<void*>(d_vertices)));
+    CUdeviceptr d_aabbBuffer;
+    CCE(cudaMalloc(reinterpret_cast<void**>(&d_aabbBuffer), sizeof(OptixAabb)));
+    CCE(cudaMemcpy(reinterpret_cast<void*>(d_aabbBuffer), &aabb, sizeof(OptixAabb),
+			  cudaMemcpyHostToDevice));
+    buildInput.type                               = OPTIX_BUILD_INPUT_TYPE_CUSTOM_PRIMITIVES;
+    buildInput.customPrimitiveArray.aabbBuffers   = &d_aabbBuffer;
+    buildInput.customPrimitiveArray.numPrimitives = 1;
+    buildInput.customPrimitiveArray.flags         = inputFlags;
+    buildInput.customPrimitiveArray.numSbtRecords = 1;
+  }
 }
 
 void GenericObject::copyToDevice(GenericObjectDevice* d_genericObject,
@@ -294,3 +269,48 @@ GenericObjectDevice::GenericObjectDevice(GenericObjectDevice&& other) noexcept:
   other.m_indexTriplets = nullptr;
   other.m_numIndexTriplets = 0;
 }
+
+
+// // Use default options for simplicity.  In a real use case we would want to
+// // enable compaction, etc
+// OptixAccelBuildOptions accelOptions = {};
+// memset(&accelOptions, 0, sizeof(OptixAccelBuildOptions));
+// accelOptions.buildFlags = OPTIX_BUILD_FLAG_NONE;
+// accelOptions.operation  = OPTIX_BUILD_OPERATION_BUILD;
+// accelOptions.motionOptions.numKeys = 0;
+
+
+
+// OptixAccelBufferSizes gasBufferSizes;
+// // TODO: optix check
+// optixAccelComputeMemoryUsage(
+// 			       context,
+// 			       &accelOptions,
+// 			       &triangleInput,
+// 			       1, // Number of build inputs
+// 			       &gasBufferSizes
+// 			       );
+// CUdeviceptr d_tempBufferGas;
+// CCE(cudaMalloc(reinterpret_cast<void**>(&d_tempBufferGas),
+// 		 gasBufferSizes.tempSizeInBytes));
+// CCE(cudaMalloc(reinterpret_cast<void**>(&d_gasOutputBuffer),
+// 		 gasBufferSizes.outputSizeInBytes));
+
+// // TODO: optix check
+// optixAccelBuild(
+// 		  context,
+// 		  0,                  // CUDA stream
+// 		  &accelOptions,
+// 		  &triangleInput,
+// 		  1,                  // num build inputs
+// 		  d_tempBufferGas,
+// 		  gasBufferSizes.tempSizeInBytes,
+// 		  d_gasOutputBuffer,
+// 		  gasBufferSizes.outputSizeInBytes,
+// 		  &gasHandle,
+// 		  nullptr,            // emitted property list
+// 		  0                   // num emitted properties
+// 		  );
+
+// CCE(cudaFree(reinterpret_cast<void*>(d_tempBufferGas)));
+// CCE(cudaFree(reinterpret_cast<void*>(d_vertices)));

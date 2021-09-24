@@ -17,9 +17,9 @@ class OptixRenderer {
   void createPipeline(OptixPipelineCompileOptions& pipelineCompileOptions,
 		      StatusCode& status);
   void setupShaderBindingTable(StatusCode& status);
-  void launch(OptixTraversableHandle gasHandle,
-	      StatusCode& status);  
-
+  void launch(uchar4* outputBuffer, StatusCode& status);  
+  void buildRootAccelStruct(std::vector<OptixTraversableHandle>& traversableHandles,
+			    StatusCode& status);
  private:
   OptixDeviceContext m_context;
   OptixModule m_module;
@@ -28,6 +28,8 @@ class OptixRenderer {
   OptixProgramGroup m_raygenProgramGroup;
   OptixPipeline m_pipeline;
   OptixShaderBindingTable m_shaderBindingTable;
+  OptixTraversableHandle m_iasHandle;
+  CUdeviceptr m_d_iasOutputBuffer;  
 };
 
 #endif //OPTIX_RENDERER_H

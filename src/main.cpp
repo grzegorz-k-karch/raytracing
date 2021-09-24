@@ -10,6 +10,8 @@
 #include "ImageSaver.h"
 #include "OptixRenderer.h"
 
+#include <fstream> // DELETEME
+
 
 int main(int argc, char** argv)
 {
@@ -22,12 +24,40 @@ int main(int argc, char** argv)
   initLogger(args.logLevel);
 
   OptixRenderer optixRenderer(status);
-  
+
   // get all objects into SceneRawObjects struct
   SceneRawObjects sceneRawObjects;
   sceneRawObjects.parseScene(args.sceneFilePath, status);
   exitIfError(status);
 
+  std::vector<OptixTraversableHandle> traversableHandles;
+  sceneRawObjects.generateTraversableHandles(traversableHandles);
+
+  optixRenderer.buildRootAccelStruct(traversableHandles, status);
+  int imageWidth = 1200;
+  int imageHeight = 800;
+  uchar4* outputBuffer = new uchar4[imageWidth*imageHeight];
+  optixRenderer.launch(outputBuffer, status);
+
+  {
+    std::fstream fs(args.pictureFilePath, std::fstream::out);
+
+    fs << "P3\n" << imageWidth << " " << imageHeight << "\n255\n";
+
+    for (int j = imageHeight - 1; j >= 0; j--) {
+      for (int i = 0; i < imageWidth; i++) {
+
+  	size_t pixelIdx = i + j*imageWidth;
+  	int ir = outputBuffer[pixelIdx].x;
+  	int ig = outputBuffer[pixelIdx].y;
+  	int ib = outputBuffer[pixelIdx].z;
+
+  	fs << ir << " " << ig << " " << ib << "\n";
+      }
+    }
+    fs.close();
+  }
+  delete [] outputBuffer;
   // // construct scene on device using class hierarchy
   // // for objects and materials
   // SceneDevice sceneDevice;
