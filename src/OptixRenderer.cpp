@@ -354,14 +354,14 @@ OptixRenderer::OptixRenderer(StatusCode& status) :
 }
 
 
-void OptixRenderer::launch(uchar4* outputBuffer,
+void OptixRenderer::launch(std::vector<float3>& outputBuffer,
 			   StatusCode& status)
 {
   unsigned int imageWidth = 1200;
   unsigned int imageHeight = 800;
 
-  uchar4* d_outputBuffer;
-  cudaMalloc(reinterpret_cast<void**>(&d_outputBuffer), imageWidth*imageHeight*sizeof(uchar4));
+  float3* d_outputBuffer;
+  cudaMalloc(reinterpret_cast<void**>(&d_outputBuffer), imageWidth*imageHeight*sizeof(float3));
 
   CUstream stream;
   status = CCE(cudaStreamCreate(&stream));
@@ -425,8 +425,8 @@ void OptixRenderer::launch(uchar4* outputBuffer,
   }
 
   status = CCE(cudaMemcpy(
-  			  reinterpret_cast<void*>(outputBuffer),
-  			  params2.image, imageWidth*imageHeight*sizeof(uchar4),
+  			  reinterpret_cast<void*>(outputBuffer.data()),
+  			  params2.image, imageWidth*imageHeight*sizeof(float3),
   			  cudaMemcpyDeviceToHost
   			  ));
   if (status != StatusCode::NoError) {

@@ -36,28 +36,12 @@ int main(int argc, char** argv)
   optixRenderer.buildRootAccelStruct(traversableHandles, status);
   int imageWidth = 1200;
   int imageHeight = 800;
-  uchar4* outputBuffer = new uchar4[imageWidth*imageHeight];
-  optixRenderer.launch(outputBuffer, status);
+  // float4* image = new float4[imageWidth*imageHeight];
+  // float4 *image = new float4[imageWidth*imageHeight];
+  std::vector<float4> image;
+  image.resize(imageWidth*imageHeight);
+  optixRenderer.launch(image, status);
 
-  {
-    std::fstream fs(args.pictureFilePath, std::fstream::out);
-
-    fs << "P3\n" << imageWidth << " " << imageHeight << "\n255\n";
-
-    for (int j = imageHeight - 1; j >= 0; j--) {
-      for (int i = 0; i < imageWidth; i++) {
-
-  	size_t pixelIdx = i + j*imageWidth;
-  	int ir = outputBuffer[pixelIdx].x;
-  	int ig = outputBuffer[pixelIdx].y;
-  	int ib = outputBuffer[pixelIdx].z;
-
-  	fs << ir << " " << ig << " " << ib << "\n";
-      }
-    }
-    fs.close();
-  }
-  delete [] outputBuffer;
   // // construct scene on device using class hierarchy
   // // for objects and materials
   // SceneDevice sceneDevice;
@@ -74,15 +58,15 @@ int main(int argc, char** argv)
   // renderer.renderScene(sceneDevice, status);
   // exitIfError(status);
 
-  // std::vector<float3> image;
   // renderer.getImageOnHost(image, status);
   // exitIfError(status);
 
-  // ImageSaver imageSaver;
-  // // save the rendered image to file
-  // imageSaver.saveImage(image, args.imageWidth, args.imageHeight,
-  // 		       args.pictureFilePath, status);
-  // exitIfError(status);
+  ImageSaver imageSaver;
+  // save the rendered image to file
+  imageSaver.saveImage(image, args.imageWidth, args.imageHeight,
+  		       args.pictureFilePath, status);
+  // delete [] image;
+  exitIfError(status);
 
   return 0;
 }

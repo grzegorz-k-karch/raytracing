@@ -1,6 +1,7 @@
 #ifndef OPTIX_RENDERER_H
 #define OPTIX_RENDERER_H
 
+#include <vector>
 #include <optix.h>
 #include "StatusCode.h"
 
@@ -17,7 +18,7 @@ class OptixRenderer {
   void createPipeline(OptixPipelineCompileOptions& pipelineCompileOptions,
 		      StatusCode& status);
   void setupShaderBindingTable(StatusCode& status);
-  void launch(uchar4* outputBuffer, StatusCode& status);  
+  void launch(std::vector<float3>& outputBuffer, StatusCode& status);
   void buildRootAccelStruct(std::vector<OptixTraversableHandle>& traversableHandles,
 			    StatusCode& status);
  private:
@@ -29,7 +30,7 @@ class OptixRenderer {
   OptixPipeline m_pipeline;
   OptixShaderBindingTable m_shaderBindingTable;
   OptixTraversableHandle m_iasHandle;
-  CUdeviceptr m_d_iasOutputBuffer;  
+  CUdeviceptr m_d_iasOutputBuffer;
 };
 
 #endif //OPTIX_RENDERER_H
