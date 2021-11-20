@@ -2,6 +2,7 @@
 
 #include "nvidia/helper_math.h"
 
+#include "Ray.cuh"
 #include "OptixRenderer.cuh"
 
 extern "C" {
@@ -35,25 +36,27 @@ extern "C" __global__ void __raygen__rg()
   const uint3 idx = optixGetLaunchIndex();
   const uint3 dim = optixGetLaunchDimensions();
 
-  // Map our launch idx to a screen location and create a ray from the camera
-  // location through the screen
-  float3 ray_origin, ray_direction;
-  computeRay(idx, dim, ray_origin, ray_direction);
+  int pixelX = idx.x;
+  int pixelY = idx.y;
+  // computeRay(idx, dim, ray_origin, ray_direction);
+  float u = float(pixelX)/float(params.image_width);
+  float v = float(pixelY)/float(params.image_height);
+  Ray ray = params.camera->getRay(u, v);
 
   // Trace the ray against our scene hierarchy
   unsigned int p0, p1, p2;
   optixTrace(
 	     params.handle,
-	     ray_origin,
-	     ray_direction,
+	     ray.m_origin,
+	     ray.m_direction,
 	     0.0f,                // Min intersection distance
 	     1e16f,               // Max intersection distance
 	     0.0f,                // rayTime -- used for motion blur
 	     OptixVisibilityMask(255), // Specify always visible
 	     OPTIX_RAY_FLAG_NONE,
-	     0,                   // SBT offset   -- See SBT discussion
-	     1,                   // SBT stride   -- See SBT discussion
-	     0,                   // missSBTIndex -- See SBT discussion
+	     0,                   // SBT offset
+	     1,                   // SBT stride
+	     0,                   // missSBTIndex
 	     p0, p1, p2);
   float3 result;
   result.x = int_as_float(p0);

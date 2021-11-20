@@ -12,34 +12,43 @@ void GenericObject::generateOptixBuildInput(OptixBuildInput& buildInput)
   const uint32_t inputFlags[1] = { OPTIX_GEOMETRY_FLAG_NONE };
 
   memset(&buildInput, 0, sizeof(OptixBuildInput));
-  
+
   LOG_TRIVIAL(trace) << "Generating Optix Build Input: ";
   if (m_objectType == ObjectType::Mesh) {
     LOG_TRIVIAL(trace) << "Mesh\n";
-    const size_t verticesSize = sizeof(float3)*m_vertices.size();
-    CUdeviceptr d_vertices = 0;
-    CCE(cudaMalloc(reinterpret_cast<void**>(&d_vertices), verticesSize));
-    CCE(cudaMemcpy(reinterpret_cast<void*>(d_vertices), m_vertices.data(),
-		   verticesSize, cudaMemcpyHostToDevice));
 
-    const size_t indexTripletsSize = sizeof(uint3)*m_indexTriplets.size();
-    CUdeviceptr d_indexTriplets = 0;
-    CCE(cudaMalloc(reinterpret_cast<void**>(&d_indexTriplets), indexTripletsSize));
-    CCE(cudaMemcpy(reinterpret_cast<void*>(d_indexTriplets), m_indexTriplets.data(),
-		   indexTripletsSize, cudaMemcpyHostToDevice));
+    // std::vector<float3> m_vertices2;
+    // // std::vector<uint3> m_indexTriplets2;
+
+    // m_vertices2.push_back(make_float3(-0.5f, -0.5f, 0.0f));
+    // m_vertices2.push_back(make_float3(0.5f, -0.5f, 0.0f));
+    // m_vertices2.push_back(make_float3(0.0f, 0.5f, 0.0f));
+    // // m_indexTriplets2.push_back(make_uint3(0,1,2));
+
+    // const size_t verticesSize = sizeof(float3)*m_vertices2.size();
+    // CUdeviceptr d_vertices = 0;
+    // CCE(cudaMalloc(reinterpret_cast<void**>(&d_vertices), verticesSize));
+    // CCE(cudaMemcpy(reinterpret_cast<void*>(d_vertices), m_vertices2.data(),
+    // 		   verticesSize, cudaMemcpyHostToDevice));
+
+    // // const size_t indexTripletsSize = sizeof(uint3)*m_indexTriplets2.size();
+    // // CUdeviceptr d_indexTriplets = 0;
+    // // CCE(cudaMalloc(reinterpret_cast<void**>(&d_indexTriplets), indexTripletsSize));
+    // // CCE(cudaMemcpy(reinterpret_cast<void*>(d_indexTriplets), m_indexTriplets2.data(),
+    // // 		   indexTripletsSize, cudaMemcpyHostToDevice));
 
     buildInput.type                           = OPTIX_BUILD_INPUT_TYPE_TRIANGLES;
     buildInput.triangleArray.vertexFormat     = OPTIX_VERTEX_FORMAT_FLOAT3;
-    buildInput.triangleArray.numVertices      = static_cast<uint32_t>(m_vertices.size());
-    buildInput.triangleArray.vertexBuffers    = &d_vertices;
-    buildInput.triangleArray.indexBuffer      = d_indexTriplets;
-    buildInput.triangleArray.numIndexTriplets = static_cast<uint32_t>(m_indexTriplets.size());
-    buildInput.triangleArray.indexFormat      = OPTIX_INDICES_FORMAT_UNSIGNED_INT3;
+    // buildInput.triangleArray.numVertices      = static_cast<uint32_t>(m_vertices2.size());
+    // buildInput.triangleArray.vertexBuffers    = &d_vertices;
+    // buildInput.triangleArray.indexBuffer      = d_indexTriplets;
+    // buildInput.triangleArray.numIndexTriplets = static_cast<uint32_t>(m_indexTriplets2.size());
+    // buildInput.triangleArray.indexFormat      = OPTIX_INDICES_FORMAT_UNSIGNED_INT3;
     buildInput.triangleArray.flags            = inputFlags;
     buildInput.triangleArray.numSbtRecords    = 1;
   }
   else if (m_objectType == ObjectType::Sphere) {
-    LOG_TRIVIAL(trace) << "Sphere\n";    
+    LOG_TRIVIAL(trace) << "Sphere\n";
     // AABB build input
     OptixAabb aabb  = {m_bbox.min().x, m_bbox.min().y, m_bbox.min().z,
 		       m_bbox.max().x, m_bbox.max().y, m_bbox.max().z};

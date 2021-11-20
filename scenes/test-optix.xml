@@ -1,12 +1,12 @@
 <scene version="0.0.1">
 
   <Camera>
-    <lookFrom value="-3.0 20 1.5"/>
-    <lookAt value="-1.5 0.0 -8"/>
+    <lookFrom value="0.0 0.0 2.0"/>
+    <lookAt value="0.0 0.0 -1.0"/>
     <up value="0.0 1.0 0.0"/>
-    <fov value="20.0"/>
+    <fov value="45.0"/>
     <aspect value="3.0 2.0"/>
-    <aperture value="0.001"/>
+    <aperture value="1.001"/>
     <focus_distance value="-1.0"/>
   </Camera>
 
@@ -17,8 +17,8 @@
       	<albedo value="8.0 8.0 9.0"/>
       </texture>
     </material>
-    <translation value="0.0 -2.0 -10.0"/>
-    <rotation value="0.0 45.0 0.0"/>
+    <translation value="0.0 0.0 -3.0"/>
+    <rotation value="0.0 0.0 0.0"/>
     <smoothness value="0.0625"/>
   </Mesh>
 

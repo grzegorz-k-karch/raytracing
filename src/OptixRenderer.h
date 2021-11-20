@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <optix.h>
+#include "Camera.cuh"
 #include "StatusCode.h"
 
 class OptixRenderer {
@@ -18,10 +19,14 @@ class OptixRenderer {
   void createPipeline(OptixPipelineCompileOptions& pipelineCompileOptions,
 		      StatusCode& status);
   void setupShaderBindingTable(StatusCode& status);
-  void launch(std::vector<float3>& outputBuffer, StatusCode& status);
+  void launch(const Camera& camera, std::vector<float3>& outputBuffer, StatusCode& status);
   void buildRootAccelStruct(std::vector<OptixTraversableHandle>& traversableHandles,
 			    StatusCode& status);
- private:
+  OptixDeviceContext getContext() const {
+    return m_context;
+  }
+
+private:
   OptixDeviceContext m_context;
   OptixModule m_module;
   OptixProgramGroup m_hitgroupProgramGroup;
@@ -31,6 +36,7 @@ class OptixRenderer {
   OptixShaderBindingTable m_shaderBindingTable;
   OptixTraversableHandle m_iasHandle;
   CUdeviceptr m_d_iasOutputBuffer;
+  CUdeviceptr m_d_gasOutputBuffer;  
 };
 
 #endif //OPTIX_RENDERER_H

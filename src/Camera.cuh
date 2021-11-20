@@ -15,7 +15,7 @@ class Camera {
 public:
 
   Camera() = default;  // default constructor
-  Camera(const Camera &other) {}  // copy constructor
+  // Camera(const Camera &other) {}  // copy constructor
   Camera(pt::ptree camera);  // explicit constructor
 
   void Init(float3 lookfrom, float3 lookat, float3 up,
@@ -31,8 +31,13 @@ public:
     return Ray(m_origin + offset, m_lowerLeftCorner +
 	       s*m_horizontal + t*m_vertical - m_origin - offset);
   }
+  __device__
+  Ray getRay(float s, float t) const {
+    return Ray(m_origin, m_lowerLeftCorner +
+	       s*m_horizontal + t*m_vertical - m_origin);
+  }
 
-private:
+public: // FIXME
   float3 m_origin;
   float3 m_lowerLeftCorner;
   float3 m_horizontal;

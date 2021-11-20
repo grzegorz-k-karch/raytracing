@@ -25,6 +25,7 @@ void Camera::Init(float3 lookfrom, float3 lookat, float3 up, float fov,
 		  float2 aspect, float aperture, float focusDist)
 {
   m_origin = lookfrom;
+  
   m_lensRadius = aperture/2.0f;
 
   float theta = fov*M_PI/180.0f;

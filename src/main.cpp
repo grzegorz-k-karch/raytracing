@@ -30,36 +30,15 @@ int main(int argc, char** argv)
   sceneRawObjects.parseScene(args.sceneFilePath, status);
   exitIfError(status);
 
+  Camera camera = sceneRawObjects.getCamera();
+
   std::vector<OptixTraversableHandle> traversableHandles;
-  sceneRawObjects.generateTraversableHandles(traversableHandles);
+  sceneRawObjects.generateTraversableHandles(optixRenderer.getContext(), traversableHandles);
 
   optixRenderer.buildRootAccelStruct(traversableHandles, status);
-  int imageWidth = 1200;
-  int imageHeight = 800;
-  // float4* image = new float4[imageWidth*imageHeight];
-  // float4 *image = new float4[imageWidth*imageHeight];
-  std::vector<float4> image;
-  image.resize(imageWidth*imageHeight);
-  optixRenderer.launch(image, status);
-
-  // // construct scene on device using class hierarchy
-  // // for objects and materials
-  // SceneDevice sceneDevice;
-  // sceneDevice.constructScene(sceneRawObjects, status);
-  // exitIfError(status);
-
-  // Renderer renderer{args.imageWidth, args.imageHeight,
-  // 		    args.sampleCount, args.rayDepth};
-  // // initialize random state and image buffer
-  // renderer.initBuffers(status);
-  // exitIfError(status);
-
-  // // render scene
-  // renderer.renderScene(sceneDevice, status);
-  // exitIfError(status);
-
-  // renderer.getImageOnHost(image, status);
-  // exitIfError(status);
+  std::vector<float3> image;
+  image.resize(args.imageWidth*args.imageHeight);
+  optixRenderer.launch(camera, image, status);
 
   ImageSaver imageSaver;
   // save the rendered image to file
