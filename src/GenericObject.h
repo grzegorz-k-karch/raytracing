@@ -27,11 +27,11 @@ struct GenericObjectDevice {
     m_material(nullptr),
     m_scalars(nullptr), m_numScalars(0),
     m_vectors(nullptr), m_numVectors(0),
-    m_vertices(nullptr), m_numVertices(0),
+    m_vertices(0), m_numVertices(0),
     m_vertexColors(nullptr), m_numVertexColors(0),
     m_vertexNormals(nullptr), m_numVertexNormals(0),
     m_textureCoords(nullptr), m_numTextureCoords(0),
-    m_indexTriplets(nullptr), m_numIndexTriplets(0) {}
+    m_indexTriplets(0), m_numIndexTriplets(0) {}
 
   GenericObjectDevice(GenericObjectDevice&& other) noexcept;
   ~GenericObjectDevice();
@@ -46,7 +46,7 @@ struct GenericObjectDevice {
   float3 *m_vectors;
   int m_numVectors;
   // mesh members
-  float3 *m_vertices;
+  CUdeviceptr m_vertices;
   int m_numVertices;
   float3 *m_vertexColors;
   int m_numVertexColors;
@@ -54,7 +54,7 @@ struct GenericObjectDevice {
   int m_numVertexNormals;
   float2 *m_textureCoords;
   int m_numTextureCoords;
-  uint3 *m_indexTriplets;
+  CUdeviceptr m_indexTriplets;
   int m_numIndexTriplets;
 };
 
@@ -77,10 +77,13 @@ public:
 
   ~GenericObject();
 
+  void copyAttributesToDevice(GenericObjectDevice& h_genericObjectDevice,
+			      StatusCode& status);
   void copyToDevice(GenericObjectDevice* d_genericObject,
 		    StatusCode& status);
 
-  void generateOptixBuildInput(OptixBuildInput& buildInput);
+  void generateOptixBuildInput(GenericObjectDevice& genObjDev,
+			       OptixBuildInput& buildInput);
 
   ObjectType getObjectType() {
     return m_objectType;
@@ -107,6 +110,9 @@ private:
   std::vector<uint3>  m_indexTriplets;
 
   GenericObjectDevice m_h_genericObjectDevice;
+
+  CUdeviceptr m_d_indexTriplets;
+  CUdeviceptr m_d_vertices;
 };
 
 #endif//GENERIC_OBJECT_H

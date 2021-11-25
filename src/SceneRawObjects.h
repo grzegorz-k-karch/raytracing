@@ -41,17 +41,20 @@ public:
   void addObject(GenericObject&& obj) {
     m_objects.push_back(std::move(obj));
   }
+  void copyToDevice(StatusCode& status);
   void copyToDevice(SceneRawObjectsDevice* d_sceneRawObjects, StatusCode &status);
   void generateTraversableHandles(OptixDeviceContext context,
 				  std::vector<OptixTraversableHandle>& traversableHandles);
   void buildAccelStruct(OptixDeviceContext context,
+			OptixBuildInput* buildInput,
 			OptixTraversableHandle* traversableHandle);
 
 private:
   Camera m_camera;
   std::vector<GenericObject> m_objects;
+  std::vector<GenericObjectDevice> m_objectsDevice;  
   SceneRawObjectsDevice m_h_sceneRawObjectsDevice;
-  CUdeviceptr m_d_triangleGasOutputBuffer;
+  CUdeviceptr m_d_gasOutputBuffer;
 };
 
 #endif//SCENE_RAW_OBJECTS_H

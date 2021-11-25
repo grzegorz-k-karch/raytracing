@@ -488,9 +488,7 @@ OptixRenderer::~OptixRenderer()
 void OptixRenderer::buildRootAccelStruct(std::vector<OptixTraversableHandle>& traversableHandles,
 					 StatusCode& status)
 {
-  OptixTraversableHandle gas_handle = traversableHandles[0];
-
-  int numInstances = 1; // FIXME // traversableHandles.size();
+  int numInstances = traversableHandles.size();
   CUdeviceptr d_instances;
   size_t instanceSizeInBytes = sizeof(OptixInstance)*numInstances;
   status = CCE(cudaMalloc(reinterpret_cast<void**>(&d_instances), instanceSizeInBytes));
@@ -534,15 +532,15 @@ void OptixRenderer::buildRootAccelStruct(std::vector<OptixTraversableHandle>& tr
   memset(instances.data(), 0, instanceSizeInBytes);
 
   int instanceId = 0;
-  // FIXME // for (auto &instance : instances) {
-  instances[0].traversableHandle = gas_handle;// traversableHandles[instanceId];
-  instances[0].flags             = OPTIX_INSTANCE_FLAG_NONE;
-  instances[0].instanceId        = instanceId;
-  instances[0].sbtOffset         = instanceId; // TODO
-  instances[0].visibilityMask    = 1;
-  memcpy(instances[0].transform, transform, sizeof(float)*12);
-  instanceId++;
-  // FIXME // }
+  for (auto &instance : instances) {
+    instance.traversableHandle = traversableHandles[instanceId];
+    instance.flags             = OPTIX_INSTANCE_FLAG_NONE;
+    instance.instanceId        = instanceId;
+    instance.sbtOffset         = 0;
+    instance.visibilityMask    = 1;
+    memcpy(instance.transform, transform, sizeof(float)*12);
+    instanceId++;
+  }
 
   CCE(cudaMemcpy(reinterpret_cast<void*>(d_instances), instances.data(), instanceSizeInBytes,
 		 cudaMemcpyHostToDevice));
@@ -563,191 +561,4 @@ void OptixRenderer::buildRootAccelStruct(std::vector<OptixTraversableHandle>& tr
 
   CCE(cudaFree(reinterpret_cast<void*>(d_tempBuffer)));
   CCE(cudaFree(reinterpret_cast<void*>(d_instances)));
-
 }
-
-// void OptixRenderer::buildRootAccelStruct(std::vector<OptixTraversableHandle>& traversableHandles,
-// 					 StatusCode& status)
-// {
-//   // Use default options for simplicity.  In a real use case we would want to
-//   // enable compaction, etc
-//   OptixAccelBuildOptions accel_options = {};
-//   accel_options.buildFlags = OPTIX_BUILD_FLAG_NONE;
-//   accel_options.operation  = OPTIX_BUILD_OPERATION_BUILD;
-
-//   // Triangle build input: simple list of three vertices
-//   const std::array<float3, 3> vertices =
-//     { {
-//        { -0.5f, -0.5f, 0.0f },
-//        {  0.5f, -0.5f, 0.0f },
-//        {  0.0f,  0.5f, 0.0f }
-//        } };
-
-//   const size_t vertices_size = sizeof(float3)*vertices.size();
-//   CUdeviceptr d_vertices=0;
-//   status = CCE(cudaMalloc(reinterpret_cast<void**>(&d_vertices), vertices_size));
-//   if (status != StatusCode::NoError) {
-//     LOG_TRIVIAL(error) << "Error\n";
-//   }
-//   status = CCE(cudaMemcpy(
-//   			 reinterpret_cast<void*>(d_vertices),
-//   			 vertices.data(),
-//   			 vertices_size,
-//   			 cudaMemcpyHostToDevice
-//   			));
-//   if (status != StatusCode::NoError) {
-//     LOG_TRIVIAL(error) << "Error\n";
-//   }
-
-//   // Our build input is a simple list of non-indexed triangle vertices
-//   const uint32_t triangle_input_flags[1] = { OPTIX_GEOMETRY_FLAG_NONE };
-//   OptixBuildInput triangle_input = {};
-//   triangle_input.type                        = OPTIX_BUILD_INPUT_TYPE_TRIANGLES;
-//   triangle_input.triangleArray.vertexFormat  = OPTIX_VERTEX_FORMAT_FLOAT3;
-//   triangle_input.triangleArray.numVertices   = static_cast<uint32_t>(vertices.size());
-//   triangle_input.triangleArray.vertexBuffers = &d_vertices;
-//   triangle_input.triangleArray.flags         = triangle_input_flags;
-//   triangle_input.triangleArray.numSbtRecords = 1;
-
-//   OptixAccelBufferSizes gas_buffer_sizes;
-//   status = OCE(optixAccelComputeMemoryUsage(
-//   					    m_context,
-//   					    &accel_options,
-//   					    &triangle_input,
-//   					    1, // Number of build inputs
-//   					    &gas_buffer_sizes
-//   					   ));
-//   if (status != StatusCode::NoError) {
-//     LOG_TRIVIAL(error) << "Error\n";
-//   }
-//   CUdeviceptr d_temp_buffer_gas;
-//   status = CCE(cudaMalloc(
-//   			 reinterpret_cast<void**>(&d_temp_buffer_gas),
-//   			 gas_buffer_sizes.tempSizeInBytes
-//   			));
-//   if (status != StatusCode::NoError) {
-//     LOG_TRIVIAL(error) << "Error\n";
-//   }
-//   status = CCE(cudaMalloc(reinterpret_cast<void**>(&m_d_iasOutputBuffer), gas_buffer_sizes.outputSizeInBytes));
-//   if (status != StatusCode::NoError) {
-//     LOG_TRIVIAL(error) << "Error\n";
-//   }
-
-//   status = OCE(optixAccelBuild(
-//   			       m_context,
-//   			       0,                  // CUDA stream
-//   			       &accel_options,
-//   			       &triangle_input,
-//   			       1,                  // num build inputs
-//   			       d_temp_buffer_gas,
-//   			       gas_buffer_sizes.tempSizeInBytes,
-//   			       m_d_iasOutputBuffer,
-//   			       gas_buffer_sizes.outputSizeInBytes,
-//   			       &m_iasHandle,
-//   			       nullptr,            // emitted property list
-//   			       0                   // num emitted properties
-//   			      ));
-//   if (status != StatusCode::NoError) {
-//     LOG_TRIVIAL(error) << "Error\n";
-//   }
-
-//   // We can now free the scratch space buffer used during build and the vertex
-//   // inputs, since they are not needed by our trivial shading method
-//   status = CCE(cudaFree(reinterpret_cast<void*>(d_temp_buffer_gas)));
-//   if (status != StatusCode::NoError) {
-//     LOG_TRIVIAL(error) << "Error\n";
-//   }
-//   status = CCE(cudaFree(reinterpret_cast<void*>(d_vertices       )));
-//   if (status != StatusCode::NoError) {
-//     LOG_TRIVIAL(error) << "Error\n";
-//   }
-
-// #if 0
-
-//   int numInstances = traversableHandles.size();
-//   CUdeviceptr d_instances;
-//   size_t instanceSizeInBytes = sizeof(OptixInstance)*numInstances;
-//   status = CCE(cudaMalloc(reinterpret_cast<void**>(&d_instances), instanceSizeInBytes));
-//   if (status != StatusCode::NoError) {
-//     LOG_TRIVIAL(error) << "Error\n";
-//   }
-
-//   OptixBuildInput instanceInput = {};
-//   instanceInput.type                       = OPTIX_BUILD_INPUT_TYPE_INSTANCES;
-//   instanceInput.instanceArray.instances    = d_instances;
-//   instanceInput.instanceArray.numInstances = numInstances;
-
-//   OptixAccelBuildOptions accelOptions = {};
-//   accelOptions.buildFlags             = OPTIX_BUILD_FLAG_NONE;
-//   accelOptions.operation              = OPTIX_BUILD_OPERATION_BUILD;
-
-//   OptixAccelBufferSizes iasBufferSizes;
-//   status = OCE(optixAccelComputeMemoryUsage(m_context, &accelOptions, &instanceInput,
-//   					    1,  // num build inputs
-//   					    &iasBufferSizes));
-//   if (status != StatusCode::NoError) {
-//     LOG_TRIVIAL(error) << "Error\n";
-//   }
-
-//   CUdeviceptr d_tempBuffer;
-//   status = CCE(cudaMalloc(reinterpret_cast<void**>(&d_tempBuffer), iasBufferSizes.tempSizeInBytes));
-//   if (status != StatusCode::NoError) {
-//     LOG_TRIVIAL(error) << "Error\n";
-//   }
-//   status = CCE(cudaMalloc(reinterpret_cast<void**>(&m_d_iasOutputBuffer), iasBufferSizes.outputSizeInBytes));
-//   if (status != StatusCode::NoError) {
-//     LOG_TRIVIAL(error) << "Error\n";
-//   }
-
-//   // Use the identity matrix for the instance transform
-//   float transform[12] = {1,0,0,0,
-//   			 0,1,0,0,
-//   			 0,0,1,0};
-//   std::vector<OptixInstance> instances;
-//   instances.resize(numInstances);
-//   memset(instances.data(), 0, instanceSizeInBytes);
-
-//   int instanceId = 0;
-//   for (auto &instance : instances) {
-//     instance.traversableHandle = traversableHandles[instanceId];
-//     instance.flags             = OPTIX_INSTANCE_FLAG_NONE;
-//     instance.instanceId        = instanceId;
-//     instance.sbtOffset         = instanceId; // TODO
-//     instance.visibilityMask    = 1;
-//     memcpy(instance.transform, transform, sizeof(float)*12);
-//     instanceId++;
-//   }
-
-//   status = CCE(cudaMemcpy(reinterpret_cast<void*>(d_instances), &instances,
-//   			  instanceSizeInBytes, cudaMemcpyHostToDevice));
-//   if (status != StatusCode::NoError) {
-//     LOG_TRIVIAL(error) << "Error\n";
-//   }
-
-//   status = OCE(optixAccelBuild(m_context,
-//   			       0,  // CUDA stream
-//   			       &accelOptions,
-//   			       &instanceInput,
-//   			       1,  // num build inputs
-//   			       d_tempBuffer,
-//   			       iasBufferSizes.tempSizeInBytes,
-//   			       m_d_iasOutputBuffer,
-//   			       iasBufferSizes.outputSizeInBytes,
-//   			       &m_iasHandle,
-//   			       nullptr,  // emitted property list
-//   			       0         // num emitted properties
-//   			      ));
-//   if (status != StatusCode::NoError) {
-//     LOG_TRIVIAL(error) << "Could not build Optix acceleration structure.\n";
-//   }
-
-//   status = CCE(cudaFree(reinterpret_cast<void*>(d_tempBuffer)));
-//   if (status != StatusCode::NoError) {
-//     LOG_TRIVIAL(error) << "Error\n";
-//   }
-//   status = CCE(cudaFree(reinterpret_cast<void*>(d_instances)));
-//   if (status != StatusCode::NoError) {
-//     LOG_TRIVIAL(error) << "Error\n";
-//   }
-// #endif // 0
-// }

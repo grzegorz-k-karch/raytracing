@@ -18,18 +18,6 @@ static __forceinline__ __device__ void setPayload(float3 p)
 }
 
 
-static __forceinline__ __device__ void computeRay(uint3 idx, uint3 dim, float3& origin, float3& direction)
-{
-  const float2 d = 2.0f * make_float2(
-				      static_cast<float>(idx.x) / static_cast<float>(dim.x),
-				      static_cast<float>(idx.y) / static_cast<float>(dim.y)
-				     ) - 1.0f;
-
-  origin    = params.cam_eye;
-  direction = normalize(make_float3(d.x, d.y, -1.0f));
-}
-
-
 extern "C" __global__ void __raygen__rg()
 {
   // Lookup our location within the launch grid
@@ -38,7 +26,7 @@ extern "C" __global__ void __raygen__rg()
 
   int pixelX = idx.x;
   int pixelY = idx.y;
-  // computeRay(idx, dim, ray_origin, ray_direction);
+
   float u = float(pixelX)/float(params.image_width);
   float v = float(pixelY)/float(params.image_height);
   Ray ray = params.camera->getRay(u, v);
@@ -71,7 +59,7 @@ extern "C" __global__ void __raygen__rg()
 extern "C" __global__ void __miss__ms()
 {
   MissData* miss_data  = reinterpret_cast<MissData*>(optixGetSbtDataPointer());
-  setPayload( miss_data->bg_color);
+  setPayload(miss_data->bg_color);
 }
 
 

@@ -66,7 +66,7 @@ public:
   __device__ Mesh(const GenericObjectDevice* genObjDev)
     : m_bbox(AABB(genObjDev->m_bmin, genObjDev->m_bmax)),
       m_material(MaterialFactory::createMaterial(genObjDev->m_material)),
-      vertices(genObjDev->m_vertices),
+      vertices(reinterpret_cast<float3*>(genObjDev->m_vertices)),
       numVertices(genObjDev->m_numVertices),
       vertexColors(genObjDev->m_vertexColors),
       numVertexColors(genObjDev->m_numVertexColors),
@@ -74,7 +74,7 @@ public:
       numVertexNormals(genObjDev->m_numVertexNormals),
       textureCoords(genObjDev->m_textureCoords),
       numTextureCoords(genObjDev->m_numTextureCoords),
-      indexTriplets(genObjDev->m_indexTriplets),
+      indexTriplets(reinterpret_cast<uint3*>(genObjDev->m_indexTriplets)),
       numIndexTriplets(genObjDev->m_numIndexTriplets),
       m_smoothness(genObjDev->m_scalars[0]) {}
 

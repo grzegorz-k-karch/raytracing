@@ -10,12 +10,10 @@
 #include "ImageSaver.h"
 #include "OptixRenderer.h"
 
-#include <fstream> // DELETEME
-
 
 int main(int argc, char** argv)
 {
-  StatusCode status{StatusCode::NoError};
+  StatusCode status = StatusCode::NoError;
 
   // parse command line arguments
   ProgramArgs args = parseArgs(argc, argv, status);
@@ -30,12 +28,16 @@ int main(int argc, char** argv)
   sceneRawObjects.parseScene(args.sceneFilePath, status);
   exitIfError(status);
 
-  Camera camera = sceneRawObjects.getCamera();
-
+  sceneRawObjects.copyToDevice(status);
+  exitIfError(status);
+  
   std::vector<OptixTraversableHandle> traversableHandles;
-  sceneRawObjects.generateTraversableHandles(optixRenderer.getContext(), traversableHandles);
+  sceneRawObjects.generateTraversableHandles(optixRenderer.getContext(),
+					     traversableHandles);
+  optixRenderer.buildRootAccelStruct(traversableHandles,
+				     status);
 
-  optixRenderer.buildRootAccelStruct(traversableHandles, status);
+  Camera camera = sceneRawObjects.getCamera();
   std::vector<float3> image;
   image.resize(args.imageWidth*args.imageHeight);
   optixRenderer.launch(camera, image, status);
@@ -44,7 +46,6 @@ int main(int argc, char** argv)
   // save the rendered image to file
   imageSaver.saveImage(image, args.imageWidth, args.imageHeight,
   		       args.pictureFilePath, status);
-  // delete [] image;
   exitIfError(status);
 
   return 0;

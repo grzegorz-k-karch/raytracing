@@ -2,6 +2,17 @@
 #include "cuda_utils.cuh"
 #include "SceneRawObjects.h"
 
+void SceneRawObjects::copyToDevice(StatusCode& status)
+{
+  status = StatusCode::NoError;
+
+  for (auto &object : m_objects) {
+    GenericObjectDevice h_genericObjectDevice;
+    object.copyAttributesToDevice(h_genericObjectDevice, status);
+    m_objectsDevice.push_back(std::move(h_genericObjectDevice));
+  }
+}
+
 
 void SceneRawObjects::copyToDevice(SceneRawObjectsDevice* d_sceneRawObjectsDevice,
 				   StatusCode& status)
