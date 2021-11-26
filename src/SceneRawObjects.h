@@ -28,21 +28,24 @@ struct SceneRawObjectsDevice {
 class SceneRawObjects {
 public:
   // default constructor
-  SceneRawObjects() {}
+  SceneRawObjects():
+    m_inputFlags{OPTIX_GEOMETRY_FLAG_NONE} {}
   ~SceneRawObjects();
 
-  void parseScene(const std::string filepath, StatusCode& status);
+  void parseScene(const std::string filepath,
+		  std::vector<GenericObject>& objects,
+		  StatusCode& status);
+  void loadScene(const std::string filepath, StatusCode& status);
   void setCamera(Camera&& camera) {
     m_camera = std::move(camera);
   }
   Camera getCamera() {
     return m_camera;
   }
-  void addObject(GenericObject&& obj) {
-    m_objects.push_back(std::move(obj));
-  }
-  void copyToDevice(StatusCode& status);
-  void copyToDevice(SceneRawObjectsDevice* d_sceneRawObjects, StatusCode &status);
+  void copyToDevice(std::vector<GenericObject>& objects,
+		    StatusCode& status);
+  void generateOptixBuildInput(GenericObjectDevice& genObjDev,
+			       OptixBuildInput& buildInput);
   void generateTraversableHandles(OptixDeviceContext context,
 				  std::vector<OptixTraversableHandle>& traversableHandles);
   void buildAccelStruct(OptixDeviceContext context,
@@ -51,10 +54,10 @@ public:
 
 private:
   Camera m_camera;
-  std::vector<GenericObject> m_objects;
-  std::vector<GenericObjectDevice> m_objectsDevice;  
+  std::vector<GenericObjectDevice> m_objectsDevice;
   SceneRawObjectsDevice m_h_sceneRawObjectsDevice;
-  CUdeviceptr m_d_gasOutputBuffer;
+  std::vector<CUdeviceptr> m_d_outputBuffers;
+  const uint32_t m_inputFlags[1];
 };
 
 #endif//SCENE_RAW_OBJECTS_H

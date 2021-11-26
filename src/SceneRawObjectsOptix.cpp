@@ -24,6 +24,7 @@ void SceneRawObjects::buildAccelStruct(OptixDeviceContext context,
 					    1,  // num_build_inputs
 					    &gasBufferSizes
 					    ));
+  
   if (status != StatusCode::NoError) {
     LOG_TRIVIAL(error) << "Error\n";
   }
@@ -34,7 +35,7 @@ void SceneRawObjects::buildAccelStruct(OptixDeviceContext context,
 			  gasBufferSizes.tempSizeInBytes
 			  ));
   if (status != StatusCode::NoError) {
-    LOG_TRIVIAL(error) << "Error\n";
+    LOG_TRIVIAL(error) << "cudaMalloc error\n";
   }
   CUdeviceptr d_tempOuputBuffer;
   status = CCE(cudaMalloc(
@@ -42,7 +43,7 @@ void SceneRawObjects::buildAccelStruct(OptixDeviceContext context,
 			  gasBufferSizes.outputSizeInBytes
 			  ));
   if (status != StatusCode::NoError) {
-    LOG_TRIVIAL(error) << "Error\n";
+    LOG_TRIVIAL(error) << "cudaMalloc error\n";
   }
   
   status = OCE(optixAccelBuild(
@@ -68,25 +69,41 @@ void SceneRawObjects::buildAccelStruct(OptixDeviceContext context,
     LOG_TRIVIAL(error) << "Error\n";
   }
 
-  m_d_gasOutputBuffer = d_tempOuputBuffer;
+  m_d_outputBuffers.push_back(d_tempOuputBuffer);
 }
 
-void SceneRawObjects::generateTraversableHandles(
-						 OptixDeviceContext context,
-						 std::vector<OptixTraversableHandle>& traversableHandles
-						 )
-{
-  std::unordered_set<ObjectType> typesInScene;
-  int objIdx = 0;
-  for (int objIdx = 0; objIdx < m_objects.size(); objIdx++) {
-    typesInScene.insert(m_objects[objIdx].getObjectType());
 
+void SceneRawObjects::generateOptixBuildInput(GenericObjectDevice& genObjDev,
+					      OptixBuildInput& buildInput)
+{
+  StatusCode status = StatusCode::NoError;
+
+  if (genObjDev.m_objectType == ObjectType::Mesh) {
+
+    buildInput.type                           = OPTIX_BUILD_INPUT_TYPE_TRIANGLES;
+    buildInput.triangleArray.vertexFormat     = OPTIX_VERTEX_FORMAT_FLOAT3;
+    buildInput.triangleArray.vertexStrideInBytes = sizeof(float3);
+    buildInput.triangleArray.numVertices      = genObjDev.m_numVertices;
+    buildInput.triangleArray.vertexBuffers    = &(genObjDev.m_vertices);
+    buildInput.triangleArray.indexFormat      = OPTIX_INDICES_FORMAT_UNSIGNED_INT3;
+    buildInput.triangleArray.indexStrideInBytes = sizeof(uint3);
+    buildInput.triangleArray.numIndexTriplets = genObjDev.m_numIndexTriplets;
+    buildInput.triangleArray.indexBuffer      = genObjDev.m_indexTriplets;
+    buildInput.triangleArray.flags            = m_inputFlags;
+    buildInput.triangleArray.numSbtRecords    = 1;
+  }
+}
+
+
+void SceneRawObjects::generateTraversableHandles(OptixDeviceContext context,
+						 std::vector<OptixTraversableHandle>& traversableHandles)
+{
+  for (GenericObjectDevice& genObjDev : m_objectsDevice) {
     OptixBuildInput buildInput = {};
     memset(&buildInput, 0, sizeof(OptixBuildInput));
-    m_objects[objIdx].generateOptixBuildInput(m_objectsDevice[objIdx], buildInput);
+    generateOptixBuildInput(genObjDev, buildInput);
     OptixTraversableHandle traversableHandle;
     buildAccelStruct(context, &buildInput, &traversableHandle);
     traversableHandles.push_back(traversableHandle);
   }
-  LOG_TRIVIAL(info) << "num types in scene: " << typesInScene.size() << "\n";
 }

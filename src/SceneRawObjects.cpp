@@ -5,6 +5,7 @@
 #include <memory>
 
 #include "logging.h"
+#include "cuda_utils.cuh"
 #include "SceneRawObjects.h"
 
 namespace pt = boost::property_tree;
@@ -15,6 +16,7 @@ bool foundAny(const std::string objectType,
   return std::find(renderableObjects.begin(),
 		   renderableObjects.end(), objectType) != renderableObjects.end();
 }
+
 
 bool checkRequiredObjects(const pt::ptree &sceneTree)
 {
@@ -38,8 +40,22 @@ bool checkRequiredObjects(const pt::ptree &sceneTree)
   return cameraPresent && renderableObjectPresent;
 }
 
+
+void SceneRawObjects::copyToDevice(std::vector<GenericObject>& objects,
+				   StatusCode& status)
+{
+  status = StatusCode::NoError;
+  m_objectsDevice.resize(objects.size());
+  for (int objIdx = 0; objIdx < objects.size(); objIdx++) {
+    objects[objIdx].copyAttributesToDevice(m_objectsDevice[objIdx], status);
+  }
+}
+
+
 void SceneRawObjects::parseScene(const std::string filepath,
-				 StatusCode &status) {
+				 std::vector<GenericObject>& objects,
+				 StatusCode &status)
+{
   status = StatusCode::NoError;
 
   //----------------------------------------------------------------------------
@@ -67,7 +83,6 @@ void SceneRawObjects::parseScene(const std::string filepath,
 
   // get all objects in the scene and put them into appropriate lists
   std::set<std::string> renderableObjects = {"Sphere", "Mesh"};
-  std::set<std::string> otherObjects = {"Camera"};
 
   for (auto &it : sceneTree) {
     std::string objectType = it.first;
@@ -76,7 +91,7 @@ void SceneRawObjects::parseScene(const std::string filepath,
     } else if (foundAny(objectType, renderableObjects)) {
       GenericObject genObj = GenericObject(objectType, it.second, status);
       if (status == StatusCode::NoError) {
-	addObject(std::move(genObj));
+	objects.push_back(std::move(genObj));
       }
       else {
 	LOG_TRIVIAL(error) << "Could not add an object of type "
@@ -89,7 +104,16 @@ void SceneRawObjects::parseScene(const std::string filepath,
 }
 
 
+void SceneRawObjects::loadScene(const std::string filepath,
+				StatusCode &status)
+{
+  std::vector<GenericObject> objects;
+  parseScene(filepath, objects, status);
+  copyToDevice(objects, status);
+}
+
+
 SceneRawObjects::~SceneRawObjects()
 {
-  LOG_TRIVIAL(trace) << "SceneRawObjects destructor";  
+  LOG_TRIVIAL(trace) << "SceneRawObjects destructor";
 }

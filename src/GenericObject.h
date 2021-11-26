@@ -61,30 +61,18 @@ struct GenericObjectDevice {
 
 class GenericObject {
 public:
-  // default constructor
-  GenericObject() = delete;
-  // explicit constructor
+  GenericObject() = delete;  // default constructor
   GenericObject(const std::string objectType, const pt::ptree object,
-		StatusCode& status);
-  // move constructor
-  GenericObject(GenericObject&& other) noexcept;
-  // copy constructor
-  GenericObject(const GenericObject& other) = delete;
-  // copy assignment operator
-  GenericObject& operator=(const GenericObject& other) = delete;
-  // move assignment operator
-  GenericObject& operator=(const GenericObject&& other) = delete;
+		StatusCode& status);  // explicit constructor
+  GenericObject(GenericObject&& other) noexcept;  // move constructor
+  GenericObject(const GenericObject& other) = delete;  // copy constructor
+  GenericObject& operator=(const GenericObject& other) = delete;  // copy assignment operator
+  GenericObject& operator=(const GenericObject&& other) = delete;  // move assignment operator
 
   ~GenericObject();
 
   void copyAttributesToDevice(GenericObjectDevice& h_genericObjectDevice,
 			      StatusCode& status);
-  void copyToDevice(GenericObjectDevice* d_genericObject,
-		    StatusCode& status);
-
-  void generateOptixBuildInput(GenericObjectDevice& genObjDev,
-			       OptixBuildInput& buildInput);
-
   ObjectType getObjectType() {
     return m_objectType;
   }
@@ -108,8 +96,6 @@ private:
   std::vector<float3> m_vertexNormals;
   std::vector<float2> m_textureCoords;
   std::vector<uint3>  m_indexTriplets;
-
-  GenericObjectDevice m_h_genericObjectDevice;
 
   CUdeviceptr m_d_indexTriplets;
   CUdeviceptr m_d_vertices;

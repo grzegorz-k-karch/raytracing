@@ -6,30 +6,6 @@
 #include "GenericObject.h"
 #include "GenericMaterial.h"
 
-void GenericObject::generateOptixBuildInput(GenericObjectDevice& genObjDev,
-					    OptixBuildInput& buildInput)
-{
-  StatusCode status = StatusCode::NoError;
-
-  const uint32_t inputFlags[1] = { OPTIX_GEOMETRY_FLAG_NONE };
-
-  if (m_objectType == ObjectType::Mesh) {
-
-    buildInput.type                           = OPTIX_BUILD_INPUT_TYPE_TRIANGLES;
-    buildInput.triangleArray.vertexFormat     = OPTIX_VERTEX_FORMAT_FLOAT3;
-    buildInput.triangleArray.vertexStrideInBytes = sizeof(float3);
-    buildInput.triangleArray.numVertices      = genObjDev.m_numVertices;
-    buildInput.triangleArray.vertexBuffers    = &(genObjDev.m_vertices);
-    buildInput.triangleArray.indexFormat      = OPTIX_INDICES_FORMAT_UNSIGNED_INT3;
-    buildInput.triangleArray.indexStrideInBytes = sizeof(uint3);
-    buildInput.triangleArray.numIndexTriplets = genObjDev.m_numIndexTriplets;
-    buildInput.triangleArray.indexBuffer      = genObjDev.m_indexTriplets;
-    buildInput.triangleArray.flags            = inputFlags;
-    buildInput.triangleArray.numSbtRecords    = 1;
-  }
-}
-
-
 void GenericObject::copyAttributesToDevice(GenericObjectDevice& h_genericObjectDevice,
 					   StatusCode& status)
 {
@@ -158,19 +134,6 @@ void GenericObject::copyAttributesToDevice(GenericObjectDevice& h_genericObjectD
 }
 
 
-void GenericObject::copyToDevice(GenericObjectDevice* d_genericObject,
-				       StatusCode& status)
-{
-  copyAttributesToDevice(m_h_genericObjectDevice, status);
-  // whole object ------------------------------------------------------------
-  status = CCE(cudaMemcpy(d_genericObject, &m_h_genericObjectDevice,
-			  sizeof(GenericObjectDevice), cudaMemcpyHostToDevice));
-  if (status != StatusCode::NoError) {
-    return;
-  }
-}
-
-
 GenericObjectDevice::~GenericObjectDevice()
 {
   LOG_TRIVIAL(trace) << "~GenericObjectDevice";
@@ -253,48 +216,3 @@ GenericObjectDevice::GenericObjectDevice(GenericObjectDevice&& other) noexcept:
   other.m_indexTriplets = 0;
   other.m_numIndexTriplets = 0;
 }
-
-
-// // Use default options for simplicity.  In a real use case we would want to
-// // enable compaction, etc
-// OptixAccelBuildOptions accelOptions = {};
-// memset(&accelOptions, 0, sizeof(OptixAccelBuildOptions));
-// accelOptions.buildFlags = OPTIX_BUILD_FLAG_NONE;
-// accelOptions.operation  = OPTIX_BUILD_OPERATION_BUILD;
-// accelOptions.motionOptions.numKeys = 0;
-
-
-
-// OptixAccelBufferSizes gasBufferSizes;
-// // TODO: optix check
-// optixAccelComputeMemoryUsage(
-// 			       context,
-// 			       &accelOptions,
-// 			       &triangleInput,
-// 			       1, // Number of build inputs
-// 			       &gasBufferSizes
-// 			       );
-// CUdeviceptr d_tempBufferGas;
-// CCE(cudaMalloc(reinterpret_cast<void**>(&d_tempBufferGas),
-// 		 gasBufferSizes.tempSizeInBytes));
-// CCE(cudaMalloc(reinterpret_cast<void**>(&d_gasOutputBuffer),
-// 		 gasBufferSizes.outputSizeInBytes));
-
-// // TODO: optix check
-// optixAccelBuild(
-// 		  context,
-// 		  0,                  // CUDA stream
-// 		  &accelOptions,
-// 		  &triangleInput,
-// 		  1,                  // num build inputs
-// 		  d_tempBufferGas,
-// 		  gasBufferSizes.tempSizeInBytes,
-// 		  d_gasOutputBuffer,
-// 		  gasBufferSizes.outputSizeInBytes,
-// 		  &gasHandle,
-// 		  nullptr,            // emitted property list
-// 		  0                   // num emitted properties
-// 		  );
-
-// CCE(cudaFree(reinterpret_cast<void*>(d_tempBufferGas)));
-// CCE(cudaFree(reinterpret_cast<void*>(d_vertices)));

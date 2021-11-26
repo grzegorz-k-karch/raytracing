@@ -19,7 +19,8 @@ class OptixRenderer {
   void createPipeline(OptixPipelineCompileOptions& pipelineCompileOptions,
 		      StatusCode& status);
   void setupShaderBindingTable(StatusCode& status);
-  void launch(const Camera& camera, std::vector<float3>& outputBuffer, StatusCode& status);
+  void launch(const Camera& camera, std::vector<float3>& outputBuffer,
+	      int imageWidth, int imageHeight, StatusCode& status);
   void buildRootAccelStruct(std::vector<OptixTraversableHandle>& traversableHandles,
 			    StatusCode& status);
   OptixDeviceContext getContext() const {

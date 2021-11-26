@@ -5,8 +5,6 @@
 #include "args_parse.h"
 #include "StatusCode.h"
 #include "SceneRawObjects.h"
-#include "SceneDevice.cuh"
-#include "Renderer.cuh"
 #include "ImageSaver.h"
 #include "OptixRenderer.h"
 
@@ -22,25 +20,27 @@ int main(int argc, char** argv)
   initLogger(args.logLevel);
 
   OptixRenderer optixRenderer(status);
+  exitIfError(status);
 
   // get all objects into SceneRawObjects struct
   SceneRawObjects sceneRawObjects;
-  sceneRawObjects.parseScene(args.sceneFilePath, status);
+  sceneRawObjects.loadScene(args.sceneFilePath, status);
   exitIfError(status);
 
-  sceneRawObjects.copyToDevice(status);
-  exitIfError(status);
-  
   std::vector<OptixTraversableHandle> traversableHandles;
   sceneRawObjects.generateTraversableHandles(optixRenderer.getContext(),
-					     traversableHandles);
+  					     traversableHandles);
   optixRenderer.buildRootAccelStruct(traversableHandles,
-				     status);
+  				     status);
 
   Camera camera = sceneRawObjects.getCamera();
   std::vector<float3> image;
   image.resize(args.imageWidth*args.imageHeight);
-  optixRenderer.launch(camera, image, status);
+  optixRenderer.launch(camera,
+  		       image,
+  		       args.imageWidth,
+  		       args.imageHeight,
+  		       status);
 
   ImageSaver imageSaver;
   // save the rendered image to file

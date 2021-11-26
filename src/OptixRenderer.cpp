@@ -267,7 +267,7 @@ void OptixRenderer::setupShaderBindingTable(StatusCode& status)
     LOG_TRIVIAL(error) << "Error\n";
   }
   MissSbtRecord ms_sbt;
-  ms_sbt.data = { 0.9f, 0.1f, 0.2f };
+  ms_sbt.data = { 0.0f, 0.0f, 0.0f };
   status = OCE(optixSbtRecordPackHeader(m_missProgramGroup, &ms_sbt));
   if (status != StatusCode::NoError) {
     LOG_TRIVIAL(error) << "Error\n";
@@ -355,11 +355,9 @@ OptixRenderer::OptixRenderer(StatusCode& status) :
 
 
 void OptixRenderer::launch(const Camera& camera, std::vector<float3>& outputBuffer,
+			   int imageWidth, int imageHeight, 
 			   StatusCode& status)
 {
-  unsigned int imageWidth = 1200;
-  unsigned int imageHeight = 800;
-
   float3 *d_outputBuffer;
   cudaMalloc(reinterpret_cast<void**>(&d_outputBuffer), imageWidth*imageHeight*sizeof(float3));
 
@@ -376,18 +374,11 @@ void OptixRenderer::launch(const Camera& camera, std::vector<float3>& outputBuff
     LOG_TRIVIAL(error) << "Error\n";
   }
 
-  // sutil::Camera cam;
-  // configureCamera(cam, width, height);
-
   Params params;
   params.image        = d_outputBuffer;
   params.image_width  = imageWidth;
   params.image_height = imageHeight;
   params.handle       = m_iasHandle;
-  params.cam_eye      = make_float3(0.0f, 0.0f, 2.0f);
-  params.cam_u        = make_float3(1.0f, 0.0f, 0.0f);
-  params.cam_v        = make_float3(0.0f, 1.0f, 0.0f);
-  params.cam_w        = make_float3(0.0f, 0.0f, 1.0f);
   params.camera       = d_camera;
 
   CUdeviceptr d_param;

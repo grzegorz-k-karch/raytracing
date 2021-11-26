@@ -43,8 +43,7 @@ GenericObject::GenericObject(GenericObject&& other) noexcept :
   m_vertexColors(other.m_vertexColors),
   m_vertexNormals(other.m_vertexNormals),
   m_textureCoords(other.m_textureCoords),
-  m_indexTriplets(other.m_indexTriplets),
-  m_h_genericObjectDevice(std::move(other.m_h_genericObjectDevice))
+  m_indexTriplets(other.m_indexTriplets)
 {
   LOG_TRIVIAL(trace) << "GenericObject move constructor";
   other.m_material = nullptr;
