@@ -27,7 +27,10 @@ struct MissData
 
 struct HitGroupData
 {
-  // No data needed
+  float3 *colors;
+  float3 *normals;
+  float2 *textureCoords;
+  uint3 *indexTriplets;
 };
 
 #endif //OPTIX_RENDERER_CUH

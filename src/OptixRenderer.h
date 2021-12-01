@@ -5,6 +5,19 @@
 #include <optix.h>
 #include "Camera.cuh"
 #include "StatusCode.h"
+#include "OptixRenderer.cuh"
+
+template <typename T>
+struct SBTRecord
+{
+  __align__(OPTIX_SBT_RECORD_ALIGNMENT) char header[OPTIX_SBT_RECORD_HEADER_SIZE];
+  T data;
+};
+
+typedef SBTRecord<RayGenData>     RayGenSBTRecord;
+typedef SBTRecord<MissData>       MissSBTRecord;
+typedef SBTRecord<HitGroupData>   HitGroupSBTRecord;
+
 
 class OptixRenderer {
  public:
@@ -12,17 +25,14 @@ class OptixRenderer {
   OptixRenderer(StatusCode& status);
   ~OptixRenderer();
 
-  void createContext(StatusCode& status);
-  void createModule(OptixPipelineCompileOptions& pipelineCompileOptions,
-		    StatusCode& status);
-  void createProgramGroups(StatusCode& status);
-  void createPipeline(OptixPipelineCompileOptions& pipelineCompileOptions,
-		      StatusCode& status);
-  void setupShaderBindingTable(StatusCode& status);
-  void launch(const Camera& camera, std::vector<float3>& outputBuffer,
-	      int imageWidth, int imageHeight, StatusCode& status);
-  void buildRootAccelStruct(std::vector<OptixTraversableHandle>& traversableHandles,
-			    StatusCode& status);
+  StatusCode createContext();
+  StatusCode createModule(OptixPipelineCompileOptions& pipelineCompileOptions);
+  StatusCode createProgramGroups();
+  StatusCode createPipeline(OptixPipelineCompileOptions& pipelineCompileOptions);
+  StatusCode setupShaderBindingTable(std::vector<HitGroupSBTRecord>& hitgroupRecords);
+  StatusCode launch(const Camera& camera, std::vector<float3>& outputBuffer,
+	      int imageWidth, int imageHeight);
+  StatusCode buildRootAccelStruct(std::vector<OptixTraversableHandle>& traversableHandles);
   OptixDeviceContext getContext() const {
     return m_context;
   }

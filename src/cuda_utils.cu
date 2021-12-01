@@ -2,7 +2,7 @@
 #include "cuda_utils.cuh"
 
 StatusCode checkCuda(cudaError_t result, char const *const func,
-		      const char *const file, int const line)
+		     const char *const file, int const line)
 {
   StatusCode status = StatusCode::NoError;
   if (result) {

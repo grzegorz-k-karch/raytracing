@@ -71,8 +71,7 @@ public:
 
   ~GenericObject();
 
-  void copyAttributesToDevice(GenericObjectDevice& h_genericObjectDevice,
-			      StatusCode& status);
+  StatusCode copyAttributesToDevice(GenericObjectDevice& h_genericObjectDevice);
   ObjectType getObjectType() {
     return m_objectType;
   }

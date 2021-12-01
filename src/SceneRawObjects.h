@@ -7,6 +7,7 @@
 #include "GenericMaterial.h"
 #include "Camera.cuh"
 #include "StatusCode.h"
+#include "OptixRenderer.h"
 
 #include "logging.h"
 
@@ -32,22 +33,21 @@ public:
     m_inputFlags{OPTIX_GEOMETRY_FLAG_NONE} {}
   ~SceneRawObjects();
 
-  void parseScene(const std::string filepath,
-		  std::vector<GenericObject>& objects,
-		  StatusCode& status);
-  void loadScene(const std::string filepath, StatusCode& status);
+  StatusCode parseScene(const std::string filepath,
+			std::vector<GenericObject>& objects);
+  StatusCode loadScene(const std::string filepath);
   void setCamera(Camera&& camera) {
     m_camera = std::move(camera);
   }
   Camera getCamera() {
     return m_camera;
   }
-  void copyToDevice(std::vector<GenericObject>& objects,
-		    StatusCode& status);
+  StatusCode copyToDevice(std::vector<GenericObject>& objects);
   void generateOptixBuildInput(GenericObjectDevice& genObjDev,
 			       OptixBuildInput& buildInput);
   void generateTraversableHandles(OptixDeviceContext context,
 				  std::vector<OptixTraversableHandle>& traversableHandles);
+  void generateHitGroupRecords(std::vector<HitGroupSBTRecord>& hitgroupRecords);
   void buildAccelStruct(OptixDeviceContext context,
 			OptixBuildInput* buildInput,
 			OptixTraversableHandle* traversableHandle);

@@ -14,38 +14,41 @@ int main(int argc, char** argv)
   StatusCode status = StatusCode::NoError;
 
   // parse command line arguments
-  ProgramArgs args = parseArgs(argc, argv, status);
+  ProgramArgs programArgs;
+  status = parseArgs(argc, argv, programArgs);
   exitIfError(status);
 
-  initLogger(args.logLevel);
+  initLogger(programArgs.logLevel);
 
   OptixRenderer optixRenderer(status);
   exitIfError(status);
 
   // get all objects into SceneRawObjects struct
   SceneRawObjects sceneRawObjects;
-  sceneRawObjects.loadScene(args.sceneFilePath, status);
+  status = sceneRawObjects.loadScene(programArgs.sceneFilePath);
   exitIfError(status);
 
   std::vector<OptixTraversableHandle> traversableHandles;
   sceneRawObjects.generateTraversableHandles(optixRenderer.getContext(),
   					     traversableHandles);
-  optixRenderer.buildRootAccelStruct(traversableHandles,
-  				     status);
+  std::vector<HitGroupSBTRecord> hitgroupRecords;
+  sceneRawObjects.generateHitGroupRecords(hitgroupRecords);
+  
+  status = optixRenderer.buildRootAccelStruct(traversableHandles);
+  status = optixRenderer.setupShaderBindingTable(hitgroupRecords);
 
   Camera camera = sceneRawObjects.getCamera();
   std::vector<float3> image;
-  image.resize(args.imageWidth*args.imageHeight);
-  optixRenderer.launch(camera,
-  		       image,
-  		       args.imageWidth,
-  		       args.imageHeight,
-  		       status);
+  image.resize(programArgs.imageWidth*programArgs.imageHeight);
+  status = optixRenderer.launch(camera,
+  				image,
+  				programArgs.imageWidth,
+  				programArgs.imageHeight);
 
   ImageSaver imageSaver;
   // save the rendered image to file
-  imageSaver.saveImage(image, args.imageWidth, args.imageHeight,
-  		       args.pictureFilePath, status);
+  imageSaver.saveImage(image, programArgs.imageWidth, programArgs.imageHeight,
+  		       programArgs.pictureFilePath, status);
   exitIfError(status);
 
   return 0;

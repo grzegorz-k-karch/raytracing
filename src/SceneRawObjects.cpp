@@ -41,23 +41,20 @@ bool checkRequiredObjects(const pt::ptree &sceneTree)
 }
 
 
-void SceneRawObjects::copyToDevice(std::vector<GenericObject>& objects,
-				   StatusCode& status)
+StatusCode SceneRawObjects::copyToDevice(std::vector<GenericObject>& objects)
 {
-  status = StatusCode::NoError;
+  StatusCode status = StatusCode::NoError;
   m_objectsDevice.resize(objects.size());
   for (int objIdx = 0; objIdx < objects.size(); objIdx++) {
-    objects[objIdx].copyAttributesToDevice(m_objectsDevice[objIdx], status);
+    status = objects[objIdx].copyAttributesToDevice(m_objectsDevice[objIdx]);
   }
+  return StatusCode::NoError;
 }
 
 
-void SceneRawObjects::parseScene(const std::string filepath,
-				 std::vector<GenericObject>& objects,
-				 StatusCode &status)
+StatusCode SceneRawObjects::parseScene(const std::string filepath,
+				       std::vector<GenericObject>& objects)
 {
-  status = StatusCode::NoError;
-
   //----------------------------------------------------------------------------
   // read XML file
   pt::ptree fileTree;
@@ -66,8 +63,7 @@ void SceneRawObjects::parseScene(const std::string filepath,
   }
   catch (pt::ptree_error &e) {
     LOG_TRIVIAL(error) << e.what();
-    status = StatusCode::FileError;
-    return;
+    return StatusCode::FileError;
   }
   //----------------------------------------------------------------------------
   // check if required objects are present in the scene:
@@ -77,12 +73,13 @@ void SceneRawObjects::parseScene(const std::string filepath,
   if (!requiredObjectsPresent) {
     LOG_TRIVIAL(error) << "Scene file does not have required objects "
 		       << "(a camera and a renderable object).";
-    status = StatusCode::SceneError;
-    return;
+    return StatusCode::SceneError;
   }
 
   // get all objects in the scene and put them into appropriate lists
   std::set<std::string> renderableObjects = {"Sphere", "Mesh"};
+
+  StatusCode status = StatusCode::NoError;
 
   for (auto &it : sceneTree) {
     std::string objectType = it.first;
@@ -96,20 +93,29 @@ void SceneRawObjects::parseScene(const std::string filepath,
       else {
 	LOG_TRIVIAL(error) << "Could not add an object of type "
 			   << objectType << ".";
+	return status;
       }
     } else if (objectType != "<xmlcomment>") {
       LOG_TRIVIAL(warning) << "Unknown object " << objectType;
     }
   }
+  return status;
 }
 
 
-void SceneRawObjects::loadScene(const std::string filepath,
-				StatusCode &status)
+StatusCode SceneRawObjects::loadScene(const std::string filepath)
 {
+  StatusCode status = StatusCode::NoError;
   std::vector<GenericObject> objects;
-  parseScene(filepath, objects, status);
-  copyToDevice(objects, status);
+  status = parseScene(filepath, objects);
+  if (status != StatusCode::NoError) {
+    return status;
+  }
+  status = copyToDevice(objects);
+  if (status != StatusCode::NoError) {
+    return status;
+  }
+  return status;
 }
 
 

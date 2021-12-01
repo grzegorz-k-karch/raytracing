@@ -16,6 +16,6 @@ struct ProgramArgs {
   boost::log::trivial::severity_level logLevel;
 };
 
-ProgramArgs parseArgs(int argc, char** argv, StatusCode& status);
+StatusCode parseArgs(int argc, char** argv, ProgramArgs& programArgs);
 
-#endif//ARGS_PARSE_H
+#endif // ARGS_PARSE_H

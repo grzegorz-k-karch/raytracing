@@ -6,13 +6,13 @@
 #include "SceneRawObjects.h"
 
 void SceneRawObjects::buildAccelStruct(OptixDeviceContext context,
-				       OptixBuildInput* buildInput,				       
+				       OptixBuildInput* buildInput,
 				       OptixTraversableHandle* traversableHandle)
 {
   StatusCode status = StatusCode::NoError; // FIXME
-  
+
   OptixAccelBuildOptions accelOptions = {};
-  memset(&accelOptions, 0, sizeof(OptixAccelBuildOptions));  
+  memset(&accelOptions, 0, sizeof(OptixAccelBuildOptions));
   accelOptions.buildFlags             = OPTIX_BUILD_FLAG_NONE;
   accelOptions.operation              = OPTIX_BUILD_OPERATION_BUILD;
 
@@ -24,7 +24,7 @@ void SceneRawObjects::buildAccelStruct(OptixDeviceContext context,
 					    1,  // num_build_inputs
 					    &gasBufferSizes
 					    ));
-  
+
   if (status != StatusCode::NoError) {
     LOG_TRIVIAL(error) << "Error\n";
   }
@@ -45,7 +45,7 @@ void SceneRawObjects::buildAccelStruct(OptixDeviceContext context,
   if (status != StatusCode::NoError) {
     LOG_TRIVIAL(error) << "cudaMalloc error\n";
   }
-  
+
   status = OCE(optixAccelBuild(
 			       context,
 			       0,              // CUDA stream
@@ -105,5 +105,18 @@ void SceneRawObjects::generateTraversableHandles(OptixDeviceContext context,
     OptixTraversableHandle traversableHandle;
     buildAccelStruct(context, &buildInput, &traversableHandle);
     traversableHandles.push_back(traversableHandle);
+  }
+}
+
+
+void SceneRawObjects::generateHitGroupRecords(std::vector<HitGroupSBTRecord>& hitgroupRecords)
+{
+  for (GenericObjectDevice& genObjDev : m_objectsDevice) {
+    HitGroupSBTRecord rec;      
+    rec.data.colors = genObjDev.m_vertexColors;
+    rec.data.normals = genObjDev.m_vertexNormals;
+    rec.data.textureCoords = genObjDev.m_textureCoords;
+    rec.data.indexTriplets = (uint3*)genObjDev.m_indexTriplets;
+    hitgroupRecords.push_back(rec);
   }
 }
