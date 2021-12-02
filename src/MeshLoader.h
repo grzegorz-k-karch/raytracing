@@ -20,7 +20,7 @@ class MeshLoader {
   MeshLoader(const pt::ptree object);
   void loadMesh(AABB& bbox,
 		std::vector<float3>& vertices,
-		std::vector<float3>& vertexColors,
+		float3& albedo,
 		std::vector<float3>& vertexNormals,
 		std::vector<float2>& vertexCoords,
 		std::vector<uint3>& indexTriplets,
@@ -34,6 +34,7 @@ private:
   float3 m_rotation;
   float m_smoothness;
   std::string m_frontFace;
+  float3 m_albedo;
 };
 
 #endif//MESH_LOADER_H

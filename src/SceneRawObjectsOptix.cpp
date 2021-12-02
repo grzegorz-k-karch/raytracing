@@ -6,7 +6,7 @@
 #include "SceneRawObjects.h"
 
 void SceneRawObjects::buildAccelStruct(OptixDeviceContext context,
-				       OptixBuildInput* buildInput,
+				       std::vector<OptixBuildInput>& buildInputs,
 				       OptixTraversableHandle* traversableHandle)
 {
   StatusCode status = StatusCode::NoError; // FIXME
@@ -20,8 +20,8 @@ void SceneRawObjects::buildAccelStruct(OptixDeviceContext context,
   status = OCE(optixAccelComputeMemoryUsage(
 					    context,
 					    &accelOptions,
-					    buildInput,
-					    1,  // num_build_inputs
+					    buildInputs.data(),
+					    buildInputs.size(),  // num_build_inputs
 					    &gasBufferSizes
 					    ));
 
@@ -50,8 +50,8 @@ void SceneRawObjects::buildAccelStruct(OptixDeviceContext context,
 			       context,
 			       0,              // CUDA stream
 			       &accelOptions,
-			       buildInput,
-			       1,              // num build inputs
+			       buildInputs.data(),
+			       buildInputs.size(), // num build inputs
 			       d_tempBuffer,
 			       gasBufferSizes.tempSizeInBytes,
 			       d_tempOuputBuffer,
@@ -91,29 +91,32 @@ void SceneRawObjects::generateOptixBuildInput(GenericObjectDevice& genObjDev,
     buildInput.triangleArray.indexBuffer      = genObjDev.m_indexTriplets;
     buildInput.triangleArray.flags            = m_inputFlags;
     buildInput.triangleArray.numSbtRecords    = 1;
+    buildInput.triangleArray.sbtIndexOffsetBuffer        = 0; 
+    buildInput.triangleArray.sbtIndexOffsetSizeInBytes   = 0; 
+    buildInput.triangleArray.sbtIndexOffsetStrideInBytes = 0; 
   }
 }
 
 
-void SceneRawObjects::generateTraversableHandles(OptixDeviceContext context,
-						 std::vector<OptixTraversableHandle>& traversableHandles)
+void SceneRawObjects::generateTraversableHandle(OptixDeviceContext context,
+						OptixTraversableHandle* traversableHandle)
 {
-  for (GenericObjectDevice& genObjDev : m_objectsDevice) {
-    OptixBuildInput buildInput = {};
-    memset(&buildInput, 0, sizeof(OptixBuildInput));
-    generateOptixBuildInput(genObjDev, buildInput);
-    OptixTraversableHandle traversableHandle;
-    buildAccelStruct(context, &buildInput, &traversableHandle);
-    traversableHandles.push_back(traversableHandle);
+  std::vector<OptixBuildInput> buildInputs;
+  buildInputs.resize(m_h_genericObjectsDevice.size());
+      
+  for (int objIdx = 0; objIdx < m_h_genericObjectsDevice.size(); objIdx++) {
+    memset(&buildInputs[objIdx], 0, sizeof(OptixBuildInput));
+    generateOptixBuildInput(m_h_genericObjectsDevice[objIdx], buildInputs[objIdx]);
   }
+  buildAccelStruct(context, buildInputs, traversableHandle);
 }
 
 
 void SceneRawObjects::generateHitGroupRecords(std::vector<HitGroupSBTRecord>& hitgroupRecords)
 {
-  for (GenericObjectDevice& genObjDev : m_objectsDevice) {
-    HitGroupSBTRecord rec;      
-    rec.data.colors = genObjDev.m_vertexColors;
+  for (GenericObjectDevice& genObjDev : m_h_genericObjectsDevice) {
+    HitGroupSBTRecord rec;
+    rec.data.albedo = genObjDev.m_albedo;
     rec.data.normals = genObjDev.m_vertexNormals;
     rec.data.textureCoords = genObjDev.m_textureCoords;
     rec.data.indexTriplets = (uint3*)genObjDev.m_indexTriplets;

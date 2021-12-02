@@ -27,7 +27,7 @@ struct MissData
 
 struct HitGroupData
 {
-  float3 *colors;
+  float3 albedo;
   float3 *normals;
   float2 *textureCoords;
   uint3 *indexTriplets;

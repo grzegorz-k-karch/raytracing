@@ -4,7 +4,6 @@
 #include "logging.h"
 #include "cuda_utils.cuh"
 #include "GenericObject.h"
-#include "GenericMaterial.h"
 
 StatusCode GenericObject::copyAttributesToDevice(GenericObjectDevice& h_genericObjectDevice)
 {
@@ -16,27 +15,14 @@ StatusCode GenericObject::copyAttributesToDevice(GenericObjectDevice& h_genericO
   h_genericObjectDevice.m_numScalars = m_scalars.size();
   h_genericObjectDevice.m_numVectors = m_vectors.size();
   h_genericObjectDevice.m_numVertices = m_vertices.size();
-  h_genericObjectDevice.m_numVertexColors = m_vertexColors.size();
+  h_genericObjectDevice.m_albedo = m_albedo;
   h_genericObjectDevice.m_numVertexNormals = m_vertexNormals.size();
   h_genericObjectDevice.m_numTextureCoords = m_textureCoords.size();
   h_genericObjectDevice.m_numIndexTriplets = m_indexTriplets.size();
   h_genericObjectDevice.m_objectType = m_objectType;
 
-  // material ----------------------------------------------------------------
-  // allocate buffer for GenericMaterialDevice struct
-  int dataSize = sizeof(GenericMaterialDevice);
-  status = CCE(cudaMalloc(reinterpret_cast<void**>(&h_genericObjectDevice.m_material),
-			  dataSize));
-  if (status != StatusCode::NoError) {
-    return status;
-  }
-  m_material->copyToDevice(h_genericObjectDevice.m_material, status);
-  if (status != StatusCode::NoError) {
-    return status;
-  }
-
   // scalars -----------------------------------------------------------------
-  dataSize = m_scalars.size()*sizeof(float);
+  size_t dataSize = m_scalars.size()*sizeof(float);
   status = CCE(cudaMalloc(reinterpret_cast<void**>(&h_genericObjectDevice.m_scalars), dataSize));
   if (status != StatusCode::NoError) {
     return status;
@@ -69,25 +55,6 @@ StatusCode GenericObject::copyAttributesToDevice(GenericObjectDevice& h_genericO
   status = CCE(cudaMemcpy(reinterpret_cast<void*>(h_genericObjectDevice.m_vertices),
 			  m_vertices.data(),
 			  dataSize,
-			  cudaMemcpyHostToDevice));
-  if (status != StatusCode::NoError) {
-    return status;
-  }
-
-  // vertex colors -----------------------------------------------------------
-  LOG_TRIVIAL(trace) << "|||| color "
-		     << m_vertexColors[m_vertexColors.size()-1].x << ","
-		     << m_vertexColors[m_vertexColors.size()-1].y << ","
-		     << m_vertexColors[m_vertexColors.size()-1].z;
-  
-  dataSize = m_vertexColors.size()*sizeof(float3);
-  status = CCE(cudaMalloc(reinterpret_cast<void**>(&h_genericObjectDevice.m_vertexColors),
-			  dataSize));
-  if (status != StatusCode::NoError) {
-    return status;
-  }
-  status = CCE(cudaMemcpy(h_genericObjectDevice.m_vertexColors,
-			  m_vertexColors.data(), dataSize,
 			  cudaMemcpyHostToDevice));
   if (status != StatusCode::NoError) {
     return status;
@@ -145,8 +112,6 @@ GenericObjectDevice::~GenericObjectDevice()
   m_objectType = ObjectType::None;
   m_bmin = make_float3(0.0f, 0.0f, 0.0f);
   m_bmax = make_float3(0.0f, 0.0f, 0.0f);
-  // m_material->releaseData();
-  // m_material =  = nullptr;
   if (m_scalars) {
     CCE(cudaFree(m_scalars));
     m_scalars = nullptr;
@@ -162,11 +127,6 @@ GenericObjectDevice::~GenericObjectDevice()
     m_vertices = 0;
   }
   m_numVertices = 0;
-  if (m_vertexColors) {
-    CCE(cudaFree(m_vertexColors));
-    m_vertexColors = nullptr;
-  }
-  m_numVertexColors = 0;
   if (m_vertexNormals) {
     CCE(cudaFree(m_vertexNormals));
     m_vertexNormals = nullptr;
@@ -189,15 +149,13 @@ GenericObjectDevice::GenericObjectDevice(GenericObjectDevice&& other) noexcept:
   m_objectType(other.m_objectType),
   m_bmin(other.m_bmin),
   m_bmax(other.m_bmax),
-  m_material(other.m_material),
   m_scalars(other.m_scalars),
   m_numScalars(other.m_numScalars),
   m_vectors(other.m_vectors),
   m_numVectors(other.m_numVectors),
   m_vertices(other.m_vertices),
   m_numVertices(other.m_numVertices),
-  m_vertexColors(other.m_vertexColors),
-  m_numVertexColors(other.m_numVertexColors),
+  m_albedo(other.m_albedo),
   m_vertexNormals(other.m_vertexNormals),
   m_numVertexNormals(other.m_numVertexNormals),
   m_textureCoords(other.m_textureCoords),
@@ -205,15 +163,12 @@ GenericObjectDevice::GenericObjectDevice(GenericObjectDevice&& other) noexcept:
   m_indexTriplets(other.m_indexTriplets),
   m_numIndexTriplets(other.m_numIndexTriplets)
 {
-  other.m_material = nullptr;
   other.m_scalars = nullptr;
   other.m_numScalars = 0;
   other.m_vectors = nullptr;
   other.m_numVectors = 0;
   other.m_vertices = 0;
   other.m_numVertices = 0;
-  other.m_vertexColors = nullptr;
-  other.m_numVertexColors = 0;
   other.m_vertexNormals = nullptr;
   other.m_numVertexNormals = 0;
   other.m_textureCoords = nullptr;

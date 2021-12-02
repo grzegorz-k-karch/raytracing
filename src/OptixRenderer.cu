@@ -65,11 +65,6 @@ extern "C" __global__ void __miss__ms()
 
 extern "C" __global__ void __closesthit__ch()
 {
-  const HitGroupData &sbtData = *(const HitGroupData*)optixGetSbtDataPointer();
-  const int primID = optixGetPrimitiveIndex();
-  const uint3 index  = sbtData.indexTriplets[primID];
-  
-  float3 color = make_float3(index.x/12.0f, index.y/12.0f, index.z/12.0f); //sbtData.colors[index.x];
-
-  setPayload(color); //make_float3(barycentrics, 1.0f));
+  const HitGroupData* sbtData = reinterpret_cast<HitGroupData*>(optixGetSbtDataPointer());
+  setPayload(sbtData->albedo);
 }

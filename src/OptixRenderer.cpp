@@ -480,20 +480,20 @@ OptixRenderer::~OptixRenderer()
 }
 
 
-StatusCode OptixRenderer::buildRootAccelStruct(std::vector<OptixTraversableHandle>& traversableHandles)
+StatusCode OptixRenderer::buildRootAccelStruct(OptixTraversableHandle& traversableHandle)
 {
   StatusCode status = StatusCode::NoError;
-  int numInstances = traversableHandles.size();
-  CUdeviceptr d_instances;
+  int numInstances = 1; //traversableHandles.size();
+  CUdeviceptr d_instance;
   size_t instanceSizeInBytes = sizeof(OptixInstance)*numInstances;
-  status = CCE(cudaMalloc(reinterpret_cast<void**>(&d_instances), instanceSizeInBytes));
+  status = CCE(cudaMalloc(reinterpret_cast<void**>(&d_instance), instanceSizeInBytes));
   if (status != StatusCode::NoError) {
     return status;
   }
 
   OptixBuildInput instanceInput = {};
   instanceInput.type                       = OPTIX_BUILD_INPUT_TYPE_INSTANCES;
-  instanceInput.instanceArray.instances    = d_instances;
+  instanceInput.instanceArray.instances    = d_instance;
   instanceInput.instanceArray.numInstances = numInstances;
 
   OptixAccelBuildOptions accelOptions = {};
@@ -522,22 +522,18 @@ StatusCode OptixRenderer::buildRootAccelStruct(std::vector<OptixTraversableHandl
   float transform[12] = {1,0,0,0,
   			 0,1,0,0,
   			 0,0,1,0};
-  std::vector<OptixInstance> instances;
-  instances.resize(numInstances);
-  memset(instances.data(), 0, instanceSizeInBytes);
+  OptixInstance instance = {};
+  memset(&instance, 0, instanceSizeInBytes);
 
   int instanceId = 0;
-  for (auto &instance : instances) {
-    instance.traversableHandle = traversableHandles[instanceId];
-    instance.flags             = OPTIX_INSTANCE_FLAG_NONE;
-    instance.instanceId        = instanceId;
-    instance.sbtOffset         = 0;
-    instance.visibilityMask    = 1;
-    memcpy(instance.transform, transform, sizeof(float)*12);
-    instanceId++;
-  }
+  instance.traversableHandle = traversableHandle;
+  instance.flags             = OPTIX_INSTANCE_FLAG_NONE;
+  instance.instanceId        = instanceId;
+  instance.sbtOffset         = instanceId;
+  instance.visibilityMask    = 1;
+  memcpy(instance.transform, transform, sizeof(float)*12);
 
-  CCE(cudaMemcpy(reinterpret_cast<void*>(d_instances), instances.data(), instanceSizeInBytes,
+  CCE(cudaMemcpy(reinterpret_cast<void*>(d_instance), &instance, instanceSizeInBytes,
 		 cudaMemcpyHostToDevice));
 
   OCE(optixAccelBuild(m_context,
@@ -555,7 +551,7 @@ StatusCode OptixRenderer::buildRootAccelStruct(std::vector<OptixTraversableHandl
 		      ));
 
   CCE(cudaFree(reinterpret_cast<void*>(d_tempBuffer)));
-  CCE(cudaFree(reinterpret_cast<void*>(d_instances)));
+  CCE(cudaFree(reinterpret_cast<void*>(d_instance)));
 
   return status;
 }

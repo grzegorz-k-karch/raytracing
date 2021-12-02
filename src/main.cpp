@@ -28,14 +28,14 @@ int main(int argc, char** argv)
   status = sceneRawObjects.loadScene(programArgs.sceneFilePath);
   exitIfError(status);
 
-  std::vector<OptixTraversableHandle> traversableHandles;
-  sceneRawObjects.generateTraversableHandles(optixRenderer.getContext(),
-  					     traversableHandles);
+  OptixTraversableHandle traversableHandle;
+  sceneRawObjects.generateTraversableHandle(optixRenderer.getContext(),
+					    &traversableHandle);
   std::vector<HitGroupSBTRecord> hitgroupRecords;
   sceneRawObjects.generateHitGroupRecords(hitgroupRecords);
-  
-  status = optixRenderer.buildRootAccelStruct(traversableHandles);
   status = optixRenderer.setupShaderBindingTable(hitgroupRecords);
+  
+  status = optixRenderer.buildRootAccelStruct(traversableHandle);
 
   Camera camera = sceneRawObjects.getCamera();
   std::vector<float3> image;

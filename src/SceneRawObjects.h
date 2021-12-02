@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "GenericObject.h"
-#include "GenericMaterial.h"
 #include "Camera.cuh"
 #include "StatusCode.h"
 #include "OptixRenderer.h"
@@ -45,16 +44,16 @@ public:
   StatusCode copyToDevice(std::vector<GenericObject>& objects);
   void generateOptixBuildInput(GenericObjectDevice& genObjDev,
 			       OptixBuildInput& buildInput);
-  void generateTraversableHandles(OptixDeviceContext context,
-				  std::vector<OptixTraversableHandle>& traversableHandles);
+  void generateTraversableHandle(OptixDeviceContext context,
+				 OptixTraversableHandle* traversableHandles);
   void generateHitGroupRecords(std::vector<HitGroupSBTRecord>& hitgroupRecords);
   void buildAccelStruct(OptixDeviceContext context,
-			OptixBuildInput* buildInput,
+			std::vector<OptixBuildInput>& buildInputs,
 			OptixTraversableHandle* traversableHandle);
 
 private:
   Camera m_camera;
-  std::vector<GenericObjectDevice> m_objectsDevice;
+  std::vector<GenericObjectDevice> m_h_genericObjectsDevice;
   SceneRawObjectsDevice m_h_sceneRawObjectsDevice;
   std::vector<CUdeviceptr> m_d_outputBuffers;
   const uint32_t m_inputFlags[1];

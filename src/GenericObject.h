@@ -12,7 +12,6 @@
 #include "logging.h"
 #include "StatusCode.h"
 #include "AABB.cuh"
-#include "GenericMaterial.h"
 
 namespace pt = boost::property_tree;
 
@@ -24,11 +23,10 @@ struct GenericObjectDevice {
     m_objectType(ObjectType::None),
     m_bmin(make_float3(0.0f, 0.0f, 0.0f)),
     m_bmax(make_float3(0.0f, 0.0f, 0.0f)),
-    m_material(nullptr),
     m_scalars(nullptr), m_numScalars(0),
     m_vectors(nullptr), m_numVectors(0),
     m_vertices(0), m_numVertices(0),
-    m_vertexColors(nullptr), m_numVertexColors(0),
+    m_albedo(make_float3(0.0f, 0.0f, 0.0f)),
     m_vertexNormals(nullptr), m_numVertexNormals(0),
     m_textureCoords(nullptr), m_numTextureCoords(0),
     m_indexTriplets(0), m_numIndexTriplets(0) {}
@@ -39,7 +37,6 @@ struct GenericObjectDevice {
   ObjectType m_objectType;
   float3 m_bmin;
   float3 m_bmax;
-  GenericMaterialDevice *m_material;
   // sphere members
   float *m_scalars;
   int m_numScalars;
@@ -48,8 +45,7 @@ struct GenericObjectDevice {
   // mesh members
   CUdeviceptr m_vertices;
   int m_numVertices;
-  float3 *m_vertexColors;
-  int m_numVertexColors;
+  float3 m_albedo;
   float3 *m_vertexNormals;
   int m_numVertexNormals;
   float2 *m_textureCoords;
@@ -85,13 +81,12 @@ private:
 
   ObjectType m_objectType;
   AABB m_bbox;
-  GenericMaterial *m_material;
   // sphere members
   std::vector<float> m_scalars;
   std::vector<float3> m_vectors;
   // mesh members
   std::vector<float3> m_vertices;
-  std::vector<float3> m_vertexColors;
+  float3 m_albedo;
   std::vector<float3> m_vertexNormals;
   std::vector<float2> m_textureCoords;
   std::vector<uint3>  m_indexTriplets;

@@ -32,7 +32,7 @@ class OptixRenderer {
   StatusCode setupShaderBindingTable(std::vector<HitGroupSBTRecord>& hitgroupRecords);
   StatusCode launch(const Camera& camera, std::vector<float3>& outputBuffer,
 	      int imageWidth, int imageHeight);
-  StatusCode buildRootAccelStruct(std::vector<OptixTraversableHandle>& traversableHandles);
+  StatusCode buildRootAccelStruct(OptixTraversableHandle& traversableHandle);
   OptixDeviceContext getContext() const {
     return m_context;
   }

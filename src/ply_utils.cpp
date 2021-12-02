@@ -99,7 +99,6 @@ void getProperties(PlyFile* ply, char* elemNameCstr,
 
 void loadPlyObject(const char* filepath,
 		   std::vector<float3>& vertices,
-		   std::vector<float3>& vertexColors,
 		   std::vector<float3>& vertexNormals,
 		   std::vector<float2>& textureCoords,
 		   std::vector<uint3>& indexTriplets,
@@ -165,11 +164,6 @@ void loadPlyObject(const char* filepath,
 	vertex_t vertex;
 	ply_get_element(ply, (void*)&vertex);
 	vertices.push_back(make_float3(vertex.x, vertex.y, vertex.z));
-	if (colorsPresent) {
-	  vertexColors.push_back(make_float3(vertex.r/255.0f,
-					     vertex.g/255.0f,
-					     vertex.b/255.0f));
-	}
       }
     }
     else if (elemName.compare("face") == 0) {

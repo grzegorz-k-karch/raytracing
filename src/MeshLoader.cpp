@@ -15,6 +15,7 @@ MeshLoader::MeshLoader(const pt::ptree object)
   m_rotation = string2float3(object.get<std::string>("rotation.<xmlattr>.value", "0 0 0"));
   m_smoothness = object.get<float>("smoothness.<xmlattr>.value", 1.0f);
   m_frontFace = object.get<std::string>("front_face.<xmlattr>.value", std::string("CCW"));
+  m_albedo = string2float3(object.get<std::string>("albedo.<xmlattr>.value", "1 0 0"));
 
   LOG_TRIVIAL(debug) << "Mesh filepath: " << m_meshFilepath;
 }
@@ -34,7 +35,7 @@ bool checkIfFileExists(std::string filepath)
 
 void MeshLoader::loadMesh(AABB& bbox,
 			  std::vector<float3>& vertices,
-			  std::vector<float3>& vertexColors,
+			  float3& albedo,
 			  std::vector<float3>& vertexNormals,
 			  std::vector<float2>& textureCoords,
 			  std::vector<uint3>& indexTriplets,
@@ -50,14 +51,12 @@ void MeshLoader::loadMesh(AABB& bbox,
   bool fileIsPly = checkIfPlyFile(m_meshFilepath);
   LOG_TRIVIAL(debug) << "File is PLY: " << fileIsPly;
   if (fileIsPly) {
-    loadPlyObject(m_meshFilepath.c_str(), vertices,
-		  vertexColors, vertexNormals,
+    loadPlyObject(m_meshFilepath.c_str(), vertices, vertexNormals,
 		  textureCoords, indexTriplets, status);
     if (status != StatusCode::NoError) {
       return;
     }
     LOG_TRIVIAL(debug) << "\nNum vertices: " << vertices.size()
-		       << "\nnum colors: " << vertexColors.size()
 		       << "\nnum normals: " << vertexNormals.size()
 		       << "\nnum coords: " << textureCoords.size()
 		       << "\nnum index triplets: " << indexTriplets.size();
@@ -76,18 +75,6 @@ void MeshLoader::loadMesh(AABB& bbox,
 		     << " num vertices: " << vertices.size()
     		     << " num index triplets: " << indexTriplets.size();
 
-  //   set vertex colors if not present
-  if (vertexColors.empty()) {
-    // if no colors - set a default color // TODO: get color from scene description file
-    vertexColors.resize(vertices.size());
-    float3 default_color = make_float3(0.0f, 0.4f, 0.8f);
-    setColor(default_color, vertexColors);
-  }
-  else {
-    // if there are colors - merge them according to the merged vertices
-    // vertexColors = mergeVectors(indicesOfKeptVertices, vertexColors);
-  }
-  LOG_TRIVIAL(debug) << "After colors merge: num colors: " << vertexColors.size();
 
   //   compute normals if not present
   if (vertexNormals.empty()) {
@@ -114,4 +101,6 @@ void MeshLoader::loadMesh(AABB& bbox,
 
   bbox = AABB(bmin, bmax);
   scalars.push_back(m_smoothness);
+
+  albedo = m_albedo;
 }

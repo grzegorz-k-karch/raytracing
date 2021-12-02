@@ -44,9 +44,9 @@ bool checkRequiredObjects(const pt::ptree &sceneTree)
 StatusCode SceneRawObjects::copyToDevice(std::vector<GenericObject>& objects)
 {
   StatusCode status = StatusCode::NoError;
-  m_objectsDevice.resize(objects.size());
+  m_h_genericObjectsDevice.resize(objects.size());
   for (int objIdx = 0; objIdx < objects.size(); objIdx++) {
-    status = objects[objIdx].copyAttributesToDevice(m_objectsDevice[objIdx]);
+    status = objects[objIdx].copyAttributesToDevice(m_h_genericObjectsDevice[objIdx]);
   }
   return StatusCode::NoError;
 }
